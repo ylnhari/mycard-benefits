@@ -1,0 +1,13 @@
+{
+  "id": "22222222-2222-4222-8222-222222222222",
+  "slug": "synthetic-example-in-visa",
+  "display_name": "Synthetic Example India Visa",
+  "issuer_id": "synthetic-issuer",
+  "product_variant_id": "synthetic-tier",
+  "network_id": "visa",
+  "market": "IN",
+  "co_brand_id": "synthetic-cobrand",
+  "cohort_id": "synthetic-2026",
+  "aliases": ["Synthetic India Visa"],
+  "effective_from": "2026-01-01"
+}

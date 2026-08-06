@@ -1,0 +1,71 @@
+"""Typed public catalog records; no cardholder or payment data belongs here."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from datetime import date, datetime
+from typing import Any
+
+
+@dataclass(frozen=True)
+class ReleaseMetadata:
+    schema_version: str
+    release_id: str
+    generated_at: datetime
+    market_scope: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class Offering:
+    id: str
+    slug: str
+    display_name: str
+    issuer_id: str
+    product_variant_id: str
+    network_id: str
+    market: str
+    co_brand_id: str | None
+    cohort_id: str | None
+    aliases: tuple[str, ...]
+    effective_from: date | None
+    effective_to: date | None
+
+
+@dataclass(frozen=True)
+class HumanReview:
+    """An immutable, attributable human decision about one evidence assertion."""
+
+    id: str
+    reviewer_id: str
+    reviewed_at: datetime
+    decision: str
+
+
+@dataclass(frozen=True)
+class EvidenceAssertion:
+    id: str
+    source_policy_class: str
+    url: str
+    content_sha256: str
+    retrieved_at: datetime
+    effective_from: date | None
+    effective_to: date | None
+    confidence: str
+    review_state: str
+    reviews: tuple[HumanReview, ...]
+
+
+@dataclass(frozen=True)
+class BenefitRule:
+    id: str
+    offering_id: str
+    benefit_type: str
+    title: str
+    status: str
+    review_tier: str
+    effective_from: date | None
+    effective_to: date | None
+    eligibility: tuple[dict[str, Any], ...]
+    allowance: dict[str, Any] | None
+    evidence: tuple[EvidenceAssertion, ...]
+    conflicts_with: tuple[str, ...]

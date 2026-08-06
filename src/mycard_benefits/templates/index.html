@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>MyCard Benefits</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="shell">
+    <aside class="sidebar" aria-label="Primary navigation">
+      <div class="brand"><span aria-hidden="true">◇</span> MyCard <b>Benefits</b></div>
+      <p class="rail-note">Public catalog · private vault</p>
+      <nav id="primaryNav" aria-label="Dashboard sections">
+        <a class="active" href="#overview" data-view="overview" aria-current="page">Overview</a>
+        <a href="#my-cards" data-view="my-cards">My Cards</a>
+        <a href="#benefits" data-view="benefits">Benefits</a>
+        <a href="#ask" data-view="ask">Ask</a>
+        <a href="#compare" data-view="compare">Compare</a>
+        <a href="#expiring" data-view="expiring">Expiring Soon</a>
+        <a href="#updates" data-view="updates">Updates</a>
+        <a href="#sources" data-view="sources">Sources</a>
+        <a href="#research" data-view="research">Research Queue</a>
+        <a href="#settings" data-view="settings">Settings</a>
+      </nav>
+      <button id="themeToggle" class="quiet" type="button" aria-pressed="true">Use light theme</button>
+      <p class="version">Local-first · v{{ app_version }}{% if demo %} · Synthetic demo{% endif %}</p>
+    </aside>
+
+    <main id="main" tabindex="-1">
+      <header class="topline">
+        <div>
+          <p class="eyebrow">Evidence-led benefits intelligence</p>
+          <h1>Know what a card offers—before you rely on it.</h1>
+          <p class="lede">Browse reviewed public catalog facts. Do not enter real card data: personal cards remain unavailable until the encrypted vault and API review are complete.</p>
+        </div>
+        <div class="catalog-state" id="catalogState" role="status" aria-live="polite">Loading public catalog…</div>
+      </header>
+
+      <section id="overview" data-panel class="view" aria-labelledby="overview-title">
+        <div class="hero panel">
+          <div>
+            <p class="eyebrow">Public catalog dashboard</p>
+            <h2 id="overview-title">Verified context, visible uncertainty</h2>
+            <p>Every displayed benefit carries an effective date, evidence status, and source trail. Catalog data can be unavailable; private data is never used as a fallback.</p>
+            <div class="actions"><a class="button secondary" href="#benefits" data-go="benefits">Browse benefits</a><a class="button secondary" href="#sources" data-go="sources">Inspect sources</a></div>
+          </div>
+          <div class="vault-card" aria-label="Private vault status">
+            <span class="vault-icon" aria-hidden="true">⌾</span><strong>Private vault not enabled</strong>
+            <small>Add, reveal, edit, import, and copy actions remain disabled pending security review.</small>
+          </div>
+        </div>
+        <div class="metrics" aria-label="Catalog summary">
+          <article><span>Catalog offerings</span><strong id="offeringCount">—</strong><small>Public, reviewed records</small></article>
+          <article><span>Active benefits</span><strong id="benefitCount">—</strong><small>At the catalog as-of date</small></article>
+          <article><span>My cards</span><strong>0</strong><small>Vault unavailable</small></article>
+        </div>
+        <section class="panel" aria-labelledby="catalog-preview-title"><div class="section-head"><div><p class="eyebrow">Catalog preview</p><h2 id="catalog-preview-title">Available offerings</h2></div><a href="#compare" data-go="compare">Compare public offerings</a></div><div id="offeringPreview" class="card-grid" aria-live="polite"></div></section>
+      </section>
+
+      <section id="my-cards" data-panel class="view" hidden aria-labelledby="cards-title">
+        <div class="section-head"><div><p class="eyebrow">Private card records</p><h2 id="cards-title">My Cards</h2></div><span class="badge pending">Security review pending</span></div>
+        <div class="panel empty-state"><span aria-hidden="true">⌾</span><h3>No private-card actions are available</h3><p>The encrypted vault, protected reveal/copy, and private-card API review are not complete. Do not enter card numbers, CVVs, PINs, owner details, or attachments here.</p><div class="actions"><button type="button" disabled>Add a card — vault review pending</button><button type="button" class="secondary" disabled>Reveal or edit — unavailable</button></div></div>
+      </section>
+
+      <section id="benefits" data-panel class="view" hidden aria-labelledby="benefits-title">
+        <div class="section-head"><div><p class="eyebrow">Active catalog rules</p><h2 id="benefits-title">Benefits</h2></div><label class="filter">Offering <select id="benefitOffering"><option value="">All offerings</option></select></label></div>
+        <p id="benefitEmpty" class="empty-state" hidden>No active catalog benefits match this selection.</p><div id="benefitList" class="stack" aria-live="polite"></div>
+      </section>
+
+      <section id="ask" data-panel class="view" hidden aria-labelledby="ask-title">
+        <div class="section-head"><div><p class="eyebrow">Traceable public answers</p><h2 id="ask-title">Ask the catalog</h2></div></div>
+        <div class="panel qa-panel">
+          <p>Ask about reviewed public benefits. Questions are not saved, and private card data is never used.</p>
+          <form id="qaForm" class="qa-form" novalidate>
+            <label for="qaQuery">Question</label>
+            <div class="qa-controls"><input id="qaQuery" name="query" type="text" maxlength="500" required autocomplete="off" aria-describedby="qaHelp qaStatus" placeholder="Benefits for Synthetic India Visa"><button id="qaSubmit" type="submit">Ask catalog</button><button id="qaReset" type="button" class="secondary">Clear</button></div>
+            <p id="qaHelp" class="quiet-copy">Up to 500 characters. Press Enter to ask or Escape to clear.</p>
+          </form>
+          <div class="qa-examples" aria-label="Synthetic-only examples"><span>Try a synthetic example:</span><button type="button" class="secondary" data-qa-example="benefits for synthetic india visa">Benefits for Synthetic India Visa</button><button type="button" class="secondary" data-qa-example="offerings for reward points">Offerings for reward points</button></div>
+          <p id="qaStatus" class="qa-status" role="status" aria-live="polite"></p>
+          <div id="qaResults" class="stack" aria-live="polite" aria-atomic="true"></div>
+        </div>
+      </section>
+
+      <section id="compare" data-panel class="view" hidden aria-labelledby="compare-title">
+        <div class="section-head"><div><p class="eyebrow">Public records only</p><h2 id="compare-title">Compare offerings</h2></div></div>
+        <div class="panel compare-controls"><label>First offering <select id="compareA"></select></label><label>Second offering <select id="compareB"></select></label></div>
+        <div id="comparison" class="comparison" aria-live="polite"></div>
+      </section>
+
+      <section id="expiring" data-panel class="view" hidden aria-labelledby="expiring-title"><div class="section-head"><div><p class="eyebrow">Private reminders</p><h2 id="expiring-title">Expiring Soon</h2></div><span class="badge pending">Vault unavailable</span></div><div class="panel empty-state"><span aria-hidden="true">◷</span><h3>No reminder data is available</h3><p>Expiry dates are private vault data. This dashboard does not infer or store them from the public catalog.</p></div></section>
+      <section id="updates" data-panel class="view" hidden aria-labelledby="updates-title"><div class="section-head"><div><p class="eyebrow">Review pipeline</p><h2 id="updates-title">Updates</h2></div></div><div class="panel empty-state"><span aria-hidden="true">✓</span><h3>No updates are queued in this preview</h3><p>Catalog changes require source evidence and independent review before they become active.</p></div></section>
+      <section id="sources" data-panel class="view" hidden aria-labelledby="sources-title"><div class="section-head"><div><p class="eyebrow">Evidence trail</p><h2 id="sources-title">Sources</h2></div></div><div id="sourceList" class="stack" aria-live="polite"></div></section>
+      <section id="research" data-panel class="view" hidden aria-labelledby="research-title"><div class="section-head"><div><p class="eyebrow">Proposals only</p><h2 id="research-title">Research Queue</h2></div><span class="badge pending">No fetcher enabled</span></div><div class="panel empty-state"><span aria-hidden="true">⌕</span><h3>No research tasks are available</h3><p>This preview does not fetch issuer pages or create benefit claims. Research candidates remain separate from approved catalog facts.</p></div></section>
+      <section id="settings" data-panel class="view" hidden aria-labelledby="settings-title"><div class="section-head"><div><p class="eyebrow">Local display</p><h2 id="settings-title">Settings</h2></div></div><div class="panel setting-row"><div><h3>Appearance</h3><p>Theme preference is stored only in this browser.</p></div><button id="themeToggleInline" type="button" class="secondary">Toggle theme</button></div></section>
+    </main>
+  </div>
+  <script src="/static/app.js" type="module"></script>
+</body>
+</html>

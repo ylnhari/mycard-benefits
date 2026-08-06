@@ -1,0 +1,17 @@
+{
+  "id": "55555555-5555-4555-8555-555555555555",
+  "name": "SYNTHETIC-ONLY Example Source",
+  "tier": 2,
+  "ingestion_class": "B",
+  "status": "candidate",
+  "url_prefixes": ["https://example.invalid/synthetic-benefits/"],
+  "cadence_seconds": 86400,
+  "max_age_days": 30,
+  "time_limited": true,
+  "robots_url": "https://example.invalid/robots.txt",
+  "robots_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "terms_url": "https://example.invalid/synthetic-terms",
+  "terms_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "reviewed_at": "2026-08-06",
+  "human_reviewer_id": null
+}

@@ -1,0 +1,35 @@
+# Runtime and secrets
+.env
+*.local.json
+data/
+demo-data/
+imports/
+evidence-private/
+logs/
+backups/
+
+# Python
+.venv/
+.venv-*/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Builds and editors
+dist/
+build/
+*.egg-info/
+.idea/
+.vscode/
+*.swp
+Thumbs.db
+.DS_Store
+
+# Agent/runtime artifacts
+.claude/
+.codex/
+coordination/evidence/private/

@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mycard-benefits.invalid/schema/catalog-1.1.0.json",
+  "title": "MyCard Benefits public catalog records",
+  "description": "Public catalog authoring contract. Runtime Python validation remains authoritative.",
+  "oneOf": [
+    {"$ref": "#/$defs/release"},
+    {"$ref": "#/$defs/offering"},
+    {"$ref": "#/$defs/benefit"}
+  ],
+  "$defs": {
+    "uuid": {"type": "string", "format": "uuid"},
+    "date": {"type": "string", "format": "date"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "effectiveRange": {
+      "type": "object",
+      "properties": {
+        "effective_from": {"$ref": "#/$defs/date"},
+        "effective_to": {"$ref": "#/$defs/date"}
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "reviewer_id", "reviewed_at", "decision"],
+      "properties": {
+        "id": {"$ref": "#/$defs/uuid"},
+        "reviewer_id": {"type": "string", "minLength": 1},
+        "reviewed_at": {"$ref": "#/$defs/timestamp"},
+        "decision": {"enum": ["approved", "rejected"]}
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "source_policy_class", "url", "content_sha256", "retrieved_at",
+        "confidence", "review_state", "reviews"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/uuid"},
+        "source_policy_class": {
+          "enum": [
+            "administering_terms", "issuer_document", "network_rule", "merchant_terms",
+            "regulatory_context", "discovery_only"
+          ]
+        },
+        "url": {"type": "string", "format": "uri"},
+        "content_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "retrieved_at": {"$ref": "#/$defs/timestamp"},
+        "effective_from": {"$ref": "#/$defs/date"},
+        "effective_to": {"$ref": "#/$defs/date"},
+        "confidence": {"enum": ["high", "medium", "low"]},
+        "review_state": {"enum": ["approved", "needs_review", "reviewed", "rejected", "superseded"]},
+        "reviews": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/review"},
+          "uniqueItems": true
+        }
+      }
+    },
+    "predicate": {
+      "type": "object",
+      "required": ["field", "operator"],
+      "properties": {
+        "field": {"type": "string", "minLength": 1},
+        "operator": {"enum": ["equals", "in", "not_in", "gte", "lte", "between", "exists"]}
+      },
+      "allOf": [{
+        "if": {"properties": {"operator": {"const": "exists"}}},
+        "then": {},
+        "else": {"required": ["value"]}
+      }],
+      "additionalProperties": true
+    },
+    "release": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "release_id", "generated_at", "market_scope"],
+      "properties": {
+        "schema_version": {"type": "string", "minLength": 1},
+        "release_id": {"$ref": "#/$defs/uuid"},
+        "generated_at": {"$ref": "#/$defs/timestamp"},
+        "market_scope": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^[A-Z]{2}$"}
+        }
+      }
+    },
+    "offering": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "slug", "display_name", "issuer_id", "product_variant_id", "network_id", "market", "aliases"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/uuid"},
+        "slug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "display_name": {"type": "string", "minLength": 1},
+        "issuer_id": {"type": "string", "minLength": 1},
+        "product_variant_id": {"type": "string", "minLength": 1},
+        "network_id": {"type": "string", "minLength": 1},
+        "market": {"type": "string", "pattern": "^[A-Z]{2}$"},
+        "co_brand_id": {"type": "string", "minLength": 1},
+        "cohort_id": {"type": "string", "minLength": 1},
+        "aliases": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "effective_from": {"$ref": "#/$defs/date"},
+        "effective_to": {"$ref": "#/$defs/date"}
+      }
+    },
+    "benefit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "offering_id", "benefit_type", "title", "status", "review_tier", "eligibility", "evidence", "conflicts_with"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/uuid"},
+        "offering_id": {"$ref": "#/$defs/uuid"},
+        "benefit_type": {
+          "enum": [
+            "reward_points", "conversion", "movie", "hotel", "food", "cashback", "voucher",
+            "meet_and_greet", "lounge", "priority_pass", "other"
+          ]
+        },
+        "title": {"type": "string", "minLength": 1},
+        "status": {"enum": ["active", "historical", "needs_review", "superseded"]},
+        "review_tier": {"enum": ["standard", "enhanced", "high_impact", "ambiguous"]},
+        "effective_from": {"$ref": "#/$defs/date"},
+        "effective_to": {"$ref": "#/$defs/date"},
+        "eligibility": {"type": "array", "items": {"$ref": "#/$defs/predicate"}},
+        "allowance": {"type": "object"},
+        "evidence": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/evidence"}},
+        "conflicts_with": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/uuid"}}
+      }
+    }
+  }
+}
