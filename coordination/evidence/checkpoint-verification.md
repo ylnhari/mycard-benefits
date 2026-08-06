@@ -21,6 +21,8 @@ Date: 2026-08-07
 - Coverage checkpoint: 92% overall and 90% for the vault core.
 - Final Claude Sonnet review reported no High/Medium vault finding. Its three
   Low cleanups were applied; 49 focused vault tests passed afterward.
+- A fresh local clone of commit `2bb07a0` completed `uv sync --locked`, all 189
+  tests, and `uv build`. The disposable clone contained no user/runtime data.
 
 ## Rendered MyCard checks
 
@@ -44,6 +46,8 @@ Date: 2026-08-07
 - Rover compatibility was checked against its local documentation: the
   launcher now unit-tests literal Tailscale `100.64.0.0/10` HTTP proxy URLs
   while continuing to reject other remote HTTP destinations.
+- The verified Family Finance changes were committed locally as `e90f073`; its
+  working tree was clean afterward and nothing was pushed.
 
 ## Remaining product gates
 

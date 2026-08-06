@@ -28,11 +28,15 @@ Local alpha: reviewed public-data foundations and isolated private-vault core.
   cleanup suggestions were applied and passed 49 focused vault tests.
 - The complete initial 120-question decision matrix, later owner revisions, and
   video/purchase-optimizer ideas are persisted in repository documentation.
+- Clean clone of commit `2bb07a0` completed locked setup, 189 tests, and package
+  build; Family Finance companion commit `e90f073` is also locally verified.
 
-## In progress
+## Next planned slice
 
-- Clean-clone verification and local checkpoint commits.
-- Final staged history, secret/path, and file-scope checks.
+- Expose synthetic-only candidate review, research queue, and optimizer
+  contracts through protected local API/UI surfaces.
+- Keep real source retrieval, real-card entry, remote identity pinning, and
+  publication behind their separate gates.
 
 ## Not yet safe
 
@@ -48,9 +52,8 @@ Local alpha: reviewed public-data foundations and isolated private-vault core.
   readiness are not implemented.
 - No public remote, push, or publication has been performed.
 
-## Next verification gate
+## Next delivery gate
 
-Complete clean-clone verification and local checkpoint commits. The next
-product slice is a synthetic-only UI/API contract for the reviewed candidate,
-queue, and optimizer cores; real source retrieval and real-card entry stay
-behind separate gates.
+Complete a synthetic-only UI/API contract for the reviewed candidate, queue,
+and optimizer cores, with rendered and API tests. Real source retrieval and
+real-card entry stay behind separate gates.
