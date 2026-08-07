@@ -1,67 +1,63 @@
 # Current worker task
 
 Status: READY
-Task: MC-003
-Assigned runner: Antigravity
+Task: MC-001
+Assigned runner: OpenCode
+Required provider/model: `opencode/deepseek-v4-flash-free`
 Manager review required: yes
-Commit or push authorized: no
+Commit authorized: local task-branch commit after all gates pass
+Push authorized: no
 
 ## Worker start instruction
 
-Read this entire file and execute only MC-003. Work directly in this repository. Do not start another backlog item. When finished, overwrite `coordination/WORKER-RESULT.md` using the required format below and set its status to `COMPLETE` or `BLOCKED`.
+Read this file completely and execute only MC-001 in this worktree. When finished, overwrite `coordination/WORKER-RESULT.md` with `COMPLETE` or `BLOCKED`, then create one local commit on the current `agent/mc001-opencode` branch only if every acceptance item passes. Never push.
 
-Before working, record the actual agent harness, provider, and model in the result. Read `AGENTS.md` and the instruction files it directly requires, the MC-003 entry in `TASKS.md`, current Git status/diff, and only the public source/tests/docs relevant to this task.
+Record the actual harness, provider, and model. Read `AGENTS.md` and directly required instructions, the MC-001 entry in `TASKS.md`, current branch/status, and only relevant public source/tests/docs.
 
-## MC-003 outcome
+## MC-001 outcome
 
-Remove production-visible synthetic `example.invalid` links and synthetic catalog records. A normal non-demo MyCard launch must never return or render the synthetic offering, synthetic benefit, or any `.invalid` URL. Synthetic fixtures may remain only in isolated tests or an unmistakably labeled demo mode.
+Make the imported private-card list immediately understandable. The My Cards view must show each card as a readable row with its matched public catalog product, issuer/bank, network, lifecycle status, and non-secret record dates. It must not expose PAN, expiry, CVV, PIN, cardholder name, private notes, owner identity, or any other secret.
 
-The worktree contains an approved but uncommitted MC-004 change set. Preserve it exactly. Do not revert or reformat those files unless this task objectively requires a small overlap; report any overlap explicitly.
+This worktree is isolated for concurrency. Work only here. Do not access or edit the integration, Antigravity, or future Claude worktrees.
 
-## Privacy and boundaries
+## Privacy and scope
 
-- Do not read private card data, `data/`, `imports/`, vaults, backups, `.env`, browser profiles, or personal records.
-- Do not use real user/card data in tests. Synthetic fixtures must retain the `SYNTHETIC-ONLY-` convention.
-- Do not research the internet; this task is separation of existing fixture data from production surfaces.
-- Do not change Rover, Family Finance, shared-agent repositories, global configuration, or another repository.
-- Do not commit, push, tag, publish, rewrite history, or edit `TASKS.md`, `dashboard.html`, or `coordination/MC-004-ANTIGRAVITY-REVIEW.md`.
-- Do not begin MC-001, MC-005, MC-177, or another task.
+- Never read real `data/`, imports, vaults, backups, `.env`, browser profiles, or personal card records.
+- Use only `SYNTHETIC-ONLY-` fixtures and temporary test data.
+- Preserve the MC-004 launcher-independent, loopback-only boundary.
+- Do not add private fields to API responses. Prefer joining existing envelope `offering_id` values to the public catalog in the browser/server without expanding the private envelope.
+- Do not implement MC-002 card details, MC-003 synthetic catalog separation, protected writes, reveal/copy, or another backlog item.
+- Do not modify global configuration, another repository/worktree, `TASKS.md`, or `dashboard.html`.
 
 ## Permitted implementation area
 
-Change only files objectively necessary within these areas, plus the result file:
+Change only files objectively necessary within:
 
-- `catalog/offerings/synthetic-example-in.json`
-- `catalog/benefits/synthetic-example-reward.json`
-- `src/mycard_benefits/catalog/`
-- `src/mycard_benefits/app.py`
-- `src/mycard_benefits/config.py`
-- `src/mycard_benefits/cli.py`
-- `src/mycard_benefits/templates/index.html`
 - `src/mycard_benefits/static/app.js`
-- relevant catalog, API, QA, app, and UI tests under `tests/`
-- new isolated synthetic fixtures under `tests/fixtures/` when needed
-- `README.md`, `docs/USER-GUIDE.md`, `PROJECT_STATUS.md`, and `ROADMAP.md` only when user-visible behavior or living status changes
+- `src/mycard_benefits/static/app.css`
+- `src/mycard_benefits/templates/index.html`
+- `src/mycard_benefits/vault/router.py` only if required without widening the envelope
+- relevant catalog lookup code only if necessary for public metadata joining
+- `tests/test_private_cards_api.py`, `tests/test_ui.py`, and narrowly relevant new tests
+- `README.md`, `docs/USER-GUIDE.md`, `PROJECT_STATUS.md`, `ROADMAP.md` only for changed user behavior/living status
 - `coordination/WORKER-RESULT.md`
-
-Do not broadly rewrite production catalog architecture. Prefer the smallest design that creates an explicit production-versus-test/demo boundary and remains easy for maintainers to understand.
 
 ## Required acceptance evidence
 
-1. A normal non-demo production catalog API list contains no synthetic offering or benefit.
-2. The synthetic offering detail route is unavailable in non-demo mode, and no non-demo API response or rendered DOM contains `example.invalid`.
-3. Real production offering records remain available and deterministic.
-4. Synthetic catalog coverage remains in isolated test fixtures; tests do not depend on a synthetic record living in the production `catalog/` directory.
-5. If demo mode exposes any fixture, the UI labels the entire view as demo and production mode cannot access it. Removing the fixture from runtime entirely is acceptable if simpler.
-6. Add a regression test that fails if a production catalog record contains an `.invalid` URL or a synthetic-only identifier.
-7. Browser-verify normal non-demo catalog/dashboard behavior at desktop and mobile widths. Record the absence of synthetic offering/link text and console errors.
-8. Run Ruff, strict mypy, full pytest, package build, and `git diff --check` using the repository's established commands.
-9. Confirm no worker-created path exists outside the permitted implementation area. Manager-owned task/dashboard/review files and the approved MC-004 diff are pre-existing.
+1. Populated My Cards renders one readable row per envelope record with public catalog product name, issuer/bank, network, lifecycle, created date, and updated date.
+2. No secret/private value is returned or rendered. The private response remains `Cache-Control: no-store` and envelope-only.
+3. Search matches visible product, issuer, network, lifecycle, and safe identifiers; lifecycle/status filtering returns exact subsets.
+4. Empty, vault-unavailable, and unmatched-offering states are explicit and actionable, without dumping an unexplained raw slug. Do not expand into MC-006 beyond a clear label.
+5. Rendered verification passes at desktop and mobile widths, in light and dark themes, for populated, empty, and unavailable states.
+6. Keyboard navigation, visible focus, labels, and status announcements remain accessible.
+7. Add deterministic API/UI regression tests for rows, public metadata joining, search/filter, empty/unavailable states, `no-store`, and absence of secret fields.
+8. Run Ruff, strict mypy, full pytest, package build, and `git diff --check`.
+9. Confirm only this worktree/branch changed and no path outside the permitted area was created.
 
 ## Result rule
 
-Do not merely answer in chat. Overwrite `coordination/WORKER-RESULT.md`.
+Overwrite `coordination/WORKER-RESULT.md`; do not only answer in chat.
 
-- Use `Status: COMPLETE` only when every acceptance item passes.
-- Use `Status: BLOCKED` otherwise.
-- Include exact files changed during this task, exact commands and outcomes, browser evidence, remaining risks, and the final verdict `MC-003_WORKER_PASS` or `MC-003_WORKER_BLOCKED`.
+- `Status: COMPLETE` only when all acceptance items pass; otherwise `BLOCKED`.
+- Include exact changed files, commands/outcomes, rendered evidence, remaining risks, branch name and commit ID.
+- Final verdict: `MC-001_WORKER_PASS` or `MC-001_WORKER_BLOCKED`.
