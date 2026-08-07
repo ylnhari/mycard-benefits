@@ -10,8 +10,9 @@
    integrity checks, strict manifest parsing, atomic batch import, and optional
    OS-keyring unlock are implemented. An authenticated My Cards view exposes
    only non-secret envelope metadata, rendered as readable rows joined to public
-   catalog product, bank, network, lifecycle, and record dates; browser writes
-   and secret reveal remain gated.
+   catalog product, bank, network, lifecycle, and record dates, with a keyboard-
+   reachable envelope-only detail panel per card; browser writes and secret
+   reveal remain gated.
 4. **Partial:** responsive dashboard, comparisons, evidence views, deterministic
    traceable Q&A, and purchase-route optimizer core. Reminders and optimizer UI
    are not implemented.

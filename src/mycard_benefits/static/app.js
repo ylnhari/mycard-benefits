@@ -155,7 +155,58 @@ function privateCardDates(card) {
   const updated = fmtDate((card.updated_at || "").slice(0, 10));
   return `Added ${created} · updated ${updated}`;
 }
-function privateCardRow(card) {
+function detailRow(label, value) {
+  const row = node("div", undefined, "card-detail-row");
+  row.append(node("dt", label), node("dd", value));
+  return row;
+}
+function replacementText(card) {
+  if (!card.replacement_card_id || card.replacement_card_id === card.card_id) return null;
+  const replaced = state.privateCards.find(candidate => candidate.card_id === card.replacement_card_id);
+  if (!replaced) return "Replaced by a card not listed in this vault.";
+  const offering = offeringForCard(replaced);
+  return `Replaced by ${offering ? offering.display_name : UNMATCHED_CARD_LABEL}`;
+}
+function replacementOfText(card) {
+  const predecessor = state.privateCards.find(candidate => candidate.replacement_card_id === card.card_id);
+  if (!predecessor) return null;
+  const offering = offeringForCard(predecessor);
+  return `This card replaced ${offering ? offering.display_name : "an earlier card record"}`;
+}
+function cardDetailSection(card, index) {
+  const offering = offeringForCard(card);
+  const section = node("div", undefined, "card-detail");
+  section.id = `card-detail-${index}`;
+  section.hidden = true;
+  const heading = node("h4", "Card details", "card-detail-title");
+  heading.tabIndex = -1;
+  const list = node("dl", undefined, "card-detail-list");
+  if (offering) {
+    list.append(detailRow("Product", offering.display_name));
+    list.append(detailRow("Issuer", offering.issuer_id));
+    list.append(detailRow("Network", offering.network_id.replaceAll("-", " ").toUpperCase()));
+  } else {
+    list.append(detailRow("Product", "Not matched in the public catalog"));
+  }
+  list.append(detailRow("Lifecycle", card.lifecycle));
+  list.append(detailRow("Added", fmtDate((card.created_at || "").slice(0, 10))));
+  list.append(detailRow("Updated", fmtDate((card.updated_at || "").slice(0, 10))));
+  const replaced = replacementText(card);
+  if (replaced) list.append(detailRow("Replacement", replaced));
+  const replaces = replacementOfText(card);
+  if (replaces) list.append(detailRow("Replaces", replaces));
+  section.append(heading, list);
+  if (!offering) section.append(node("p", "This card's product identifier has no match in the public catalog. Fix the identifier in the import file or request the card variant; its product name will appear once the match succeeds.", "unmatched-note"));
+  return section;
+}
+function toggleCardDetail(button, section, heading) {
+  const opening = section.hidden;
+  section.hidden = !opening;
+  button.setAttribute("aria-expanded", String(opening));
+  button.textContent = opening ? "Hide details" : "View details";
+  if (opening) heading.focus({ preventScroll: true });
+}
+function privateCardRow(card, index) {
   const offering = offeringForCard(card);
   const item = node("article", undefined, "catalog-card private-card");
   const head = node("div", undefined, "card-title");
@@ -167,6 +218,23 @@ function privateCardRow(card) {
   item.append(node("p", privateCardDates(card), "quiet-copy"));
   if (!matched) item.append(node("p", "This card's product identifier has no match in the public catalog. Its product name will appear once the identifier matches or the card variant is added.", "unmatched-note"));
   if (card.replacement_card_id) item.append(node("p", "Replacement history is linked.", "allowance"));
+  const section = cardDetailSection(card, index);
+  const button = node("button", "View details", "secondary card-detail-toggle");
+  button.type = "button";
+  button.setAttribute("aria-expanded", "false");
+  button.setAttribute("aria-controls", section.id);
+  button.setAttribute("aria-label", `View details for ${matched ? offering.display_name : "unmatched card"}`);
+  button.addEventListener("click", () => toggleCardDetail(button, section, section.querySelector("h4")));
+  section.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      section.hidden = true;
+      button.setAttribute("aria-expanded", "false");
+      button.textContent = "View details";
+      button.focus();
+    }
+  });
+  item.append(button, section);
   return item;
 }
 function renderPrivateCards() {
@@ -186,7 +254,7 @@ function renderPrivateCards() {
     target.append(node("p", "No cards match the current search and lifecycle filter. Clear the search or choose a different status.", "empty-state"));
     return;
   }
-  for (const card of cards) target.append(privateCardRow(card));
+  cards.forEach((card, index) => target.append(privateCardRow(card, index)));
 }
 function setPrivateAccess(title, text, badge, status) {
   document.querySelector("#vaultSummaryTitle").textContent = title;

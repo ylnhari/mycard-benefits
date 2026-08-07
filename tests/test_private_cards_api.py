@@ -62,8 +62,8 @@ def test_private_cards_return_only_envelope_metadata(tmp_path: Path) -> None:
     assert payload["lifecycle_counts"] == {"active": 1, "archived": 1}
     assert [card["lifecycle"] for card in payload["cards"]] == ["active", "archived"]
     assert "secret_fields" not in response.text
-    assert "pan" not in response.text.lower()
-    assert "cvv" not in response.text.lower()
+    for secret in ("pan", "cvv", "pin", "nickname", "expiry", "cardholder", "notes", "owner"):
+        assert secret not in response.text.lower()
 
 
 def test_private_cards_fail_closed_on_unexpected_reader_fields(tmp_path: Path) -> None:

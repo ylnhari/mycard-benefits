@@ -207,3 +207,57 @@ def test_private_cards_keep_read_only_boundary_and_browser_cache_policy() -> Non
     assert ".unmatched-note" in style
     assert 'placeholder="Product, bank, network, or status"' in template
     assert "PAN, CVV, PIN" in template
+
+
+def test_private_card_detail_shows_only_allowlisted_public_and_envelope_fields() -> None:
+    script = (ROOT / "src" / "mycard_benefits" / "static" / "app.js").read_text(encoding="utf-8")
+
+    assert "function cardDetailSection" in script
+    assert "function detailRow" in script
+    for label in (
+        "Product",
+        "Issuer",
+        "Network",
+        "Lifecycle",
+        "Added",
+        "Updated",
+        "Replacement",
+        "Replaces",
+    ):
+        assert f'detailRow("{label}"' in script
+    assert "offering.display_name" in script and "offering.issuer_id" in script
+    assert "offering.network_id.replaceAll" in script
+    assert "Not matched in the public catalog" in script
+    assert "secret_fields" not in script
+    assert 'node("dd", card.offering_id)' not in script
+    assert 'node("dd", card.card_id)' not in script
+    assert 'node("dd", card.replacement_card_id)' not in script
+    assert "card.secret" not in script
+
+
+def test_private_card_detail_is_keyboard_reachable_and_escape_closes() -> None:
+    script = (ROOT / "src" / "mycard_benefits" / "static" / "app.js").read_text(encoding="utf-8")
+
+    assert "View details" in script and "Hide details" in script
+    assert "card-detail-toggle" in script
+    assert "aria-expanded" in script and "aria-controls" in script
+    assert "aria-label" in script
+    assert "function toggleCardDetail" in script
+    assert 'event.key === "Escape"' in script
+    assert "heading.focus({ preventScroll: true })" in script
+    assert "button.focus()" in script
+    assert 'button.type = "button"' in script
+
+
+def test_private_card_detail_replacement_links_and_unmatched_state_are_safe() -> None:
+    script = (ROOT / "src" / "mycard_benefits" / "static" / "app.js").read_text(encoding="utf-8")
+
+    assert "function replacementText" in script and "function replacementOfText" in script
+    assert "Replaced by" in script
+    assert "Replaced by a card not listed in this vault." in script
+    assert "This card replaced" in script
+    assert "UNMATCHED_CARD_LABEL" in script
+    assert "replacement_card_id" in script
+    assert "Replacement history is linked." in script
+    assert "card-detail" in script and "card-detail-list" in script
+    assert "Fix the identifier in the import file or request the card variant" in script
