@@ -188,9 +188,11 @@ none was already present.
 - Quality gates, all green on the final (corrected) tree:
   - `uv run ruff check .` — all checks passed.
   - `uv run mypy src` — success, no issues found in 31 source files.
-  - `uv run pytest -q` — 282 passed (started at 254 before this batch; net
-    +28 across the initial submission and the correction — several tests
-    were added, removed, or renamed as the child-record contract changed).
+  - `uv run pytest -q` — 272 passed (254 before this batch; 281 after the
+    initial MC-024/MC-177 submission; 272 after the correction — several
+    label/expiry-specific tests were removed or consolidated into shared
+    `_child_record()`/`_card_with_children()` helpers as the child-record
+    contract changed, and new fail-closed tests were added).
   - `node --check src/mycard_benefits/static/app.js` — passed.
   - `uv build` — both sdist and wheel built successfully.
   - `git diff --check` — clean (no whitespace errors).
@@ -263,18 +265,40 @@ was pushed in between.
 Also removed as dead code once `label` was gone: `_validate_label` and
 `_MAX_LABEL_CHARS` in `core.py`.
 
+**Follow-up fix caught by the tracked-diff privacy/secret scan**: the new
+`test_private_cards_fail_closed_on_free_text_child_label` fixture originally
+embedded a well-known 16-digit Visa test-card number (Luhn-valid, purely
+numeric) inside a rejected `label` value. `git diff | grep -oE
+"[0-9]{13,19}"` caught it. `AGENTS.md` boundary 1 requires synthetic
+PAN-shaped fixtures to be "deliberately non-numeric and cannot be
+Luhn-valid" even though this string was never a `pan` field and never
+reaches a response body (the whole point of the test is that it's
+rejected) — replaced with a non-numeric placeholder,
+`SYNTHETIC-ONLY-secret-membership-number-ALPHA-NOT-A-REAL-PAN`, which reads
+the same in the test's intent but cannot be mistaken for a real or
+Luhn-valid card number. Re-ran `git diff | grep -oE "[0-9]{13,19}"` after
+the fix: no matches anywhere in the tracked diff.
+
 Re-verification: re-ran the full gate set on the corrected tree (all green,
-see updated counts below) and re-checked the live JSON response of a scratch
-dev server seeded with expired/expiring-soon/far-future/no-expiry child
-records — confirmed the response contains only `expiry_signal` buckets, no
-`label` key anywhere, and no exact date string. A live Chrome DOM screenshot
-pass (done for the original submission) was not repeated for this
-correction: the browser-automation tool required an interactive
-browser-selection choice this session had no user available to answer, so
-verification for the correction relies on the curl-verified live API
-payload plus the existing static JS-source assertions in `test_ui.py`
-(`childRecordRow`'s rendering logic itself did not change — only which
-fields it reads did, and those field names are asserted directly).
+see updated counts above) and did a genuine live browser pass in Chrome
+(desktop 1280×900 and a true ~390px-wide mobile viewport, both dark and
+light themes) against a scratch dev server (`browser_verify_server2.py`,
+`create_app(settings, private_card_reader=<synthetic fixture>)`, no real
+vault/keyring) seeded with all 5 child-record kinds across all 3
+`expiry_signal` buckets plus a no-expiry case. Confirmed visually and via
+`curl`'d JSON: each child row shows only its `kind` label (e.g. "PRIORITY
+PASS") with no free-text name, a lifecycle badge, and — only when
+`expiry_signal` is non-null — one of "Expired" / "Expiring soon" / "Not
+expiring soon"; no exact date, and no `label` key, appears anywhere in the
+DOM or the API response at any width or theme. (This session's
+`resize_window` call reported success but did not actually narrow the
+underlying Chrome window's rendered viewport for this browser instance;
+genuine narrow-viewport rendering was instead confirmed by loading the same
+page in a same-origin `<iframe>` sized to 390px, which gets its own CSS
+viewport for `@media` purposes regardless of the outer window's actual
+size — `window.innerWidth` inside that iframe read 386.) The scratch
+server, its process, and its `data`/`demo-data` directories were all
+stopped and removed afterward.
 
 ## Risks / follow-ups for later tasks
 
