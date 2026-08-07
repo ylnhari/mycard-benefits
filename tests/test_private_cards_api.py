@@ -57,7 +57,7 @@ def test_private_cards_require_rover_before_reader_runs(tmp_path: Path) -> None:
         response = client.get("/api/v1/private/cards")
 
     assert response.status_code == 401
-    assert response.json() == {"detail": "Open MyCard through authenticated Rover"}
+    assert response.json() == {"detail": "Authenticated companion session required"}
     assert not called
 
 

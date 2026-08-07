@@ -308,10 +308,10 @@ is each one?" — not to show you a card number.
 1. The vault must exist and be unlockable through the OS keyring (above).
 2. The app must be started **without** `--demo`, so it reads your real data
    folder.
-3. **Your browser must be signed in to the authenticated gateway.** The app
-   requires a current signed session cookie issued by the gateway (Rover) and
+3. **Your browser must be signed in to the secure Companion Dashboard.** The
+   app requires a current signed session cookie issued by that dashboard and
    checks it before touching the vault at all. Opening the loopback address
-   directly, without that session, gets you the public catalog and a *Rover
+   directly, without that session, gets you the public catalog and a *secure
    sign-in required* notice on My Cards. See
    [section 8](#8-using-it-from-your-phone).
 
@@ -406,11 +406,11 @@ missing, expired, tampered with, or signed by something else. Nothing is read
 from your vault until that check passes. The sessions expire after a day, so
 signing in again is normal.
 
-That is why **My Cards works when you arrive through the gateway and shows a
-*Rover sign-in required* notice when you open the loopback address directly** —
-even on the same computer. The public catalog works either way. If you want the
-private list on your desktop too, open MyCard from your gateway's project page
-rather than typing `127.0.0.1` into the address bar.
+That is why **My Cards works when you arrive through the Companion Dashboard and
+shows a *secure sign-in required* notice when you open the loopback address
+directly** — even on the same computer. The public catalog works either way. If
+you want the private list on your desktop too, open MyCard from the Companion
+Dashboard's project page rather than typing `127.0.0.1` into the address bar.
 
 **Do not do these things**, even if a guide somewhere suggests them:
 
@@ -565,10 +565,10 @@ only the first time. After the vault exists, leave `--create` off.
 **An import failed after the vault was created.** The vault is kept on purpose.
 Fix your file and run the import again without `--create`.
 
-**My Cards says "Rover sign-in required".** Your browser has no current gateway
-session. Sign in to the gateway and open MyCard from its project page instead of
-typing the loopback address directly. Sessions expire after a day, so this is
-also what you see the morning after.
+**My Cards says "secure sign-in required".** Your browser has no current
+Companion Dashboard session. Sign in there and open MyCard from its project page
+instead of typing the loopback address directly. Sessions expire after a day, so
+this is also what you see the morning after.
 
 **My Cards says the private vault is unavailable.** The app reached the vault step
 but could not complete it. Usual causes, in order: you started the app with

@@ -38,6 +38,8 @@ def test_catalog_dashboard_assets_use_read_only_endpoints_and_safe_dom_updates()
     assert 'fetch("/api/v1/private/cards"' in script
     assert 'credentials: "same-origin"' in script
     assert 'cache: "no-store"' in script
+    assert "Rover" not in script
+    assert "Companion Dashboard" in script
     assert "function renderPrivateCards" in script
     assert "textContent" in script
     assert "innerHTML" not in script

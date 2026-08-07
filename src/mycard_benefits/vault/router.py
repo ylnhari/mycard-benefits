@@ -48,7 +48,7 @@ def create_private_cards_router(
     def list_private_cards(request: Request, response: Response) -> PrivateCardList:
         token = request.cookies.get("rover_proxy")
         if not verify_rover_token(rover_secret, token):
-            raise HTTPException(status_code=401, detail="Open MyCard through authenticated Rover")
+            raise HTTPException(status_code=401, detail="Authenticated companion session required")
         try:
             raw_cards = read_cards()
             cards = [PrivateCardSummary.model_validate(item) for item in raw_cards]

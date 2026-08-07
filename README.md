@@ -122,9 +122,9 @@ Rover proxy): you open the gateway's URL, sign in there, and it forwards the
 request locally. The app's bind never changes — do not set it to `0.0.0.0`, your
 LAN address, or a forwarded router port.
 
-Signing in to the gateway is also what unlocks **My Cards**, on the phone and on
-the desktop alike: opening the loopback address directly gets you the public
-catalog and a *Rover sign-in required* notice. See
+Signing in to the secure Companion Dashboard is also what unlocks **My Cards**,
+on the phone and on the desktop alike: opening the loopback address directly
+gets you the public catalog and a *secure sign-in required* notice. See
 [the User Guide](docs/USER-GUIDE.md#8-using-it-from-your-phone).
 
 The app receives Rover's matching signing secret only through its configuration
