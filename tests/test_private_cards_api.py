@@ -84,3 +84,93 @@ def test_private_cards_fail_closed_on_unexpected_reader_fields(tmp_path: Path) -
 
     assert response.status_code == 503
     assert "SYNTHETIC-ONLY-SHOULD-NOT-LEAK" not in response.text
+
+
+def test_private_cards_rows_carry_only_the_five_envelope_fields(tmp_path: Path) -> None:
+    def reader() -> tuple[dict[str, str], ...]:
+        return (
+            {
+                "card_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0001",
+                "offering_id": "hdfc-regalia-gold-credit",
+                "lifecycle": "active",
+                "created_at": "2026-08-07T00:00:00Z",
+                "updated_at": "2026-08-07T00:00:00Z",
+                "replacement_card_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0002",
+            },
+        )
+
+    with _client(tmp_path, reader) as client:
+        payload = client.get("/api/v1/private/cards").json()
+
+    assert len(payload["cards"]) == 1
+    row = payload["cards"][0]
+    assert row["card_id"] == "018f47f2-0f86-7b0a-bc7d-f00ba47c0001"
+    assert row["offering_id"] == "hdfc-regalia-gold-credit"
+    assert row["lifecycle"] == "active"
+    assert row["created_at"] == "2026-08-07T00:00:00Z"
+    assert row["updated_at"] == "2026-08-07T00:00:00Z"
+    assert row["replacement_card_id"] == "018f47f2-0f86-7b0a-bc7d-f00ba47c0002"
+    assert set(row) == {
+        "card_id",
+        "offering_id",
+        "lifecycle",
+        "created_at",
+        "updated_at",
+        "replacement_card_id",
+    }
+
+
+def test_private_cards_accept_unmatched_offerings_and_never_return_secret_values(
+    tmp_path: Path,
+) -> None:
+    def reader() -> tuple[dict[str, object], ...]:
+        return (
+            {
+                "card_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0003",
+                "offering_id": "not-a-catalog-slug",
+                "lifecycle": "expired",
+                "created_at": "2026-01-02T00:00:00Z",
+                "updated_at": "2026-02-03T00:00:00Z",
+                "secret_fields": {
+                    "nickname": "SYNTHETIC-ONLY-PRIMARY",
+                    "notes": "SYNTHETIC-ONLY-NOTE",
+                    "cardholder": "SYNTHETIC-ONLY-OWNER",
+                    "expiry": "2030-12",
+                    "pan": "SYNTHETIC-ONLY-4000",
+                    "cvv": "SYNTHETIC-ONLY-123",
+                    "pin": "SYNTHETIC-ONLY-4321",
+                },
+            },
+        )
+
+    with _client(tmp_path, reader) as client:
+        response = client.get("/api/v1/private/cards")
+
+    assert response.status_code == 503
+    text = response.text
+    for secret in (
+        "SYNTHETIC-ONLY-PRIMARY",
+        "SYNTHETIC-ONLY-NOTE",
+        "SYNTHETIC-ONLY-OWNER",
+        "2030-12",
+        "SYNTHETIC-ONLY-4000",
+        "SYNTHETIC-ONLY-123",
+        "SYNTHETIC-ONLY-4321",
+        "not-a-catalog-slug",
+    ):
+        assert secret not in text
+
+
+def test_private_cards_503_when_reader_raises(tmp_path: Path) -> None:
+    def reader() -> tuple[dict[str, str], ...]:
+        raise OSError("vault unavailable")
+
+    with _client(tmp_path, reader) as client:
+        response = client.get("/api/v1/private/cards")
+
+    assert response.status_code == 503
+    assert (
+        response.headers.get("cache-control") is None
+        or response.headers["cache-control"] != "no-store"
+    )
+    assert "fallback" not in response.text.lower()

@@ -27,7 +27,11 @@ view of the encrypted portfolio.
   synthetic fixture. Product presence is not presented as benefit verification.
 - Loopback-local, read-only My Cards API/UI. It opens the existing vault through
   the operating-system keyring, returns only card UUID, offering, lifecycle,
-  timestamps, and replacement metadata, and applies `no-store`.
+  timestamps, and replacement metadata, and applies `no-store`. The view renders
+  each card as a readable row joined to public catalog product, issuer/bank,
+  network, lifecycle, and record dates; unmatched identifiers appear as a
+  clearly labeled "Unmatched card variant" row, and search and lifecycle
+  filtering return exact subsets.
 - MyCard remains loopback-bound. A personal external launcher may start it and
   provide phone access, but MyCard does not integrate with that tool.
 - Discovery-only pilot source work for Tata Neu HDFC Infinity and HDFC Regalia
