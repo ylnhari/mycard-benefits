@@ -4,7 +4,7 @@ Last updated: 2026-08-07
 
 ## Current milestone
 
-Initial release candidate: reviewed public-data foundations plus a narrow,
+Published local-first alpha: reviewed public-data foundations plus a narrow,
 encrypted private-import path.
 
 ## Completed
@@ -34,10 +34,12 @@ encrypted private-import path.
   verification.
 - The complete initial 120-question decision matrix, later owner revisions, and
   video/purchase-optimizer ideas are persisted in repository documentation.
-- The prior clean clone of commit `2bb07a0` completed locked setup, 189 tests,
-  and package build; the current release candidate will receive a new clean
-  clone gate before publication. Family Finance companion commit `e90f073` is
-  also locally verified.
+- A dependency-cold clean clone of commit `c037ccf` passed locked setup without
+  the optional keyring extra, Ruff, strict mypy, all 201 tests, and both package
+  builds.
+- The public MyCard repository is live at
+  `https://github.com/ylnhari/mycard-benefits`; Family Finance companion commit
+  `e90f073` is pushed and synchronized on its public `main` branch.
 
 ## Next planned slice
 
@@ -61,11 +63,11 @@ encrypted private-import path.
 - Family Finance one-time import, notifications, and Rover verification are not
   implemented. The new Drive-manifest import is local to MyCard Benefits and is
   not a continuous synchronization bridge.
-- Initial public publication is owner-approved and awaiting the final clean
-  clone, history scan, commit, and push gates.
+- Initial publication and companion synchronization are complete. Future
+  catalog publication, releases, and remote-access changes retain their own
+  review gates.
 
 ## Next delivery gate
 
-Publish the reviewed initial repository and companion commit, then complete a
-synthetic-only UI/API contract for the candidate, queue, and optimizer cores.
-Protected real-card browser/API controls remain a later gate.
+Complete a synthetic-only UI/API contract for the candidate, queue, and
+optimizer cores. Protected real-card browser/API controls remain a later gate.

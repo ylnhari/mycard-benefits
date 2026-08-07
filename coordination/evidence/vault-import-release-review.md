@@ -55,3 +55,6 @@ keyring protocol was added; the clean-clone gate must be repeated before push.
 
 The repeated clean clone at commit `c037ccf` passed locked setup without the
 keyring extra, Ruff, strict mypy, all 201 tests, and both package builds.
+
+Post-push verification found public MyCard `main` at `657bcc8` and public
+Family Finance `main` at `e90f073`, each matching its local branch.

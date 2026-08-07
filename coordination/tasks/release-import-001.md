@@ -1,6 +1,6 @@
 # Initial release and private card import
 
-Status: ready for publication
+Status: complete
 Owner: primary orchestrator
 Approved: 2026-08-07
 
@@ -47,3 +47,6 @@ delegating financial documents or decrypted vault data.
 - Complete deterministic gates passed: 201 MyCard tests, Ruff, strict mypy,
   dependency checks, build, package privacy checks, 207 Family Finance Python
   tests, and 51 Family Finance Node tests.
+- Public MyCard `main` was created and pushed at `657bcc8`; Family Finance
+  `main` was pushed at `e90f073`. Both branches reported zero divergence after
+  push.
