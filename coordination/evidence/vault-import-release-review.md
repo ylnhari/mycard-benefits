@@ -52,3 +52,6 @@ approval. Deterministic release gates remain owned and verified by the primary.
 The first dependency-cold clone then exposed one optional-keyring strict-mypy
 failure hidden by the installed extra. An explicit cast to the already-defined
 keyring protocol was added; the clean-clone gate must be repeated before push.
+
+The repeated clean clone at commit `c037ccf` passed locked setup without the
+keyring extra, Ruff, strict mypy, all 201 tests, and both package builds.
