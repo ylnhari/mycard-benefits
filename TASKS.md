@@ -6,17 +6,17 @@ Manager protocol: tasks are assigned one at a time; a worker owns only its named
 
 ### Broken user experience — first
 
-- [ ] **MC-001: Make the imported card list clearly visible** - The My Cards view must immediately show every imported card as readable rows (catalog product, bank, network, status, record dates) with no secret values and no ambiguous placeholder text.
+- [x] **MC-001: Make the imported card list clearly visible** - The My Cards view must immediately show every imported card as readable rows (catalog product, bank, network, status, record dates) with no secret values and no ambiguous placeholder text.
   - Acceptance: rendered list verified desktop/mobile and dark/light with populated, empty, and vault-unavailable states; search and status filter return correct subsets; response remains `no-store` and contains only envelope fields per `PROJECT_STATUS.md` "Next planned slice".
   - Depends on: none
   - Suggested runner: OpenCode
 
-- [ ] **MC-002: Add a card record detail view reachable from My Cards** - Selecting an imported card opens a detail panel showing its offering, lifecycle state, created/updated timestamps, and any replacement link, without revealing secrets.
+- [x] **MC-002: Add a card record detail view reachable from My Cards** - Selecting an imported card opens a detail panel showing its offering, lifecycle state, created/updated timestamps, and any replacement link, without revealing secrets.
   - Acceptance: each row navigates to a detail view; envelope-only fields verified; keyboard reachable; covered by `tests/test_private_cards_api.py` and UI tests; no secret field appears in the response.
   - Depends on: MC-001
   - Suggested runner: OpenCode
 
-- [ ] **MC-003: Remove production-visible synthetic example.invalid links** - The catalog and dashboard must never render synthetic/example `.invalid` links or synthetic-only URLs in non-demo production views.
+- [x] **MC-003: Remove production-visible synthetic example.invalid links** - The catalog and dashboard must never render synthetic/example `.invalid` links or synthetic-only URLs in non-demo production views.
   - Acceptance: grep of rendered production catalog views finds no `example.invalid` or synthetic host; a test asserts public catalog records carry only real or explicitly-absent URLs; demo content is labeled demo only.
   - Depends on: none
   - Suggested runner: OpenCode
@@ -26,7 +26,7 @@ Manager protocol: tasks are assigned one at a time; a worker owns only its named
   - Depends on: none
   - Suggested runner: Antigravity
 
-- [ ] **MC-005: Keep MyCard wording neutral and launcher-free** - MyCard's own UI and docs must carry only neutral MyCard-local branding. Rover is the owner's personal external start-stop/mobile-access launcher, not part of MyCard and not a "Companion Dashboard"; remove Rover-branded and Companion-Dashboard-branded sign-in language from user-facing templates, API error text, README, and guide so MyCard reads as self-contained.
+- [x] **MC-005: Keep MyCard wording neutral and launcher-free** - MyCard's own UI and docs must carry only neutral MyCard-local branding. Rover is the owner's personal external start-stop/mobile-access launcher, not part of MyCard and not a "Companion Dashboard"; remove Rover-branded and Companion-Dashboard-branded sign-in language from user-facing templates, API error text, README, and guide so MyCard reads as self-contained.
   - Acceptance: grep of templates, static assets, README, and guide finds no Rover sign-in or Companion Dashboard wording in active MyCard surfaces; rendered states use neutral MyCard-local copy; historical coordination evidence (`coordination/events.jsonl`) stays historical; docs updated in the same change.
   - Depends on: MC-004
   - Suggested runner: OpenCode
