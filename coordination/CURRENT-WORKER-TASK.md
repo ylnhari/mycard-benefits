@@ -1,12 +1,12 @@
 # Integration status
 
-Status: CONCURRENT_BATCH_ACTIVE
+Status: HANDOFF_READY_NO_ACTIVE_BATCH
 
-The manager integration branch is the canonical trace. Worker worktrees remain
-isolated while a task is in progress; before every subsequent task handoff, the
-manager merges the completed dependency, gives the worker the resulting commit,
-and requires a rebase plus a full gate rerun before review. No push or
-publication is authorized.
+The current safe manager/main line is the canonical continuation point. There
+is no active external-worker batch. Start future work from `CONTINUE-HERE.md`
+and `coordination/ORCHESTRATION-HANDOFF-2026-08-07.md`; Antigravity or another
+agent may continue independently without launching any other runner. A worker
+branch remains isolated until a separate review accepts it.
 
 ## Integrated and validated
 
@@ -21,14 +21,17 @@ publication is authorized.
 - MC-021, MC-070, and MC-093: reviewed relationship graph, temporal benefit
   versions, and provenance assertions — worker sequence ending at `61e68d7`,
   integrated and manager-validated at `7a939a2`
+- MC-098: bounded ephemeral optimizer API — worker implementation ending at
+  `cb7d08f`, independently validated and integrated through `7070a22`
 
-## Awaiting integration
+## Review-blocked or remaining work
 
 - Claude Sonnet: MC-024 and MC-177 on `agent/mc024-177-claude`.
-- OpenCode DeepSeek V4 Flash Free: MC-098 on `agent/mc098-opencode`.
 - Antigravity Gemini 3.6 Flash High: MC-085 on `agent/mc085-antigravity`.
 - Manager: MC-206 encrypted local source consolidation and safe last-four
   projection. Private source data is not delegated.
 
-This file is manager-owned. Workers must use their explicitly assigned task
-record and may not edit another worktree or private data directory.
+The first two branches above have unresolved independent-review findings in the
+handoff and must not be merged unchanged. This file is manager-owned. A future
+agent may work directly from the canonical line; it must not edit another dirty
+worktree or expose the ignored private data directory.

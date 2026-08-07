@@ -1,10 +1,10 @@
 # OpenCode task — MC-098 optimizer API
 
-Status: assigned
+Status: integrated after independent manager review
 Worker: OpenCode free route
 Branch: `agent/mc098-opencode`
 Base: `33a866c2c402b976cb59b03af2ae6c803df51d18`
-Push authorized: no
+Push authorized: only under the repository publication gate
 
 Read `AGENTS.md`, `PRODUCT_REQUIREMENTS.md`, `PROJECT_STATUS.md`, `TASKS.md`,
 `docs/PURCHASE-OPTIMIZER.md`, the complete reviewed optimizer package, and its

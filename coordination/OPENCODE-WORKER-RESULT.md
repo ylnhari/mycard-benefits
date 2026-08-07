@@ -69,22 +69,21 @@ or response paths.
 
 ## Risks / notes for review
 
-- The endpoint intentionally documents no request-body schema in OpenAPI
-  (manual parsing for the 413 cap); the contract is documented in
-  `docs/PURCHASE-OPTIMIZER.md` "Loopback API".
+- The correction adds explicit OpenAPI request and `200`/`413`/`422` response
+  schemas while retaining bounded manual body streaming for the 413 cap.
 - Bounds: 128 KiB body, 20 routes, 8 components/route, 5+5 fees, 8 source
   refs, 8 origins, text caps 200/300/2048. Increase only with a documented
   reason and tests.
 - The response is capped by the request bounds; maximal-input test asserts
   < 500 KB and determinism.
 - No browser verification was performed: MC-098 deliberately adds no UI.
-- Manager should independently review and integrate; worker did not merge,
-  rebase, or push.
+- The manager independently reviewed and integrated the worker commits; the
+  worker itself did not merge, rebase, or push.
 
 ## Commit
 
-Local commit on `agent/mc098-opencode` (hash recorded in the task file and
-by the commit message); no push.
+Worker implementation commits are `098503a` and `cb7d08f`; worker result
+commits are `d2a9033` and `2f6d34e`. No worker-side push occurred.
 
 ## Correction round (manager review, 2026-08-07)
 
