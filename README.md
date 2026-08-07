@@ -36,8 +36,10 @@ Private data remains local. The application binds only to 127.0.0.1.
 
 Use the address it prints. Press `Ctrl+C` to stop. Drop `--demo` once you have
 imported your own cards. `--demo` is a clearly labelled dry run: the page shows
-a permanent banner, demo activity stays in a separate `demo-data` folder, and
-My Cards is switched off — a demo run never even opens your real vault.
+a permanent banner, demo activity uses a separate `demo-data` folder by
+default, and My Cards is switched off — a demo run never opens your vault.
+An explicit `--data-dir` changes the demo activity folder but does not enable
+My Cards.
 
 ## What works today
 

@@ -294,6 +294,8 @@ def test_demo_run_shows_persistent_banner_and_switches_off_my_cards(tmp_path: Pa
         assert "Synthetic demo run" in page.text
         assert "demo-data" in page.text
         assert "--demo" in page.text
+        assert "an explicit" in page.text
+        assert "changes only that demo activity folder" in page.text
         cards = client.get("/api/v1/private/cards")
         assert cards.status_code == 503
         assert cards.json() == {

@@ -142,8 +142,8 @@ folder. You do not need `uv sync` again unless the project has been updated.
 | Keep your data somewhere else | `uv run mycard-benefits --data-dir D:\MyCardData` |
 
 `--demo` is a clearly labelled dry run. The page shows a **permanent banner**
-saying so on every screen, demo activity lives in a separate `demo-data` folder,
-and **My Cards is switched off** — a demo run never even opens your real vault.
+saying so on every screen, demo activity uses a separate `demo-data` folder by
+default, and **My Cards is switched off** — a demo run never opens your vault.
 The public catalog is the same either way. Start the app without `--demo` when
 you want to see My Cards; your imported cards live under the normal `data`
 folder and only appear there.

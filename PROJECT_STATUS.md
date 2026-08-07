@@ -40,9 +40,10 @@ view of the encrypted portfolio.
 - MyCard remains loopback-bound. A personal external launcher may start it and
   provide phone access, but MyCard does not integrate with that tool.
 - `--demo` runs are unmistakable: a persistent banner labels the run on every
-  screen, demo activity stays in a separate `demo-data` folder, My Cards is
-  switched off in demo mode, and the guide explains the boundary. Tests prove
-  demo and normal runs point at different data folders.
+  screen, demo activity uses a separate `demo-data` folder by default, My Cards
+  is switched off in demo mode, and the guide explains the explicit
+  `--data-dir` override. Tests prove default demo and normal runs point at
+  different data folders.
 - My Cards explains why the vault is unavailable instead of failing silently:
   each known cause (demo mode, no vault yet, passphrase-only vault, wrong data
   folder, keyring unavailable, locked vault) maps to a distinct safe API

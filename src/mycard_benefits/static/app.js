@@ -260,7 +260,7 @@ function renderPrivateCards() {
 const VAULT_DIAGNOSTICS = {
   demo: {
     title: "Demo run: My Cards is switched off",
-    text: "This run uses only the demo-data folder and never opens a real vault, so there is no card list to show.",
+    text: "My Cards is disabled and no private vault is opened. Demo activity uses demo-data by default; an explicit --data-dir changes only the demo activity folder.",
     badge: "Demo",
     status: "Synthetic demo run; no fallback data was used.",
     note: "Start the app without --demo to open your real vault and see My Cards.",
