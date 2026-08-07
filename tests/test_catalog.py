@@ -10,11 +10,12 @@ from jsonschema import Draft202012Validator, FormatChecker
 from mycard_benefits.catalog import CatalogLoadError, load_catalog
 
 CATALOG_ROOT = Path(__file__).parents[1] / "catalog"
+SYNTHETIC_CATALOG_ROOT = Path(__file__).parent / "fixtures" / "synthetic_catalog"
 
 
 def test_synthetic_catalog_loads_deterministically() -> None:
-    first = load_catalog(CATALOG_ROOT)
-    second = load_catalog(CATALOG_ROOT)
+    first = load_catalog(SYNTHETIC_CATALOG_ROOT)
+    second = load_catalog(SYNTHETIC_CATALOG_ROOT)
 
     assert first == second
     offering = first.offering_by_slug("synthetic-example-in-visa")
@@ -28,7 +29,7 @@ def test_synthetic_catalog_loads_deterministically() -> None:
 def test_india_starter_catalog_contains_real_product_variants() -> None:
     catalog = load_catalog(CATALOG_ROOT)
 
-    assert len(catalog.offerings) >= 69
+    assert len(catalog.offerings) >= 68
     tata_neu = catalog.offering_by_slug("hdfc-tata-neu-rupay-select-credit")
     regalia = catalog.offering_by_slug("hdfc-regalia-gold-credit")
     assert tata_neu is not None
@@ -39,7 +40,7 @@ def test_india_starter_catalog_contains_real_product_variants() -> None:
 
 
 def test_tracked_import_sample_uses_known_catalog_offerings() -> None:
-    catalog = load_catalog(CATALOG_ROOT)
+    catalog = load_catalog(SYNTHETIC_CATALOG_ROOT)
     sample_path = Path(__file__).parents[1] / "samples" / "card-import.example.json"
     sample = json.loads(sample_path.read_text(encoding="utf-8"))
 
@@ -164,9 +165,28 @@ def test_conflicts_must_reference_another_known_rule(tmp_path: Path) -> None:
         load_catalog(tmp_path)
 
 
+def test_production_catalog_contains_no_synthetic_records_or_invalid_urls() -> None:
+    catalog = load_catalog(CATALOG_ROOT)
+    assert catalog.offerings
+    for offering in catalog.offerings:
+        assert "synthetic" not in offering.slug.lower()
+        assert "synthetic" not in offering.display_name.lower()
+        assert "synthetic" not in offering.issuer_id.lower()
+        assert "example.invalid" not in offering.slug.lower()
+        for alias in offering.aliases:
+            assert "synthetic" not in alias.lower()
+    for rule in catalog.benefits:
+        assert "synthetic" not in rule.title.lower()
+        for assertion in rule.evidence:
+            assert not assertion.url.endswith(".invalid")
+            assert "example.invalid" not in assertion.url.lower()
+            for review in assertion.reviews:
+                assert "synthetic" not in review.reviewer_id.lower()
+
+
 def _copy_catalog(destination: Path) -> None:
     for relative in ("schema/release.json", "offerings/synthetic-example-in.json", "benefits/synthetic-example-reward.json"):
-        source = CATALOG_ROOT / relative
+        source = SYNTHETIC_CATALOG_ROOT / relative
         target = destination / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(source.read_text(encoding="utf-8"), encoding="utf-8")

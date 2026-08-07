@@ -9,7 +9,29 @@ from fastapi.testclient import TestClient
 from mycard_benefits.catalog.router import create_catalog_router
 
 CATALOG_ROOT = Path(__file__).parents[1] / "catalog"
+SYNTHETIC_CATALOG_ROOT = Path(__file__).parent / "fixtures" / "synthetic_catalog"
 OFFERING_SLUG = "synthetic-example-in-visa"
+
+
+def test_production_catalog_api_contains_no_synthetic_or_invalid_urls() -> None:
+    app = FastAPI()
+    app.include_router(create_catalog_router(CATALOG_ROOT))
+    with TestClient(app) as client:
+        offerings = client.get("/api/v1/catalog/offerings")
+        assert offerings.status_code == 200
+        offerings_data = offerings.json()
+        assert len(offerings_data) >= 68
+        assert "synthetic-example-in-visa" not in [item["slug"] for item in offerings_data]
+        assert "example.invalid" not in offerings.text
+        assert "synthetic" not in offerings.text.lower()
+
+        detail = client.get("/api/v1/catalog/offerings/synthetic-example-in-visa")
+        assert detail.status_code == 404
+
+        benefits = client.get("/api/v1/catalog/benefits")
+        assert benefits.status_code == 200
+        assert "example.invalid" not in benefits.text
+        assert "synthetic" not in benefits.text.lower()
 
 
 def test_list_and_detail_are_date_aware_and_deterministic(tmp_path: Path) -> None:
@@ -97,7 +119,7 @@ def _copy_catalog(destination: Path) -> None:
         "offerings/synthetic-example-in.json",
         "benefits/synthetic-example-reward.json",
     ):
-        source = CATALOG_ROOT / relative
+        source = SYNTHETIC_CATALOG_ROOT / relative
         target = destination / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
