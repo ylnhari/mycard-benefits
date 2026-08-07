@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from typing import Any
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse
@@ -14,7 +15,7 @@ from . import __version__
 from .catalog.router import create_catalog_router
 from .config import API_VERSION, APP_ID, PACKAGE_ROOT, Settings
 from .identity import InstallationIdentity
-from .optimizer.router import create_optimizer_router
+from .optimizer.router import create_optimizer_router, install_optimizer_openapi_schema
 from .qa import create_qa_router
 from .vault.router import CardReader, create_private_cards_router
 
@@ -83,6 +84,16 @@ def create_app(
             "install_id": identity.install_id,
             "public_key": identity.public_key,
         }
+
+    default_openapi = application.openapi
+
+    def openapi_with_optimizer_schema() -> dict[str, Any]:
+        application.openapi_schema = None
+        schema = default_openapi()
+        install_optimizer_openapi_schema(schema)
+        return schema
+
+    application.openapi = openapi_with_optimizer_schema  # type: ignore[method-assign]
 
     return application
 

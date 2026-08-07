@@ -4,20 +4,35 @@ The endpoint accepts a fully self-contained planned-purchase scenario plus
 candidate routes, runs the reviewed engine in-process, and returns the ranked
 and rejected routes with the engine's provenance, assumptions, value classes,
 and rejection reasons.  The request and response are never persisted or
-logged, errors never echo request values, and responses carry
+logged, errors never echo request values, and every response carries
 ``Cache-Control: no-store``.  All semantic validation and ranking stay in the
 reviewed engine; this adapter adds only structural bounds.
+
+The request body is read through a bounded stream: a declared
+``Content-Length`` over the limit is rejected before any body is read, and
+chunked bodies are rejected the moment the accumulated bytes cross the limit
+without buffering past it.  The endpoint declares the request and response
+models in the OpenAPI document so ``/api/docs`` documents the request body and
+the ``200``, ``413``, and ``422`` responses.
 """
 
 from __future__ import annotations
 
 from datetime import date
 from decimal import Decimal
-from typing import Annotated
+from typing import Annotated, Any
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, ValidationError
+from pydantic import (
+    BaseModel,
+    BeforeValidator,
+    ConfigDict,
+    Field,
+    ValidationError,
+    WithJsonSchema,
+    field_validator,
+)
 
 from .engine import optimize
 from .model import (
@@ -29,6 +44,7 @@ from .model import (
     RouteCandidate,
     RouteComponent,
     UserFee,
+    canonical_https_origin,
 )
 
 MAX_REQUEST_BYTES = 128 * 1024
@@ -47,6 +63,8 @@ MAX_TEXT_LENGTH = 200
 MAX_LONG_TEXT_LENGTH = 300
 MAX_URL_LENGTH = 2048
 
+_NO_STORE = {"Cache-Control": "no-store"}
+
 
 class _RequestModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -62,10 +80,50 @@ def _reject_float(value: object) -> object:
     return value
 
 
-Money = Annotated[Decimal, BeforeValidator(_reject_float)]
+Money = Annotated[
+    Decimal,
+    BeforeValidator(_reject_float),
+    WithJsonSchema(
+        {
+            "oneOf": [
+                {"type": "string", "pattern": r"^-?\d+(\.\d{1,6})?$"},
+                {"type": "integer"},
+            ],
+            "description": "exact money as a decimal string or an integer",
+        }
+    ),
+]
+MoneyResponse = Annotated[
+    Decimal,
+    WithJsonSchema({"type": "string", "description": "exact money as a decimal string"}),
+]
 Text = Annotated[str, Field(min_length=1, max_length=MAX_TEXT_LENGTH)]
 LongText = Annotated[str, Field(min_length=1, max_length=MAX_LONG_TEXT_LENGTH)]
-UrlText = Annotated[str, Field(min_length=1, max_length=MAX_URL_LENGTH)]
+UrlText = Annotated[
+    str,
+    Field(min_length=1, max_length=MAX_URL_LENGTH, description="anonymous HTTPS URL"),
+]
+
+
+def _require_unique(values: list[Any], message: str) -> list[Any]:
+    if len(values) != len(set(values)):
+        raise ValueError(message)
+    return values
+
+
+def _require_unique_origins(values: list[str]) -> list[str]:
+    seen: set[str] = set()
+    for origin in values:
+        try:
+            canonical = canonical_https_origin(
+                origin, "approved_official_origin", origin_entry=True
+            )
+        except ValueError:
+            canonical = origin.casefold()
+        if canonical in seen:
+            raise ValueError("approved official origins must be unique")
+        seen.add(canonical)
+    return values
 
 
 class FeePayload(_RequestModel):
@@ -81,6 +139,16 @@ class ScenarioPayload(_RequestModel):
     user_fees: list[FeePayload] = Field(default_factory=list, max_length=MAX_USER_FEES)
     allowed_link_classes: list[LinkClass] = Field(min_length=1, max_length=MAX_LINK_CLASSES)
     approved_official_origins: list[UrlText] = Field(min_length=1, max_length=MAX_ORIGINS)
+
+    @field_validator("allowed_link_classes")
+    @classmethod
+    def _no_duplicate_link_classes(cls, values: list[LinkClass]) -> list[LinkClass]:
+        return _require_unique(values, "allowed link classes must be unique")
+
+    @field_validator("approved_official_origins")
+    @classmethod
+    def _no_duplicate_origins(cls, values: list[str]) -> list[str]:
+        return _require_unique_origins(values)
 
 
 class ComponentPayload(_RequestModel):
@@ -106,6 +174,11 @@ class ComponentPayload(_RequestModel):
     time_limited: bool = False
     valuation_name: Text | None = None
 
+    @field_validator("compatible_with")
+    @classmethod
+    def _no_duplicate_stacking_refs(cls, values: list[str]) -> list[str]:
+        return _require_unique(values, "stacking references must be unique")
+
 
 class RoutePayload(_RequestModel):
     id: Text
@@ -115,6 +188,16 @@ class RoutePayload(_RequestModel):
     link_class: LinkClass
     official_reference: UrlText
     route_fees: list[FeePayload] = Field(default_factory=list, max_length=MAX_ROUTE_FEES)
+
+    @field_validator("components")
+    @classmethod
+    def _no_duplicate_component_ids(
+        cls, components: list[ComponentPayload]
+    ) -> list[ComponentPayload]:
+        ids = [component.id for component in components]
+        if len(ids) != len(set(ids)):
+            raise ValueError("component IDs must be unique within a route")
+        return components
 
 
 class OptimizerRequest(_RequestModel):
@@ -128,8 +211,8 @@ class ComponentContributionResponse(_ResponseModel):
     benefit_rule_id: str
     value_class: ComponentValueClass
     currency: str
-    value_min: Decimal
-    value_max: Decimal
+    value_min: MoneyResponse
+    value_max: MoneyResponse
     source_refs: list[str]
     evidence_tier: EvidenceTier
     verified_on: date
@@ -141,15 +224,15 @@ class ComponentContributionResponse(_ResponseModel):
 class RankedRouteResponse(_ResponseModel):
     route_id: str
     label: str
-    guaranteed_before_fees: Decimal
-    scenario_fees: Decimal
-    route_fees: Decimal
-    total_fees: Decimal
-    net_guaranteed: Decimal
-    conditional_min: Decimal
-    conditional_max: Decimal
-    estimated_min: Decimal
-    estimated_max: Decimal
+    guaranteed_before_fees: MoneyResponse
+    scenario_fees: MoneyResponse
+    route_fees: MoneyResponse
+    total_fees: MoneyResponse
+    net_guaranteed: MoneyResponse
+    conditional_min: MoneyResponse
+    conditional_max: MoneyResponse
+    estimated_min: MoneyResponse
+    estimated_max: MoneyResponse
     components: list[ComponentContributionResponse]
     assumptions: list[str]
     source_refs: list[str]
@@ -174,6 +257,47 @@ class OptimizationResultResponse(_ResponseModel):
     guidance: str
 
 
+class OversizeErrorResponse(_ResponseModel):
+    detail: str
+
+
+class ValidationErrorItemResponse(_ResponseModel):
+    loc: list[str]
+    msg: str
+    type: str
+
+
+class ValidationErrorResponse(_ResponseModel):
+    detail: list[ValidationErrorItemResponse] | str
+
+
+async def _read_bounded_body(request: Request) -> bytes | None:
+    length_header = request.headers.get("content-length")
+    if length_header is not None:
+        try:
+            declared = int(length_header)
+        except ValueError:
+            declared = None
+        if declared is not None and declared > MAX_REQUEST_BYTES:
+            return None
+    chunks: list[bytes] = []
+    total = 0
+    async for chunk in request.stream():
+        if total + len(chunk) > MAX_REQUEST_BYTES:
+            return None
+        chunks.append(chunk)
+        total += len(chunk)
+    return b"".join(chunks)
+
+
+def _error(status_code: int, detail: object) -> JSONResponse:
+    return JSONResponse(
+        status_code=status_code,
+        content={"detail": detail},
+        headers=_NO_STORE,
+    )
+
+
 def create_optimizer_router() -> APIRouter:
     """Create the single ephemeral optimizer endpoint.
 
@@ -185,37 +309,99 @@ def create_optimizer_router() -> APIRouter:
     """
     router = APIRouter(prefix="/api/v1/optimizer", tags=["optimizer"])
 
-    @router.post("/routes")
+    @router.post("/routes", response_model=OptimizationResultResponse)
     async def optimize_routes(request: Request) -> JSONResponse:
-        body = await request.body()
-        if len(body) > MAX_REQUEST_BYTES:
-            raise HTTPException(status_code=413, detail="request body exceeds the size limit")
+        body = await _read_bounded_body(request)
+        if body is None:
+            return _error(413, "request body exceeds the size limit")
         try:
             payload = OptimizerRequest.model_validate_json(body)
         except ValidationError as exc:
-            raise _invalid_input(exc) from None
+            return _error(422, _validation_detail(exc))
         try:
             result = optimize(
                 _scenario(payload.scenario),
                 tuple(_route(route) for route in payload.routes),
             )
         except ValueError as exc:
-            raise HTTPException(status_code=422, detail=str(exc)) from None
+            return _error(422, str(exc))
         response = OptimizationResultResponse.model_validate(result)
         return JSONResponse(
             content=response.model_dump(mode="json"),
-            headers={"Cache-Control": "no-store"},
+            headers=_NO_STORE,
         )
 
     return router
 
 
-def _invalid_input(exc: ValidationError) -> HTTPException:
-    detail = [
-        {"loc": [str(part) for part in error["loc"]], "msg": error["msg"], "type": error["type"]}
-        for error in exc.errors()
-    ]
-    return HTTPException(status_code=422, detail=detail)
+def _validation_detail(exc: ValidationError) -> list[dict[str, list[str] | str]]:
+    detail: list[dict[str, list[str] | str]] = []
+    for error in exc.errors():
+        detail.append(
+            {
+                "loc": [str(part) for part in error["loc"]],
+                "msg": str(error["msg"]),
+                "type": str(error["type"]),
+            }
+        )
+    return detail
+
+
+def _rewrite_defs_to_components(node: Any) -> None:
+    if isinstance(node, dict):
+        ref = node.get("$ref")
+        if isinstance(ref, str) and ref.startswith("#/$defs/"):
+            node["$ref"] = "#/components/schemas/" + ref[len("#/$defs/") :]
+        for value in node.values():
+            _rewrite_defs_to_components(value)
+    elif isinstance(node, list):
+        for value in node:
+            _rewrite_defs_to_components(value)
+
+
+def install_optimizer_openapi_schema(schema: dict[str, Any]) -> None:
+    """Document the optimizer request body and responses in the OpenAPI schema."""
+    components = schema.setdefault("components", {}).setdefault("schemas", {})
+    for model in (
+        OptimizerRequest,
+        OptimizationResultResponse,
+        OversizeErrorResponse,
+        ValidationErrorResponse,
+    ):
+        model_schema = model.model_json_schema(ref_template="#/components/schemas/{model}")
+        for name, definition in model_schema.pop("$defs", {}).items():
+            _rewrite_defs_to_components(definition)
+            components.setdefault(name, definition)
+        _rewrite_defs_to_components(model_schema)
+        components.setdefault(model.__name__, model_schema)
+    operation = schema["paths"]["/api/v1/optimizer/routes"]["post"]
+    operation["requestBody"] = {
+        "required": True,
+        "content": {
+            "application/json": {"schema": {"$ref": "#/components/schemas/OptimizerRequest"}}
+        },
+    }
+    responses = operation.setdefault("responses", {})
+    responses["200"] = {
+        "description": "Ranked and rejected routes",
+        "content": {
+            "application/json": {
+                "schema": {"$ref": "#/components/schemas/OptimizationResultResponse"}
+            }
+        },
+    }
+    responses["413"] = {
+        "description": "Request body exceeds the 128 KiB size limit",
+        "content": {
+            "application/json": {"schema": {"$ref": "#/components/schemas/OversizeErrorResponse"}}
+        },
+    }
+    responses["422"] = {
+        "description": "Structural or semantic validation failed",
+        "content": {
+            "application/json": {"schema": {"$ref": "#/components/schemas/ValidationErrorResponse"}}
+        },
+    }
 
 
 def _scenario(payload: ScenarioPayload) -> PurchaseScenario:
