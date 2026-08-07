@@ -51,7 +51,8 @@ Output artifact: `docs/research/lounge-and-meet-greet-verification-2026-08-07.md
 ## Commit Sequence
 
 - Initial commit: `64dd5f4`
-- Follow-up correction commit: `[PENDING]`
+- Follow-up correction commit: `42543c1` ("Fix MC-085: byte hashes, direct PDF links, corrected Visa/RuPay facts, clean diff")
+- Final result update commit: `3b888e0` / `[PENDING]`
 
 ## Identified Risks
 
