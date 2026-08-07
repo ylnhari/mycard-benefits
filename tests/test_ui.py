@@ -301,11 +301,17 @@ def test_private_card_detail_renders_linked_child_records_without_secrets() -> N
         in script
     )
     assert "card.child_records" in script
-    assert "record.label" in script and "record.kind" in script and "record.lifecycle" in script
-    assert "record.expiry_date" in script
+    assert "record.kind" in script and "record.lifecycle" in script
+    assert "record.expiry_signal" in script
+    assert "const CHILD_RECORD_EXPIRY_SIGNAL_TEXT" in script
     assert "section.append(childRecordsSection(card));" in script
     assert "innerHTML" not in script and "insertAdjacentHTML" not in script
+    # There is no free-text label field at all: display text is always the
+    # allowlisted kind label, and the exact expiry date never crosses this
+    # boundary — only the bounded expiry_signal does.
     for field in (
+        "record.label",
+        "record.expiry_date",
         "record.membership_number",
         "record.credential_secret",
         "record.barcode",

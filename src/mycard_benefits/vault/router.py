@@ -2,18 +2,22 @@
 
 from __future__ import annotations
 
+import uuid
 from collections import Counter
 from collections.abc import Callable
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import APIRouter, HTTPException, Response
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from .core import VaultError, VaultStore
+from .core import ChildRecordKind, ChildRecordLifecycle, VaultError, VaultStore
 from .keyring_store import get_keyring_password, keyring_account, load_keyring
 
 CardReader = Callable[[], tuple[dict[str, Any], ...]]
+
+_EXPIRING_SOON_WINDOW_DAYS = 30
 
 
 class VaultUnavailable(Exception):
@@ -35,6 +39,20 @@ VAULT_DIAGNOSTIC_MESSAGES: dict[str, str] = {
 }
 
 
+def _expiry_signal_from_date(expiry_date: str, *, today: date) -> str:
+    """Bucket a private expiry date into a coarse signal; the exact date never
+    crosses this boundary. `today` is a `datetime.date`."""
+    try:
+        parsed = datetime.strptime(expiry_date, "%Y-%m-%d").date()
+    except ValueError:
+        raise ValueError("expiry_date is invalid") from None
+    if parsed < today:
+        return "expired"
+    if parsed <= today + timedelta(days=_EXPIRING_SOON_WINDOW_DAYS):
+        return "expiring_soon"
+    return "active"
+
+
 class _PrivateModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -42,12 +60,35 @@ class _PrivateModel(BaseModel):
 class PrivateChildRecordSummary(_PrivateModel):
     child_id: str
     parent_card_id: str
-    kind: str
-    label: str
-    lifecycle: str
+    kind: ChildRecordKind
+    lifecycle: ChildRecordLifecycle
     created_at: str
     updated_at: str
-    expiry_date: str | None = None
+    expiry_signal: Literal["expired", "expiring_soon", "active"] | None = None
+
+    @field_validator("child_id", "parent_card_id")
+    @classmethod
+    def _validate_identifier(cls, value: str) -> str:
+        uuid.UUID(value)
+        return value
+
+    @model_validator(mode="before")
+    @classmethod
+    def _derive_expiry_signal(cls, data: Any) -> Any:
+        """Replace any incoming `expiry_date` with a bounded signal before this
+        model's own field/extra-field validation runs, so an exact date can
+        never reach a validated instance, let alone the HTTP response."""
+        if not isinstance(data, dict) or "expiry_date" not in data:
+            return data
+        data = dict(data)
+        expiry_date = data.pop("expiry_date")
+        if expiry_date is not None:
+            if not isinstance(expiry_date, str):
+                raise ValueError("expiry_date is invalid")
+            data["expiry_signal"] = _expiry_signal_from_date(
+                expiry_date, today=datetime.now(UTC).date()
+            )
+        return data
 
 
 class PrivateCardSummary(_PrivateModel):
@@ -58,6 +99,23 @@ class PrivateCardSummary(_PrivateModel):
     updated_at: str
     replacement_card_id: str | None = None
     child_records: list[PrivateChildRecordSummary] = Field(default_factory=list)
+
+    @field_validator("card_id")
+    @classmethod
+    def _validate_card_id(cls, value: str) -> str:
+        uuid.UUID(value)
+        return value
+
+    @model_validator(mode="after")
+    def _validate_child_record_linkage(self) -> PrivateCardSummary:
+        seen: set[str] = set()
+        for child in self.child_records:
+            if child.parent_card_id != self.card_id:
+                raise ValueError("child record parent_card_id does not match its card")
+            if child.child_id in seen:
+                raise ValueError("duplicate child record id")
+            seen.add(child.child_id)
+        return self
 
 
 class PrivateCardList(_PrivateModel):

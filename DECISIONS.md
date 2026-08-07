@@ -110,10 +110,23 @@
   credentials, memberships, vouchers, companion credentials) are added to that
   same envelope as an additive `child_records` list, protected by the existing
   envelope MAC rather than per-field encryption, since none of their fields
-  (kind, label, lifecycle, expiry date) are secret. Absent `child_records` on
-  an older envelope means zero child records, not a parse failure, so an
-  existing local vault opens unchanged and upgrades in place on its next
-  write.
+  are secret. Absent `child_records` on an older envelope means zero child
+  records, not a parse failure, so an existing local vault opens unchanged
+  and upgrades in place on its next write.
 - Loopback-only startup and the remote-access boundary are stated in the app
   itself (a Settings panel), not only in docs, so a non-technical user sees
   the boundary without leaving the dashboard.
+- **Manager-review correction, same day**: a child record has no free-text
+  display label at all — the browser always derives the shown name from the
+  allowlisted `kind` enum, closing the path by which a real membership
+  number or other secret could have been typed into a "safe display label"
+  field and rendered back in cleartext. The private-cards API now also
+  strictly enum-validates `kind`/`lifecycle`, uuid-validates every
+  identifier, and fails closed (503) on a child record whose `parent_card_id`
+  does not match its containing card or that duplicates another child's id —
+  previously only the vault's own disk-parsing layer enforced this, not the
+  HTTP boundary itself, so a bug in a future reader implementation would not
+  have been caught. The exact child `expiry_date` no longer crosses the
+  HTTP boundary in any form; the API computes a bounded `expiry_signal`
+  (`expired` / `expiring_soon` / `active`) server-side and that is the only
+  time-related value ever sent to the browser.

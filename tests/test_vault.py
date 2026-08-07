@@ -771,7 +771,6 @@ def test_child_record_round_trip_is_non_secret_and_survives_reopen(tmp_path: Pat
     child_id = session.add_child_record(
         card_id,
         ChildRecordKind.PRIORITY_PASS,
-        "SYNTHETIC-ONLY-Priority Pass membership",
         expiry_date="2027-01-01",
     )
 
@@ -781,14 +780,25 @@ def test_child_record_round_trip_is_non_secret_and_survives_reopen(tmp_path: Pat
     assert envelope["child_records"][0]["parent_card_id"] == card_id
     assert envelope["child_records"][0]["kind"] == "priority_pass"
     assert envelope["child_records"][0]["expiry_date"] == "2027-01-01"
+    assert "label" not in envelope["child_records"][0]
 
     reopened = store.open("synthetic passphrase")
     records = reopened.list_child_records()
     assert len(records) == 1
     assert records[0]["child_id"] == child_id
-    assert records[0]["label"] == "SYNTHETIC-ONLY-Priority Pass membership"
+    assert "label" not in records[0]
     assert reopened.list_child_records(parent_card_id=card_id) == records
     assert reopened.list_child_records(parent_card_id="018f47f2-0f86-7b0a-bc7d-f00ba47c0099") == ()
+
+
+def test_child_record_has_no_free_text_label_field(tmp_path: Path) -> None:
+    """There is no way to pass arbitrary display text into a child record at all."""
+    import inspect
+
+    session = _store(tmp_path).create("synthetic passphrase")
+    parameters = inspect.signature(session.add_child_record).parameters
+    assert "label" not in parameters
+    assert set(parameters) == {"parent_card_id", "kind", "lifecycle", "expiry_date"}
 
 
 def test_child_record_requires_an_existing_parent_card(tmp_path: Path) -> None:
@@ -797,26 +807,22 @@ def test_child_record_requires_an_existing_parent_card(tmp_path: Path) -> None:
         session.add_child_record(
             "018f47f2-0f86-7b0a-bc7d-f00ba47c0099",
             ChildRecordKind.VOUCHER,
-            "SYNTHETIC-ONLY-Voucher",
         )
 
 
 @pytest.mark.parametrize(
-    "kind,lifecycle,label,expiry_date",
+    "kind,lifecycle,expiry_date",
     [
-        ("not-a-kind", ChildRecordLifecycle.ACTIVE, "SYNTHETIC-ONLY-Label", None),
-        (ChildRecordKind.MEMBERSHIP, "not-a-lifecycle", "SYNTHETIC-ONLY-Label", None),
-        (ChildRecordKind.MEMBERSHIP, ChildRecordLifecycle.ACTIVE, "", None),
-        (ChildRecordKind.MEMBERSHIP, ChildRecordLifecycle.ACTIVE, "x" * 161, None),
-        (ChildRecordKind.MEMBERSHIP, ChildRecordLifecycle.ACTIVE, "SYNTHETIC-ONLY-Label", "not-a-date"),
-        (ChildRecordKind.MEMBERSHIP, ChildRecordLifecycle.ACTIVE, "SYNTHETIC-ONLY-Label", "2027-13-40"),
+        ("not-a-kind", ChildRecordLifecycle.ACTIVE, None),
+        (ChildRecordKind.MEMBERSHIP, "not-a-lifecycle", None),
+        (ChildRecordKind.MEMBERSHIP, ChildRecordLifecycle.ACTIVE, "not-a-date"),
+        (ChildRecordKind.MEMBERSHIP, ChildRecordLifecycle.ACTIVE, "2027-13-40"),
     ],
 )
-def test_child_record_invalid_kind_lifecycle_label_or_date_fail_closed(
+def test_child_record_invalid_kind_lifecycle_or_date_fail_closed(
     tmp_path: Path,
     kind: object,
     lifecycle: object,
-    label: str,
     expiry_date: str | None,
 ) -> None:
     session = _store(tmp_path).create("synthetic passphrase")
@@ -825,7 +831,6 @@ def test_child_record_invalid_kind_lifecycle_label_or_date_fail_closed(
         session.add_child_record(
             card_id,
             kind,  # type: ignore[arg-type]
-            label,
             lifecycle=lifecycle,  # type: ignore[arg-type]
             expiry_date=expiry_date,
         )
@@ -837,7 +842,6 @@ def test_child_record_invalid_kind_lifecycle_label_or_date_fail_closed(
     [
         ("parent_card_id", "018f47f2-0f86-7b0a-bc7d-f00ba47c0099"),
         ("kind", "membership"),
-        ("label", "SYNTHETIC-ONLY-Tampered label"),
         ("lifecycle", "expired"),
         ("created_at", "2020-01-01T00:00:00Z"),
         ("updated_at", "2020-01-01T00:00:00Z"),
@@ -849,7 +853,7 @@ def test_all_child_record_metadata_is_authenticated_by_the_envelope_mac(
     store = _store(tmp_path)
     session = store.create("synthetic passphrase")
     card_id = session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-BRAVO"})
-    session.add_child_record(card_id, ChildRecordKind.LOUNGE_CREDENTIAL, "SYNTHETIC-ONLY-Lounge")
+    session.add_child_record(card_id, ChildRecordKind.LOUNGE_CREDENTIAL)
     envelope = json.loads(store.path.read_text(encoding="utf-8"))
     envelope["child_records"][0][field] = replacement
     store.path.write_text(json.dumps(envelope), encoding="utf-8")
@@ -863,7 +867,7 @@ def test_child_record_dangling_or_unknown_kind_persisted_externally_fails_closed
     store = _store(tmp_path)
     session = store.create("synthetic passphrase")
     card_id = session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-BRAVO"})
-    session.add_child_record(card_id, ChildRecordKind.VOUCHER, "SYNTHETIC-ONLY-Voucher")
+    session.add_child_record(card_id, ChildRecordKind.VOUCHER)
 
     envelope = json.loads(store.path.read_text(encoding="utf-8"))
     envelope["child_records"][0]["parent_card_id"] = "018f47f2-0f86-7b0a-bc7d-f00ba47c0099"
@@ -896,7 +900,7 @@ def test_vault_without_a_child_records_key_opens_with_none_and_upgrades_on_next_
     assert reopened.list_child_records() == ()
     assert reopened.list_cards()[0]["card_id"] == card_id
 
-    reopened.add_child_record(card_id, ChildRecordKind.MEMBERSHIP, "SYNTHETIC-ONLY-Membership")
+    reopened.add_child_record(card_id, ChildRecordKind.MEMBERSHIP)
     upgraded = json.loads(store.path.read_text(encoding="utf-8"))
     assert len(upgraded["child_records"]) == 1
 
@@ -905,6 +909,6 @@ def test_child_record_count_is_bounded(tmp_path: Path, monkeypatch: pytest.Monke
     session = _store(tmp_path).create("synthetic passphrase")
     card_id = session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-BRAVO"})
     monkeypatch.setattr(vault_core, "_MAX_CHILD_RECORDS", 1)
-    session.add_child_record(card_id, ChildRecordKind.VOUCHER, "SYNTHETIC-ONLY-Voucher one")
+    session.add_child_record(card_id, ChildRecordKind.VOUCHER)
     with pytest.raises(VaultError):
-        session.add_child_record(card_id, ChildRecordKind.VOUCHER, "SYNTHETIC-ONLY-Voucher two")
+        session.add_child_record(card_id, ChildRecordKind.VOUCHER)
