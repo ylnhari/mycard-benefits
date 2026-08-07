@@ -206,6 +206,5 @@ none was already present.
 
 ## Commit
 
-Committed locally on `agent/mc024-177-claude`. Not merged, rebased, pushed,
-or published. Exact commit hash: recorded by the commit that follows this
-file in the same change (see `git log -1` on this branch).
+Committed locally on `agent/mc024-177-claude` as `d0c76f1537a0e59ced135256a808e100077edb55`.
+Not merged, rebased, pushed, or published.
