@@ -31,7 +31,7 @@ Manager protocol: tasks are assigned one at a time; a worker owns only its named
   - Depends on: MC-004
   - Suggested runner: OpenCode
 
-- [ ] **MC-177: Document and verify MyCard is self-contained and launcher-independent** - MyCard's app, UI, and docs state that it binds loopback-only and that any personal external launcher (including the owner's Rover) is an optional start-stop/mobile-access tool, never a MyCard dependency, identity, or configuration requirement.
+- [x] **MC-177: Document and verify MyCard is self-contained and launcher-independent** - MyCard's app, UI, and docs state that it binds loopback-only and that any personal external launcher (including the owner's Rover) is an optional start-stop/mobile-access tool, never a MyCard dependency, identity, or configuration requirement.
   - Acceptance: README, user guide, and app copy describe the external launcher as optional and external with no launcher secret, identity, or config in MyCard source, browser storage, or docs; loopback-only startup test passes; verified per `PRODUCT_REQUIREMENTS.md` "Family Finance and remote access" and `docs/FAMILY-FINANCE-INTEGRATION.md`.
   - Depends on: MC-004, MC-005
   - Suggested runner: OpenCode
@@ -133,7 +133,7 @@ Manager protocol: tasks are assigned one at a time; a worker owns only its named
   - Depends on: MC-028
   - Suggested runner: OpenCode
 
-- [ ] **MC-024: Model child records for Priority Pass, lounge credentials, memberships, vouchers, and companion credentials** - Represent attached credentials as child records of the issuing card.
+- [x] **MC-024: Model child records for Priority Pass, lounge credentials, memberships, vouchers, and companion credentials** - Represent attached credentials as child records of the issuing card.
   - Acceptance: child-record model with parent linkage, expiry, and lifecycle; rendered in detail views without secrets per item 22.
   - Depends on: MC-002
   - Suggested runner: OpenCode

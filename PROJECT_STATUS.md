@@ -61,6 +61,20 @@ view of the encrypted portfolio.
   is switched off in demo mode, and the guide explains the explicit
   `--data-dir` override. Tests prove default demo and normal runs point at
   different data folders.
+- Non-secret linked child records (Priority Pass, lounge credentials,
+  memberships, vouchers, companion credentials) are modeled in the encrypted
+  vault with their own private UUID, parent card-instance UUID, kind, safe
+  display label, lifecycle (`active`/`expired`/`archived`), and optional
+  expiry date; the vault format upgrade is additive and opens a pre-existing
+  vault unchanged. The read-only My Cards API nests each card's child records
+  under the existing `no-store`, envelope-only boundary, and the card detail
+  view renders them with clear empty, populated, expired, and archived states.
+  No write path exists yet; that remains separate protected-flow work.
+- The app itself, not only its docs, states its remote-access boundary: a
+  Settings panel explains the loopback-only bind and that any external
+  gateway or launcher is separate software, never part of MyCard's identity
+  or configuration. A CLI test proves there is no `--host` flag, environment
+  variable, or config field that could widen the bind.
 - My Cards explains why the vault is unavailable instead of failing silently:
   each known cause (demo mode, no vault yet, passphrase-only vault, wrong data
   folder, keyring unavailable, locked vault) maps to a distinct safe API

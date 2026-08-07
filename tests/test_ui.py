@@ -280,6 +280,43 @@ def test_private_card_detail_replacement_links_and_unmatched_state_are_safe() ->
     assert "Fix the identifier in the import file or request the card variant" in script
 
 
+def test_private_card_detail_renders_linked_child_records_without_secrets() -> None:
+    script = (ROOT / "src" / "mycard_benefits" / "static" / "app.js").read_text(encoding="utf-8")
+    style = (ROOT / "src" / "mycard_benefits" / "static" / "app.css").read_text(encoding="utf-8")
+
+    assert "function childRecordsSection" in script
+    assert "function childRecordRow" in script
+    assert "function childRecordBadge" in script
+    assert "const CHILD_RECORD_KIND_LABELS" in script
+    for label in (
+        "Priority Pass",
+        "Lounge credential",
+        "Membership",
+        "Voucher",
+        "Companion credential",
+    ):
+        assert label in script
+    assert (
+        "No Priority Pass, lounge, membership, voucher, or companion credentials are linked to this card."
+        in script
+    )
+    assert "card.child_records" in script
+    assert "record.label" in script and "record.kind" in script and "record.lifecycle" in script
+    assert "record.expiry_date" in script
+    assert "section.append(childRecordsSection(card));" in script
+    assert "innerHTML" not in script and "insertAdjacentHTML" not in script
+    for field in (
+        "record.membership_number",
+        "record.credential_secret",
+        "record.barcode",
+        "record.pan",
+        "record.cvv",
+        "record.pin",
+    ):
+        assert field not in script
+    assert ".child-records" in style and ".child-record-row" in style
+
+
 def test_demo_run_shows_persistent_banner_and_switches_off_my_cards(tmp_path: Path) -> None:
     demo_settings = Settings(
         data_dir=tmp_path / "demo-data",
@@ -344,11 +381,18 @@ def test_active_surfaces_have_neutral_copy_and_self_contained_startup(
     assert "Public catalog · private vault" in template
     assert "Local-first" in template
 
+    assert "<h3>Remote access</h3>" in template
+    assert "127.0.0.1" in template
+    assert "authenticated gateway or launcher you control" in template
+    assert "never part of this app" in template
+    assert "external launcher" not in template
+
     with _client(tmp_path) as client:
         page = client.get("/")
         assert page.status_code == 200
         assert "MyCard" in page.text and "Benefits" in page.text
         assert "Public catalog · private vault" in page.text
+        assert "<h3>Remote access</h3>" in page.text
 
         health = client.get("/api/v1/health").json()
         assert health["status"] == "ok"

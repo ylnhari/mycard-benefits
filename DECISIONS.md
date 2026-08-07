@@ -101,3 +101,19 @@
   `source_tier` (1–6) is strictly derived at runtime from `source_policy_class` and exposed in API
   responses; it is omitted from authoring JSON schemas. Loader enforces that no approved assertion
   lacks full provenance and rejects tier 6 (`discovery_only`) sources from ever holding an `approved` review state.
+
+## Linked child records and remote-access UI copy — 2026-08-07
+
+- The private vault has no SQLAlchemy/Alembic layer despite the architecture
+  blurb above; card records are an encrypted, AEAD-authenticated JSON envelope
+  with no database. Non-secret linked child records (Priority Pass, lounge
+  credentials, memberships, vouchers, companion credentials) are added to that
+  same envelope as an additive `child_records` list, protected by the existing
+  envelope MAC rather than per-field encryption, since none of their fields
+  (kind, label, lifecycle, expiry date) are secret. Absent `child_records` on
+  an older envelope means zero child records, not a parse failure, so an
+  existing local vault opens unchanged and upgrades in place on its next
+  write.
+- Loopback-only startup and the remote-access boundary are stated in the app
+  itself (a Settings panel), not only in docs, so a non-technical user sees
+  the boundary without leaving the dashboard.

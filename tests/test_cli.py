@@ -51,3 +51,20 @@ def test_cli_always_binds_loopback(
     assert settings.data_dir == (tmp_path / "data").resolve()
     assert captured["host"] == "127.0.0.1"
     assert captured["port"] == 18877
+
+
+def test_cli_has_no_way_to_configure_a_non_loopback_bind() -> None:
+    """The bind cannot silently widen: no --host flag, env var, or Settings field exists."""
+    parser = cli.build_parser()
+    option_strings = {option for action in parser._actions for option in action.option_strings}
+    assert "--host" not in option_strings
+    assert not any("host" in option.lower() for option in option_strings)
+
+    import dataclasses
+
+    assert "host" not in {field.name for field in dataclasses.fields(Settings)}
+
+    cli_source = (Path(cli.__file__)).read_text(encoding="utf-8")
+    assert 'uvicorn.run(create_app(settings), host="127.0.0.1"' in cli_source
+    assert "MYCARD_BENEFITS_HOST" not in cli_source
+    assert "os.environ" not in cli_source

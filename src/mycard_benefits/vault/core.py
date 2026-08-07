@@ -38,6 +38,8 @@ _RECORD_AAD_PREFIX: Final = b"mycard-benefits/vault-record/v1:"
 _ENVELOPE_MAC_INFO: Final = b"mycard-benefits/vault-envelope-mac/v2"
 _MAX_VAULT_BYTES: Final = 5 * 1024 * 1024
 _MAX_RECORDS: Final = 1_000
+_MAX_CHILD_RECORDS: Final = 5_000
+_MAX_LABEL_CHARS: Final = 160
 _BACKUP_COUNT: Final = 3
 _COPY_CHUNK_BYTES: Final = 64 * 1024
 _MAX_SECRET_VALUE_CHARS: Final = 4_096
@@ -149,6 +151,20 @@ class CardLifecycle(StrEnum):
     ARCHIVED = "archived"
 
 
+class ChildRecordKind(StrEnum):
+    PRIORITY_PASS = "priority_pass"
+    LOUNGE_CREDENTIAL = "lounge_credential"
+    MEMBERSHIP = "membership"
+    VOUCHER = "voucher"
+    COMPANION_CREDENTIAL = "companion_credential"
+
+
+class ChildRecordLifecycle(StrEnum):
+    ACTIVE = "active"
+    EXPIRED = "expired"
+    ARCHIVED = "archived"
+
+
 @dataclass(frozen=True)
 class _KdfParameters:
     salt: bytes
@@ -166,6 +182,18 @@ class _Record:
     updated_at: str
     ciphertext: bytes
     replacement_card_id: str | None = None
+
+
+@dataclass(frozen=True)
+class _ChildRecord:
+    child_id: str
+    parent_card_id: str
+    kind: ChildRecordKind
+    label: str
+    lifecycle: ChildRecordLifecycle
+    created_at: str
+    updated_at: str
+    expiry_date: str | None = None
 
 
 class RevealAuthorization:
@@ -190,12 +218,14 @@ class VaultStore:
         dek = secrets.token_bytes(_DEK_BYTES)
         envelope = _new_envelope(kdf, dek, passphrase)
         encoded = _encode_envelope(envelope)
-        _validate_write_bounds(encoded, {})
+        _validate_write_bounds(encoded, {}, {})
         with _exclusive_lock(self.path, self._permissions):
             if self.path.exists():
                 raise VaultError("vault already exists")
             _atomic_write(self.path, encoded, self._permissions, backup=False)
-        return VaultSession(self, kdf, bytearray(dek), {}, str(envelope["wrapped_dek"]), _digest(encoded))
+        return VaultSession(
+            self, kdf, bytearray(dek), {}, {}, str(envelope["wrapped_dek"]), _digest(encoded)
+        )
 
     def open(self, passphrase: str) -> VaultSession:
         try:
@@ -212,11 +242,20 @@ class VaultStore:
             dek = _unwrap_dek(envelope, kdf, passphrase)
             _verify_envelope_mac(envelope, dek)
             records = _parse_records(envelope, dek)
+            child_records = _parse_child_records(envelope, records)
         except (OSError, ValueError, KeyError, TypeError, InvalidTag, VaultError) as exc:
             if isinstance(exc, VaultAccessError):
                 raise
             raise VaultAccessError("unable to unlock vault") from None
-        return VaultSession(self, kdf, bytearray(dek), records, str(envelope["wrapped_dek"]), _digest(raw_file))
+        return VaultSession(
+            self,
+            kdf,
+            bytearray(dek),
+            records,
+            child_records,
+            str(envelope["wrapped_dek"]),
+            _digest(raw_file),
+        )
 
 
 class VaultSession:
@@ -228,6 +267,7 @@ class VaultSession:
         kdf: _KdfParameters,
         dek: bytearray,
         records: dict[str, _Record],
+        child_records: dict[str, _ChildRecord],
         wrapped_dek: str,
         revision: bytes,
         *,
@@ -239,6 +279,7 @@ class VaultSession:
         self._kdf = kdf
         self._dek: bytearray | None = dek
         self._records = records
+        self._child_records = child_records
         self._wrapped_dek = wrapped_dek
         self._revision = revision
         self._idle_timeout_seconds = idle_timeout_seconds
@@ -259,6 +300,7 @@ class VaultSession:
                 _zero(self._dek)
             self._dek = None
             self._records.clear()
+            self._child_records.clear()
             self._reveal_authorizations.clear()
 
     def list_cards(self) -> tuple[dict[str, str], ...]:
@@ -278,6 +320,24 @@ class VaultSession:
                     ),
                 }
                 for record in self._records.values()
+            )
+
+    def list_child_records(self, parent_card_id: str | None = None) -> tuple[dict[str, str], ...]:
+        with self._lock:
+            self._ensure_unlocked()
+            return tuple(
+                {
+                    "child_id": record.child_id,
+                    "parent_card_id": record.parent_card_id,
+                    "kind": record.kind.value,
+                    "label": record.label,
+                    "lifecycle": record.lifecycle.value,
+                    "created_at": record.created_at,
+                    "updated_at": record.updated_at,
+                    **({"expiry_date": record.expiry_date} if record.expiry_date else {}),
+                }
+                for record in self._child_records.values()
+                if parent_card_id is None or record.parent_card_id == parent_card_id
             )
 
     def add_card(
@@ -305,8 +365,45 @@ class VaultSession:
             )
             record = replace(record, ciphertext=self._encrypt_record(record, secret_fields))
             candidate = {**self._records, card_id: record}
-            self._persist(candidate)
+            self._persist(candidate, self._child_records)
             return card_id
+
+    def add_child_record(
+        self,
+        parent_card_id: str,
+        kind: ChildRecordKind,
+        label: str,
+        *,
+        lifecycle: ChildRecordLifecycle = ChildRecordLifecycle.ACTIVE,
+        expiry_date: str | None = None,
+    ) -> str:
+        with self._lock:
+            self._require_unlocked()
+            self._get_record(parent_card_id)
+            if not isinstance(kind, ChildRecordKind):
+                raise VaultError("invalid child record kind")
+            if not isinstance(lifecycle, ChildRecordLifecycle):
+                raise VaultError("invalid lifecycle")
+            label = _validate_label(label)
+            if expiry_date is not None:
+                _validate_date(expiry_date)
+            if len(self._child_records) >= _MAX_CHILD_RECORDS:
+                raise VaultError("too many child records")
+            child_id = _uuid7()
+            now = _timestamp()
+            record = _ChildRecord(
+                child_id=child_id,
+                parent_card_id=parent_card_id,
+                kind=kind,
+                label=label,
+                lifecycle=lifecycle,
+                created_at=now,
+                updated_at=now,
+                expiry_date=expiry_date,
+            )
+            candidate = {**self._child_records, child_id: record}
+            self._persist(self._records, candidate)
+            return child_id
 
     def add_cards(
         self,
@@ -349,7 +446,7 @@ class VaultSession:
                 record = replace(record, ciphertext=self._encrypt_record(record, secret_fields))
                 candidate[card_id] = record
                 card_ids.append(card_id)
-            self._persist(candidate)
+            self._persist(candidate, self._child_records)
             return tuple(card_ids)
 
     def replace_card(
@@ -390,7 +487,7 @@ class VaultSession:
             updated_old = replace(old, lifecycle=lifecycle, replacement_card_id=new_id, updated_at=now)
             updated_old = replace(updated_old, ciphertext=self._encrypt_record(updated_old, old_values))
             candidate = {**self._records, old.card_id: updated_old, new_id: new_record}
-            self._persist(candidate)
+            self._persist(candidate, self._child_records)
             return new_id
 
     def authorize_reveal(
@@ -479,11 +576,15 @@ class VaultSession:
                 raise VaultAccessError("encrypted record is invalid")
             return values
 
-    def _persist(self, candidate: dict[str, _Record]) -> None:
+    def _persist(
+        self, cards: dict[str, _Record], child_records: dict[str, _ChildRecord]
+    ) -> None:
         with self._lock:
             dek = self._require_unlocked()
-            encoded = _encode_envelope(_serialize_envelope(self._kdf, self._wrapped_dek, candidate, dek))
-            _validate_write_bounds(encoded, candidate)
+            encoded = _encode_envelope(
+                _serialize_envelope(self._kdf, self._wrapped_dek, cards, child_records, dek)
+            )
+            _validate_write_bounds(encoded, cards, child_records)
             with _exclusive_lock(self._store.path, self._store._permissions):
                 try:
                     current_revision = _bounded_file_digest(self._store.path)
@@ -493,7 +594,8 @@ class VaultSession:
                     raise VaultConflictError("vault changed elsewhere; reopen before saving")
                 _atomic_write(self._store.path, encoded, self._store._permissions, backup=True)
             self._revision = _digest(encoded)
-            self._records = candidate
+            self._records = cards
+            self._child_records = child_records
 
     def _auto_lock_if_idle(self) -> None:
         with self._lock:
@@ -529,13 +631,18 @@ def _new_envelope(kdf: _KdfParameters, dek: bytes, passphrase: str) -> dict[str,
         "kdf": _serialize_kdf(kdf),
         "wrapped_dek": _b64(nonce + wrapped),
         "records": [],
+        "child_records": [],
     }
     envelope["mac"] = _envelope_mac(envelope, dek)
     return envelope
 
 
 def _serialize_envelope(
-    kdf: _KdfParameters, wrapped_dek: str, records: dict[str, _Record], dek: bytes | bytearray
+    kdf: _KdfParameters,
+    wrapped_dek: str,
+    cards: dict[str, _Record],
+    child_records: dict[str, _ChildRecord],
+    dek: bytes | bytearray,
 ) -> dict[str, Any]:
     envelope = {
         "version": _FORMAT_VERSION,
@@ -555,7 +662,20 @@ def _serialize_envelope(
                     else {}
                 ),
             }
-            for record in records.values()
+            for record in cards.values()
+        ],
+        "child_records": [
+            {
+                "child_id": record.child_id,
+                "parent_card_id": record.parent_card_id,
+                "kind": record.kind.value,
+                "label": record.label,
+                "lifecycle": record.lifecycle.value,
+                "created_at": record.created_at,
+                "updated_at": record.updated_at,
+                **({"expiry_date": record.expiry_date} if record.expiry_date else {}),
+            }
+            for record in child_records.values()
         ],
     }
     envelope["mac"] = _envelope_mac(envelope, dek)
@@ -693,6 +813,63 @@ def _parse_records(envelope: dict[str, Any], dek: bytes) -> dict[str, _Record]:
     return records
 
 
+def _parse_child_records(
+    envelope: dict[str, Any], cards: dict[str, _Record]
+) -> dict[str, _ChildRecord]:
+    """Parse the additive, non-secret child-record list; absent means none yet."""
+    raw_child_records = envelope.get("child_records", [])
+    if not isinstance(raw_child_records, list) or len(raw_child_records) > _MAX_CHILD_RECORDS:
+        raise VaultAccessError("encrypted record is invalid")
+    child_records: dict[str, _ChildRecord] = {}
+    for raw in raw_child_records:
+        if not isinstance(raw, dict):
+            raise VaultAccessError("encrypted record is invalid")
+        required = (
+            "child_id",
+            "parent_card_id",
+            "kind",
+            "label",
+            "lifecycle",
+            "created_at",
+            "updated_at",
+        )
+        if any(not isinstance(raw.get(name), str) for name in required):
+            raise VaultAccessError("encrypted record is invalid")
+        child_id = raw["child_id"]
+        parent_card_id = raw["parent_card_id"]
+        expiry_date = raw.get("expiry_date")
+        if expiry_date is not None and not isinstance(expiry_date, str):
+            raise VaultAccessError("encrypted record is invalid")
+        uuid.UUID(child_id)
+        uuid.UUID(parent_card_id)
+        if parent_card_id not in cards or child_id in child_records:
+            raise VaultAccessError("encrypted record is invalid")
+        try:
+            kind = ChildRecordKind(raw["kind"])
+            lifecycle = ChildRecordLifecycle(raw["lifecycle"])
+            label = _validate_label(raw["label"])
+            if expiry_date is not None:
+                _validate_date(expiry_date)
+        except (ValueError, VaultError):
+            raise VaultAccessError("encrypted record is invalid") from None
+        record = _ChildRecord(
+            child_id=child_id,
+            parent_card_id=parent_card_id,
+            kind=kind,
+            label=label,
+            lifecycle=lifecycle,
+            created_at=raw["created_at"],
+            updated_at=raw["updated_at"],
+            expiry_date=expiry_date,
+        )
+        _validate_timestamp(record.created_at)
+        _validate_timestamp(record.updated_at)
+        if record.updated_at < record.created_at:
+            raise VaultAccessError("encrypted record is invalid")
+        child_records[child_id] = record
+    return child_records
+
+
 def _derive_kek(passphrase: str, kdf: _KdfParameters) -> bytes:
     return hash_secret_raw(
         secret=passphrase.encode("utf-8"),
@@ -740,6 +917,23 @@ def validate_offering_id(value: str) -> None:
     """Protect the cleartext envelope field from receiving arbitrary private text."""
     if not isinstance(value, str) or _OFFERING_ID.fullmatch(value) is None:
         raise VaultError("offering_id is invalid")
+
+
+def _validate_label(value: str) -> str:
+    """Bound a non-secret child-record display label; never a place for secrets."""
+    if not isinstance(value, str):
+        raise VaultError("label is invalid")
+    stripped = value.strip()
+    if not stripped or len(stripped) > _MAX_LABEL_CHARS or not stripped.isprintable():
+        raise VaultError("label is invalid")
+    return stripped
+
+
+def _validate_date(value: str) -> None:
+    try:
+        datetime.strptime(value, "%Y-%m-%d")
+    except ValueError:
+        raise VaultError("date is invalid") from None
 
 
 def _atomic_write(path: Path, encoded: bytes, permissions: _PermissionHelper, *, backup: bool) -> None:
@@ -942,8 +1136,14 @@ def _encode_envelope(envelope: dict[str, Any]) -> bytes:
     return json.dumps(envelope, separators=(",", ":"), sort_keys=True).encode("utf-8")
 
 
-def _validate_write_bounds(encoded: bytes, records: dict[str, _Record]) -> None:
-    if len(records) > _MAX_RECORDS or len(encoded) > _MAX_VAULT_BYTES:
+def _validate_write_bounds(
+    encoded: bytes, cards: dict[str, _Record], child_records: dict[str, _ChildRecord]
+) -> None:
+    if (
+        len(cards) > _MAX_RECORDS
+        or len(child_records) > _MAX_CHILD_RECORDS
+        or len(encoded) > _MAX_VAULT_BYTES
+    ):
         raise VaultError("vault size limit exceeded")
 
 
