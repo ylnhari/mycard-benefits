@@ -10,7 +10,14 @@ from types import SimpleNamespace
 
 import pytest
 
-from mycard_benefits.vault import CardLifecycle, VaultAccessError, VaultError, VaultStore
+from mycard_benefits.vault import (
+    CardLifecycle,
+    ChildRecordKind,
+    ChildRecordLifecycle,
+    VaultAccessError,
+    VaultError,
+    VaultStore,
+)
 from mycard_benefits.vault import core as vault_core
 
 
@@ -174,6 +181,7 @@ def test_secret_field_bounds_and_persisted_unknown_fields_fail_closed(tmp_path: 
         session._kdf,
         session._wrapped_dek,
         {card_id: tampered},
+        {},
         session._dek or bytearray(),
     )
     store.path.write_bytes(vault_core._encode_envelope(envelope))
@@ -268,7 +276,10 @@ def test_same_session_concurrent_adds_do_not_lose_updates(
     call_count = 0
     count_lock = threading.Lock()
 
-    def delayed_persist(candidate: dict[str, vault_core._Record]) -> None:
+    def delayed_persist(
+        cards: dict[str, vault_core._Record],
+        child_records: dict[str, vault_core._ChildRecord],
+    ) -> None:
         nonlocal call_count
         with count_lock:
             call_count += 1
@@ -276,7 +287,7 @@ def test_same_session_concurrent_adds_do_not_lose_updates(
         if is_first:
             first_entered.set()
             assert release_first.wait(timeout=2)
-        original_persist(candidate)
+        original_persist(cards, child_records)
 
     monkeypatch.setattr(session, "_persist", delayed_persist)
     with ThreadPoolExecutor(max_workers=2) as executor:
@@ -565,6 +576,7 @@ def test_replacement_chain_tampering_fails_after_mac_recomputation(tmp_path: Pat
         session._kdf,
         session._wrapped_dek,
         {old_id: old, new_id: bad_successor},
+        {},
         dek,
     )
     store.path.write_bytes(vault_core._encode_envelope(envelope))
@@ -750,3 +762,149 @@ def test_unicode_passphrase_is_validated_by_utf8_byte_length(tmp_path: Path) -> 
 
     assert not session.locked
     assert not store.open(passphrase).locked
+
+
+def test_child_record_round_trip_is_non_secret_and_survives_reopen(tmp_path: Path) -> None:
+    store = _store(tmp_path)
+    session = store.create("synthetic passphrase")
+    card_id = session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-BRAVO"})
+    child_id = session.add_child_record(
+        card_id,
+        ChildRecordKind.PRIORITY_PASS,
+        "SYNTHETIC-ONLY-Priority Pass membership",
+        expiry_date="2027-01-01",
+    )
+
+    payload = store.path.read_text(encoding="utf-8")
+    envelope = json.loads(payload)
+    assert envelope["child_records"][0]["child_id"] == child_id
+    assert envelope["child_records"][0]["parent_card_id"] == card_id
+    assert envelope["child_records"][0]["kind"] == "priority_pass"
+    assert envelope["child_records"][0]["expiry_date"] == "2027-01-01"
+
+    reopened = store.open("synthetic passphrase")
+    records = reopened.list_child_records()
+    assert len(records) == 1
+    assert records[0]["child_id"] == child_id
+    assert records[0]["label"] == "SYNTHETIC-ONLY-Priority Pass membership"
+    assert reopened.list_child_records(parent_card_id=card_id) == records
+    assert reopened.list_child_records(parent_card_id="018f47f2-0f86-7b0a-bc7d-f00ba47c0099") == ()
+
+
+def test_child_record_requires_an_existing_parent_card(tmp_path: Path) -> None:
+    session = _store(tmp_path).create("synthetic passphrase")
+    with pytest.raises(VaultError):
+        session.add_child_record(
+            "018f47f2-0f86-7b0a-bc7d-f00ba47c0099",
+            ChildRecordKind.VOUCHER,
+            "SYNTHETIC-ONLY-Voucher",
+        )
+
+
+@pytest.mark.parametrize(
+    "kind,lifecycle,label,expiry_date",
+    [
+        ("not-a-kind", ChildRecordLifecycle.ACTIVE, "SYNTHETIC-ONLY-Label", None),
+        (ChildRecordKind.MEMBERSHIP, "not-a-lifecycle", "SYNTHETIC-ONLY-Label", None),
+        (ChildRecordKind.MEMBERSHIP, ChildRecordLifecycle.ACTIVE, "", None),
+        (ChildRecordKind.MEMBERSHIP, ChildRecordLifecycle.ACTIVE, "x" * 161, None),
+        (ChildRecordKind.MEMBERSHIP, ChildRecordLifecycle.ACTIVE, "SYNTHETIC-ONLY-Label", "not-a-date"),
+        (ChildRecordKind.MEMBERSHIP, ChildRecordLifecycle.ACTIVE, "SYNTHETIC-ONLY-Label", "2027-13-40"),
+    ],
+)
+def test_child_record_invalid_kind_lifecycle_label_or_date_fail_closed(
+    tmp_path: Path,
+    kind: object,
+    lifecycle: object,
+    label: str,
+    expiry_date: str | None,
+) -> None:
+    session = _store(tmp_path).create("synthetic passphrase")
+    card_id = session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-BRAVO"})
+    with pytest.raises(VaultError):
+        session.add_child_record(
+            card_id,
+            kind,  # type: ignore[arg-type]
+            label,
+            lifecycle=lifecycle,  # type: ignore[arg-type]
+            expiry_date=expiry_date,
+        )
+    assert session.list_child_records() == ()
+
+
+@pytest.mark.parametrize(
+    "field,replacement",
+    [
+        ("parent_card_id", "018f47f2-0f86-7b0a-bc7d-f00ba47c0099"),
+        ("kind", "membership"),
+        ("label", "SYNTHETIC-ONLY-Tampered label"),
+        ("lifecycle", "expired"),
+        ("created_at", "2020-01-01T00:00:00Z"),
+        ("updated_at", "2020-01-01T00:00:00Z"),
+    ],
+)
+def test_all_child_record_metadata_is_authenticated_by_the_envelope_mac(
+    tmp_path: Path, field: str, replacement: str
+) -> None:
+    store = _store(tmp_path)
+    session = store.create("synthetic passphrase")
+    card_id = session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-BRAVO"})
+    session.add_child_record(card_id, ChildRecordKind.LOUNGE_CREDENTIAL, "SYNTHETIC-ONLY-Lounge")
+    envelope = json.loads(store.path.read_text(encoding="utf-8"))
+    envelope["child_records"][0][field] = replacement
+    store.path.write_text(json.dumps(envelope), encoding="utf-8")
+    with pytest.raises(VaultAccessError):
+        store.open("synthetic passphrase")
+
+
+def test_child_record_dangling_or_unknown_kind_persisted_externally_fails_closed(
+    tmp_path: Path,
+) -> None:
+    store = _store(tmp_path)
+    session = store.create("synthetic passphrase")
+    card_id = session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-BRAVO"})
+    session.add_child_record(card_id, ChildRecordKind.VOUCHER, "SYNTHETIC-ONLY-Voucher")
+
+    envelope = json.loads(store.path.read_text(encoding="utf-8"))
+    envelope["child_records"][0]["parent_card_id"] = "018f47f2-0f86-7b0a-bc7d-f00ba47c0099"
+    store.path.write_text(json.dumps(envelope), encoding="utf-8")
+    with pytest.raises(VaultAccessError):
+        store.open("synthetic passphrase")
+
+    envelope = json.loads(store.path.read_text(encoding="utf-8"))
+    envelope["child_records"][0]["kind"] = "not-a-real-kind"
+    store.path.write_text(json.dumps(envelope), encoding="utf-8")
+    with pytest.raises(VaultAccessError):
+        store.open("synthetic passphrase")
+
+
+def test_vault_without_a_child_records_key_opens_with_none_and_upgrades_on_next_write(
+    tmp_path: Path,
+) -> None:
+    """A vault written before this feature existed must still open cleanly."""
+    store = _store(tmp_path)
+    session = store.create("synthetic passphrase")
+    card_id = session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-BRAVO"})
+
+    envelope = json.loads(store.path.read_text(encoding="utf-8"))
+    del envelope["child_records"]
+    dek = vault_core._unwrap_dek(envelope, vault_core._parse_kdf(envelope), "synthetic passphrase")
+    envelope["mac"] = vault_core._envelope_mac(envelope, dek)
+    store.path.write_text(json.dumps(envelope), encoding="utf-8")
+
+    reopened = store.open("synthetic passphrase")
+    assert reopened.list_child_records() == ()
+    assert reopened.list_cards()[0]["card_id"] == card_id
+
+    reopened.add_child_record(card_id, ChildRecordKind.MEMBERSHIP, "SYNTHETIC-ONLY-Membership")
+    upgraded = json.loads(store.path.read_text(encoding="utf-8"))
+    assert len(upgraded["child_records"]) == 1
+
+
+def test_child_record_count_is_bounded(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    session = _store(tmp_path).create("synthetic passphrase")
+    card_id = session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-BRAVO"})
+    monkeypatch.setattr(vault_core, "_MAX_CHILD_RECORDS", 1)
+    session.add_child_record(card_id, ChildRecordKind.VOUCHER, "SYNTHETIC-ONLY-Voucher one")
+    with pytest.raises(VaultError):
+        session.add_child_record(card_id, ChildRecordKind.VOUCHER, "SYNTHETIC-ONLY-Voucher two")

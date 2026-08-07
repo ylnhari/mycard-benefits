@@ -5,6 +5,8 @@ This package intentionally has no web, logging, or network dependencies.
 
 from .core import (
     CardLifecycle,
+    ChildRecordKind,
+    ChildRecordLifecycle,
     RevealAuthorization,
     VaultAccessError,
     VaultConflictError,
@@ -18,6 +20,8 @@ from .core import (
 
 __all__ = [
     "CardLifecycle",
+    "ChildRecordKind",
+    "ChildRecordLifecycle",
     "RevealAuthorization",
     "VaultAccessError",
     "VaultConflictError",

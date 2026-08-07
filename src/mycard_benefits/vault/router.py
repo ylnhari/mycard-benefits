@@ -5,14 +5,15 @@ from __future__ import annotations
 from collections import Counter
 from collections.abc import Callable
 from pathlib import Path
+from typing import Any
 
 from fastapi import APIRouter, HTTPException, Response
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from .core import VaultError, VaultStore
 from .keyring_store import get_keyring_password, keyring_account, load_keyring
 
-CardReader = Callable[[], tuple[dict[str, str], ...]]
+CardReader = Callable[[], tuple[dict[str, Any], ...]]
 
 
 class VaultUnavailable(Exception):
@@ -38,6 +39,17 @@ class _PrivateModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class PrivateChildRecordSummary(_PrivateModel):
+    child_id: str
+    parent_card_id: str
+    kind: str
+    label: str
+    lifecycle: str
+    created_at: str
+    updated_at: str
+    expiry_date: str | None = None
+
+
 class PrivateCardSummary(_PrivateModel):
     card_id: str
     offering_id: str
@@ -45,6 +57,7 @@ class PrivateCardSummary(_PrivateModel):
     created_at: str
     updated_at: str
     replacement_card_id: str | None = None
+    child_records: list[PrivateChildRecordSummary] = Field(default_factory=list)
 
 
 class PrivateCardList(_PrivateModel):
@@ -112,7 +125,7 @@ def create_private_cards_router(
     return router
 
 
-def _read_keyring_cards(vault_path: Path) -> tuple[dict[str, str], ...]:
+def _read_keyring_cards(vault_path: Path) -> tuple[dict[str, Any], ...]:
     try:
         keyring = load_keyring()
         passphrase = get_keyring_password(keyring, keyring_account(vault_path))
@@ -126,6 +139,11 @@ def _read_keyring_cards(vault_path: Path) -> tuple[dict[str, str], ...]:
         raise VaultUnavailable("passphrase_only")
     session = VaultStore(vault_path).open(passphrase)
     try:
-        return session.list_cards()
+        cards = session.list_cards()
+        child_records = session.list_child_records()
     finally:
         session.lock()
+    grouped: dict[str, list[dict[str, str]]] = {}
+    for child in child_records:
+        grouped.setdefault(child["parent_card_id"], []).append(child)
+    return tuple({**card, "child_records": grouped.get(card["card_id"], [])} for card in cards)

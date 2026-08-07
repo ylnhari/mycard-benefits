@@ -1,0 +1,211 @@
+# Claude batch result — MC-024 and MC-177
+
+Status: COMPLETE
+Task: MC-024, MC-177
+Runner: Claude Code Sonnet 5
+Branch: `agent/mc024-177-claude`
+Base: `33a866c2c402b976cb59b03af2ae6c803df51d18`
+Push authorized: no (not pushed)
+
+## MC-024 — linked child records
+
+### Architecture note
+
+The private vault has no SQLAlchemy/Alembic layer despite `AGENTS.md`'s
+architecture line — grep for `sqlalchemy`/`alembic` usage across `src/`
+returns nothing beyond the unused `pyproject.toml` dependency declarations.
+Card records are a single encrypted, AEAD-authenticated JSON envelope
+(`src/mycard_benefits/vault/core.py`), not a database. Child records extend
+that same pattern rather than introducing a new persistence layer.
+
+### Model (`src/mycard_benefits/vault/core.py`)
+
+- `ChildRecordKind` (`priority_pass`, `lounge_credential`, `membership`,
+  `voucher`, `companion_credential`) and `ChildRecordLifecycle`
+  (`active`/`expired`/`archived`) enums.
+- `_ChildRecord` frozen dataclass: `child_id`, `parent_card_id`, `kind`,
+  `label`, `lifecycle`, `created_at`, `updated_at`, `expiry_date` (optional).
+  All fields are non-secret; none of the `_ALLOWED_SECRET_FIELDS` machinery
+  was touched or extended.
+- `VaultSession.add_child_record(...)` validates the parent card exists
+  (`_get_record`), validates kind/lifecycle enum membership, a bounded
+  printable `label` (`_validate_label`, ≤160 chars), and an optional
+  `YYYY-MM-DD` `expiry_date` (`_validate_date`). `list_child_records(parent_card_id=None)`
+  mirrors `list_cards()`'s envelope-projection pattern.
+- Persistence: `child_records` is a new top-level envelope key, cleartext
+  (no per-field secret to encrypt) but covered by the same whole-envelope
+  HMAC (`_envelope_mac`) that already authenticates every other cleartext
+  field — no new crypto primitive. `_persist`, `_serialize_envelope`, and
+  `_validate_write_bounds` now take both the card map and the child-record
+  map together so both stay in one atomic vault revision.
+- **Backward compatibility**: `_parse_child_records` treats a missing
+  `child_records` key as an empty list (`envelope.get("child_records", [])`),
+  so a vault written before this change opens unchanged and silently
+  upgrades to carry the new key on its next write. Verified with a
+  reconstructed pre-existing-format envelope in
+  `test_vault_without_a_child_records_key_opens_with_none_and_upgrades_on_next_write`.
+  The on-disk format version constant (`_FORMAT_VERSION = 2`) was
+  deliberately **not** bumped.
+- Fail-closed parsing: unknown parent card id, unknown kind/lifecycle string,
+  malformed label/date, or any tampered cleartext field (parent id, kind,
+  label, lifecycle, timestamps) makes the whole vault refuse to open
+  (`VaultAccessError`), matching the existing card-record invariants.
+- `ChildRecordKind`/`ChildRecordLifecycle` exported from `vault/__init__.py`.
+
+### API (`src/mycard_benefits/vault/router.py`)
+
+- `PrivateChildRecordSummary` (new, `extra="forbid"`) nested as
+  `PrivateCardSummary.child_records: list[...] = Field(default_factory=list)`
+  — child records ride inside the existing `GET /api/v1/private/cards`
+  response rather than a new endpoint, so the existing `no-store` header,
+  `demo` gate, and `VaultUnavailable` → 503 mapping cover them automatically.
+- `_read_keyring_cards` now also calls `session.list_child_records()` and
+  groups by `parent_card_id` before returning each card row, so the real
+  keyring-backed reader (not just injectable test readers) exercises the new
+  grouping.
+- `CardReader` type widened from `tuple[dict[str, str], ...]` to
+  `tuple[dict[str, Any], ...]` to admit the nested list; strict mypy passes.
+
+### UI (`templates/index.html`, `static/app.js`, `static/app.css`)
+
+- `cardDetailSection` now appends a "Linked credentials" block
+  (`childRecordsSection`) after the existing card-detail `<dl>`, before the
+  unmatched-offering note.
+- `CHILD_RECORD_KIND_LABELS` maps each kind to a human label; `childRecordBadge`
+  reuses the existing `badge active`/`badge error`/`badge pending` classes
+  (active → green, expired → red, archived → muted) — no new badge palette.
+- Empty state: "No Priority Pass, lounge, membership, voucher, or companion
+  credentials are linked to this card." (two-tier pattern matching the
+  existing My Cards empty/filtered-empty convention).
+- All DOM construction uses the existing `node()`/`textContent` helpers; no
+  `innerHTML`/`insertAdjacentHTML` was introduced (enforced by test and
+  `node --check`).
+- No new interactive elements were added inside the child-records block, so
+  it inherits the existing detail panel's keyboard reachability
+  (View details → Enter/Space to open, Escape to close and return focus)
+  without any change to that logic.
+- CSS: `.child-records`, `.child-record-row`, `.child-record-list`,
+  `.child-record-meta` — flex-wrap based, so it reflows at the existing
+  850px mobile breakpoint without a new media-query entry; uses only
+  existing CSS custom properties, so both themes are covered automatically.
+
+### Browser verification
+
+Verified live (not just via static string tests) with a scratch dev server
+(`create_app(settings, private_card_reader=<synthetic fixture>)`, no real
+vault or OS keyring touched) covering: all 5 child-record kinds, all 3
+lifecycle badges (active/expired/archived), a card with zero child records
+(empty state), an unmatched-offering card, desktop (1280×900) and mobile
+(390×844) widths, and both dark and light themes. Screenshots were reviewed
+inline during the session; the scratch server, its data directory, and the
+temporary verification script were all removed afterward — nothing from
+this pass is tracked or left running.
+
+### Tests added
+
+- `tests/test_vault.py`: round-trip + reopen, parent-must-exist, invalid
+  kind/lifecycle/label/date (parametrized, 6 cases), full tamper-each-field
+  authentication (parametrized, 6 fields), dangling-parent and unknown-kind
+  externally-tampered rejection, the backward-compatibility open test above,
+  and a count-bound test.
+- `tests/test_private_cards_api.py`: nested rendering with the full expected
+  field set, fail-closed on an unexpected nested field (`membership_number`)
+  with a leak check, and an end-to-end test through the real
+  `_read_keyring_cards` reader (via `VaultStore`/`StubKeyring`, no real
+  keyring) proving per-card grouping.
+- `tests/test_ui.py`: static-source assertions for the new render functions,
+  kind labels, empty-state copy, and secret-field-name absence
+  (`record.pan`, `record.cvv`, `record.pin`, `record.membership_number`, …).
+- Two pre-existing exact-field-set assertions
+  (`test_private_cards_rows_carry_only_the_five_envelope_fields`,
+  `test_unmatched_offering_response_is_envelope_only_and_never_repeats_slug`)
+  were updated to include the new `child_records` field — this is the field
+  MC-024 intentionally adds, not a regression.
+
+No secret child value (membership number, credential value, barcode) is
+modeled, stored, or ever crosses the HTTP boundary — only kind, a
+user-supplied display label, lifecycle, and an optional expiry date.
+
+## MC-177 — self-contained, launcher-independent guidance
+
+`README.md`, `docs/USER-GUIDE.md`, `docs/FAMILY-FINANCE-INTEGRATION.md`, and
+`PRODUCT_REQUIREMENTS.md` "Family Finance and remote access" were already
+compliant (verified by re-reading each in full and grepping for `Rover`,
+`launcher`, `Companion Dashboard` — zero matches outside historical
+append-only `coordination/` evidence, which the task brief allows to keep its
+original wording). The remaining gap was that the **running app itself**
+said nothing about this boundary — only the docs did.
+
+- Added a "Remote access" row to the in-app Settings panel
+  (`templates/index.html`), next to the existing Appearance row: states the
+  app answers only on `127.0.0.1`, that phone/other-device access goes
+  through "an authenticated gateway or launcher you control" (same phrase
+  the docs already use), and that this tool is separate software that never
+  shares MyCard's identity or configuration and can never widen MyCard's own
+  bind. Deliberately avoids the literal phrase "external launcher" to stay
+  consistent with the existing `test_dashboard_has_all_public_navigation_and_honest_vault_gate`
+  assertion that phrase must not appear on the homepage.
+- Extended `test_active_surfaces_have_neutral_copy_and_self_contained_startup`
+  to assert this new Settings copy is present in the template and in the
+  rendered homepage HTML (single-page app, so all panels are in one
+  response).
+- Strengthened the loopback-only guarantee: `tests/test_cli.py` already had
+  `test_cli_always_binds_loopback` proving the current call passes
+  `host="127.0.0.1"`. Added
+  `test_cli_has_no_way_to_configure_a_non_loopback_bind`, which additionally
+  proves there is no `--host` (or any `*host*`) argparse option, no `host`
+  field on `Settings`, and no `os.environ`/`MYCARD_BENEFITS_HOST` read
+  anywhere in `cli.py` — i.e. the bind cannot be silently widened by any
+  currently-reachable code path, not just that today's one call happens to
+  pass the right string.
+- Browser-verified the new Settings copy with `uv run mycard-benefits --demo`
+  at desktop and mobile widths, in both themes (see screenshots reviewed
+  inline during the session); the demo server and its `demo-data/`
+  directory (gitignored, untracked) were stopped and removed afterward.
+
+No launcher secret, identity, or configuration value exists in MyCard source,
+browser storage, or docs — none was added, and the grep sweep above confirms
+none was already present.
+
+## Delivery and verification
+
+- Living artifacts updated in this change: `TASKS.md` (MC-024, MC-177
+  checked off), `PROJECT_STATUS.md` ("Completed" section), `DECISIONS.md`
+  (new "Linked child records and remote-access UI copy — 2026-08-07"
+  section recording the no-SQLAlchemy architecture decision and the
+  in-app-copy decision).
+- Quality gates, all green on the final tree:
+  - `uv run ruff check .` — all checks passed.
+  - `uv run mypy src` — success, no issues found in 31 source files.
+  - `uv run pytest -q` — 281 passed (started at 254 before this batch).
+  - `node --check src/mycard_benefits/static/app.js` — passed.
+  - `uv build` — both sdist and wheel built successfully.
+  - `git diff --check` — clean (no whitespace errors).
+- Diff inspected for secrets, real identifiers, absolute user paths, and
+  generated/runtime files: none found. `dist/` and `demo-data/` remain
+  gitignored and were not committed.
+- No behavior outside MC-024/MC-177 scope was changed. Existing tests were
+  only touched where the new `child_records` field intentionally changed an
+  exact-field-set assertion, and where internal helper signatures
+  (`_serialize_envelope`, `_persist`) changed and their direct unit-test
+  call sites needed the new parameter.
+
+## Risks / follow-ups for later tasks
+
+- MC-024 explicitly excludes write controls (add/edit/archive a child
+  record from the browser) — `add_child_record` exists at the vault-session
+  level only, with no HTTP write endpoint, matching the same boundary as
+  `add_card`/`replace_card` today. A future protected-write task (MC-028/
+  MC-029-adjacent) would wire a reauthenticated endpoint to it.
+- MC-159 (encrypted attachments) depends on MC-024 per `TASKS.md` and can
+  now build on the `parent_card_id` linkage pattern established here.
+- The CLI-widen guard test added for MC-177 will need a matching update if
+  a future task legitimately adds a `--host`-style override; that would be
+  an explicit, reviewed change to `AGENTS.md` boundary 7, not an incidental
+  one.
+
+## Commit
+
+Committed locally on `agent/mc024-177-claude`. Not merged, rebased, pushed,
+or published. Exact commit hash: recorded by the commit that follows this
+file in the same change (see `git log -1` on this branch).

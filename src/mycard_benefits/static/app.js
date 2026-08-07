@@ -174,6 +174,43 @@ function replacementOfText(card) {
   const offering = offeringForCard(predecessor);
   return `This card replaced ${offering ? offering.display_name : "an earlier card record"}`;
 }
+const CHILD_RECORD_KIND_LABELS = {
+  priority_pass: "Priority Pass",
+  lounge_credential: "Lounge credential",
+  membership: "Membership",
+  voucher: "Voucher",
+  companion_credential: "Companion credential",
+};
+const CHILD_RECORDS_EMPTY_NOTE = "No Priority Pass, lounge, membership, voucher, or companion credentials are linked to this card.";
+function childRecordBadge(lifecycle) {
+  if (lifecycle === "active") return "badge active";
+  if (lifecycle === "expired") return "badge error";
+  return "badge pending";
+}
+function childRecordRow(record) {
+  const row = node("div", undefined, "child-record-row");
+  const title = node("div");
+  title.append(node("p", CHILD_RECORD_KIND_LABELS[record.kind] || "Linked credential", "eyebrow"), node("p", record.label));
+  row.append(title);
+  const meta = node("div", undefined, "child-record-meta");
+  meta.append(node("span", record.lifecycle, childRecordBadge(record.lifecycle)));
+  if (record.expiry_date) meta.append(node("span", `Expires ${fmtDate(record.expiry_date)}`, "quiet-copy"));
+  row.append(meta);
+  return row;
+}
+function childRecordsSection(card) {
+  const section = node("div", undefined, "child-records");
+  section.append(node("h5", "Linked credentials", "child-records-title"));
+  const records = Array.isArray(card.child_records) ? card.child_records : [];
+  if (!records.length) {
+    section.append(node("p", CHILD_RECORDS_EMPTY_NOTE, "child-records-empty"));
+    return section;
+  }
+  const list = node("div", undefined, "child-record-list");
+  for (const record of records) list.append(childRecordRow(record));
+  section.append(list);
+  return section;
+}
 function cardDetailSection(card, index) {
   const offering = offeringForCard(card);
   const section = node("div", undefined, "card-detail");
@@ -197,6 +234,7 @@ function cardDetailSection(card, index) {
   const replaces = replacementOfText(card);
   if (replaces) list.append(detailRow("Replaces", replaces));
   section.append(heading, list);
+  section.append(childRecordsSection(card));
   if (!offering) section.append(node("p", UNMATCHED_NOTE, "unmatched-note"));
   return section;
 }

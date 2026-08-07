@@ -112,6 +112,7 @@ def test_private_cards_rows_carry_only_the_five_envelope_fields(tmp_path: Path) 
     assert row["created_at"] == "2026-08-07T00:00:00Z"
     assert row["updated_at"] == "2026-08-07T00:00:00Z"
     assert row["replacement_card_id"] == "018f47f2-0f86-7b0a-bc7d-f00ba47c0002"
+    assert row["child_records"] == []
     assert set(row) == {
         "card_id",
         "offering_id",
@@ -119,6 +120,7 @@ def test_private_cards_rows_carry_only_the_five_envelope_fields(tmp_path: Path) 
         "created_at",
         "updated_at",
         "replacement_card_id",
+        "child_records",
     }
 
 
@@ -190,6 +192,7 @@ def test_unmatched_offering_response_is_envelope_only_and_never_repeats_slug(
         "created_at",
         "updated_at",
         "replacement_card_id",
+        "child_records",
     }
     assert response.text.count("not-a-catalog-slug") == 1, (
         "the raw offering identifier must never leak into any extra field"
@@ -317,3 +320,134 @@ def test_real_reader_reports_locked_when_vault_exists_with_stored_passphrase_but
 
     assert response.status_code == 503
     assert response.json()["detail"]["code"] == "locked"
+
+
+def test_private_cards_nest_child_records_with_only_envelope_fields(tmp_path: Path) -> None:
+    def reader() -> tuple[dict[str, object], ...]:
+        return (
+            {
+                "card_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0001",
+                "offering_id": "hdfc-regalia-gold-credit",
+                "lifecycle": "active",
+                "created_at": "2026-08-07T00:00:00Z",
+                "updated_at": "2026-08-07T00:00:00Z",
+                "child_records": [
+                    {
+                        "child_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0010",
+                        "parent_card_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0001",
+                        "kind": "priority_pass",
+                        "label": "Priority Pass membership",
+                        "lifecycle": "active",
+                        "created_at": "2026-08-07T00:00:00Z",
+                        "updated_at": "2026-08-07T00:00:00Z",
+                        "expiry_date": "2027-01-01",
+                    },
+                    {
+                        "child_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0011",
+                        "parent_card_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0001",
+                        "kind": "voucher",
+                        "label": "Movie voucher",
+                        "lifecycle": "expired",
+                        "created_at": "2026-08-06T00:00:00Z",
+                        "updated_at": "2026-08-06T00:00:00Z",
+                    },
+                ],
+            },
+        )
+
+    with _client(tmp_path, reader) as client:
+        response = client.get("/api/v1/private/cards")
+
+    assert response.status_code == 200
+    assert response.headers["cache-control"] == "no-store"
+    children = response.json()["cards"][0]["child_records"]
+    assert len(children) == 2
+    assert children[0]["kind"] == "priority_pass"
+    assert children[0]["expiry_date"] == "2027-01-01"
+    assert set(children[0]) == {
+        "child_id",
+        "parent_card_id",
+        "kind",
+        "label",
+        "lifecycle",
+        "created_at",
+        "updated_at",
+        "expiry_date",
+    }
+    assert children[1]["kind"] == "voucher"
+    assert children[1]["lifecycle"] == "expired"
+    assert children[1]["expiry_date"] is None
+
+
+def test_private_cards_fail_closed_on_unexpected_child_record_fields(tmp_path: Path) -> None:
+    def reader() -> tuple[dict[str, object], ...]:
+        return (
+            {
+                "card_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0001",
+                "offering_id": "hdfc-regalia-gold-credit",
+                "lifecycle": "active",
+                "created_at": "2026-08-07T00:00:00Z",
+                "updated_at": "2026-08-07T00:00:00Z",
+                "child_records": [
+                    {
+                        "child_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0010",
+                        "parent_card_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0001",
+                        "kind": "priority_pass",
+                        "label": "Priority Pass membership",
+                        "lifecycle": "active",
+                        "created_at": "2026-08-07T00:00:00Z",
+                        "updated_at": "2026-08-07T00:00:00Z",
+                        "membership_number": "SYNTHETIC-ONLY-SHOULD-NOT-LEAK",
+                    },
+                ],
+            },
+        )
+
+    with _client(tmp_path, reader) as client:
+        response = client.get("/api/v1/private/cards")
+
+    assert response.status_code == 503
+    assert "SYNTHETIC-ONLY-SHOULD-NOT-LEAK" not in response.text
+    for secret in ("membership_number", "barcode", "credential_secret", "pan", "cvv", "pin"):
+        assert secret not in response.text.lower()
+
+
+def test_real_reader_groups_child_records_under_their_parent_card(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from mycard_benefits.vault import ChildRecordKind
+    from mycard_benefits.vault.core import VaultStore
+    from mycard_benefits.vault.keyring_store import keyring_account
+
+    vault_path = tmp_path / "data" / "private" / "vault.json"
+    session = VaultStore(vault_path).create("synthetic passphrase for child records")
+    card_id = session.add_card("hdfc-regalia-gold-credit", {"pan": "SYNTHETIC-ONLY-PAN"})
+    other_card_id = session.add_card("hdfc-tata-neu-rupay-select-credit", {"pan": "SYNTHETIC-ONLY-PAN-2"})
+    session.add_child_record(
+        card_id, ChildRecordKind.LOUNGE_CREDENTIAL, "SYNTHETIC-ONLY-Lounge access"
+    )
+    session.add_child_record(other_card_id, ChildRecordKind.MEMBERSHIP, "SYNTHETIC-ONLY-Membership")
+    session.lock()
+
+    class StubKeyring:
+        def get_password(self, service_name: str, username: str) -> str | None:
+            return "synthetic passphrase for child records"
+
+    import mycard_benefits.vault.router as router_module
+
+    monkeypatch.setattr(router_module, "load_keyring", lambda: StubKeyring())
+    assert keyring_account(vault_path)  # exercised implicitly by the real reader below
+
+    with _client(tmp_path, None) as client:  # type: ignore[arg-type]
+        response = client.get("/api/v1/private/cards")
+
+    assert response.status_code == 200
+    payload = response.json()
+    by_card = {card["card_id"]: card for card in payload["cards"]}
+    assert len(by_card[card_id]["child_records"]) == 1
+    assert by_card[card_id]["child_records"][0]["kind"] == "lounge_credential"
+    assert len(by_card[other_card_id]["child_records"]) == 1
+    assert by_card[other_card_id]["child_records"][0]["kind"] == "membership"
+    assert "SYNTHETIC-ONLY-PAN" not in response.text
+    for secret in ("pan", "cvv", "pin"):
+        assert secret not in response.text.lower()
