@@ -71,8 +71,8 @@ command-line tool that creates your encrypted vault and imports your cards.
   dashboard.
 - **Expiring Soon**, **Updates**, and **Research Queue** appear in the sidebar but
   are intentionally empty.
-- The purchase-route comparison engine exists in code but is not connected to
-  any screen and cannot open a shopping link.
+- The purchase-route comparison engine is reachable through a local loopback
+  API but is not connected to any screen and cannot open a shopping link.
 
 ## Your cards
 

@@ -15,6 +15,12 @@ view of the encrypted portfolio.
   immutable candidate/diff store, and resumable SQLite research queue.
 - Deterministic public catalog Q&A API/UI and a pure purchase-route optimizer;
   neither requires an LLM or private card values.
+- Ephemeral loopback optimizer API (`POST /api/v1/optimizer/routes`): a
+  bounded, self-contained planned-purchase scenario returns ranked routes
+  with engine provenance, assumptions, value classes, and rejection reasons.
+  It rejects stale, unreviewed, inactive, malformed, oversized, or ineligible
+  inputs, persists and logs nothing, and answers with `Cache-Control:
+  no-store`.
 - Encrypted vault core with Argon2id key wrapping, AES-GCM records, complete
   envelope authentication, bounded persistence, locking, backups, lifecycle,
   auto-lock, reauthentication, and one-use reveal authorization.
@@ -91,8 +97,8 @@ view of the encrypted portfolio.
 - Add protected add/edit/archive/replace controls; the CLI remains the only
   real-card write surface until that review completes.
 - Convert official-source pilot research into reviewable benefit candidates.
-- Expose candidate review, research queue, and optimizer contracts through
-  protected local API/UI surfaces.
+- Expose candidate review and research queue contracts through protected local
+  API/UI surfaces.
 
 ## Not yet safe
 
@@ -107,8 +113,9 @@ view of the encrypted portfolio.
   offline orchestration only. The active benefit catalog is empty until
   official-source findings are reviewed and approved; real pilot findings remain
   unapproved research candidates.
-- The optimizer core is not exposed through the UI and cannot open purchase or
-  affiliate routes.
+- The optimizer core is exposed only through the loopback API, never through
+  the UI; it cannot open purchase or affiliate routes and it persists no
+  scenario or result.
 - Family Finance performs a privacy-preserving reachability check only; signed
   companion identity pinning remains a later gate.
 - Family Finance one-time import and notifications are not implemented. The

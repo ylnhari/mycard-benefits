@@ -35,3 +35,11 @@ commands/results, risks, and commit hash. Do not merge, rebase, push, publish,
 or edit another worktree. End with `OPENCODE_MC098_COMPLETE` only when the full
 suite passes and the worktree is clean; otherwise record evidence and end with
 `OPENCODE_MC098_BLOCKED`.
+
+## Worker result (2026-08-07)
+
+Status: COMPLETE
+Runner: OpenCode free route (opencode/deepseek-v4-flash-free)
+Branch: agent/mc098-opencode
+Push: none (local commit only)
+Result: implemented MC-098. New module src/mycard_benefits/optimizer/router.py exposes a single bounded ephemeral endpoint POST /api/v1/optimizer/routes registered in src/mycard_benefits/app.py; returns engine-ranked routes with provenance, assumptions, value classes, and rejection reasons; rejects malformed (422), oversized (413/422), stale, unreviewed, inactive, ineligible inputs; persists/logs nothing; Cache-Control: no-store. 8 new deterministic API tests in tests/test_optimizer_api.py. Gates: ruff clean, strict mypy 32 files, 254 tests passed, JS syntax OK, uv build OK, git diff --check OK. Commit: <hash>. Record: coordination/OPENCODE-WORKER-RESULT.md.

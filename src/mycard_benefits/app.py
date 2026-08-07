@@ -14,6 +14,7 @@ from . import __version__
 from .catalog.router import create_catalog_router
 from .config import API_VERSION, APP_ID, PACKAGE_ROOT, Settings
 from .identity import InstallationIdentity
+from .optimizer.router import create_optimizer_router
 from .qa import create_qa_router
 from .vault.router import CardReader, create_private_cards_router
 
@@ -48,6 +49,7 @@ def create_app(
             demo=settings.demo,
         )
     )
+    application.include_router(create_optimizer_router())
     application.mount(
         "/static",
         StaticFiles(directory=str(PACKAGE_ROOT / "static")),

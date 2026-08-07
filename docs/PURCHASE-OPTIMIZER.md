@@ -85,3 +85,31 @@ purchase amount and context but does not persist them unless the user explicitly
 saves a private plan. Agents receive only public offering IDs and public rules.
 The app does not sign in to portals, place orders, redeem points, or submit
 forms.
+
+## Loopback API
+
+The reviewed engine is reachable locally through one narrowly scoped endpoint:
+`POST /api/v1/optimizer/routes` on the loopback-bound application.
+
+- The request is a fully self-contained planned-purchase scenario plus
+  candidate routes. It is ephemeral: nothing is persisted, logged, or sent
+  over the network, and responses carry `Cache-Control: no-store`.
+- The request must be at most 128 KiB and holds at most 20 routes, 8
+  components per route, 5 scenario fees, 5 route fees, 8 source references,
+  and 8 approved origins. Money is accepted as decimal strings or integers;
+  JSON numbers are rejected so values stay exact.
+- All evidence, expiry, review, stacking, currency, and origin rules are the
+  engine's. The adapter adds only the structural bounds above and never
+  reimplements ranking.
+- The response mirrors the engine exactly: ranked routes with net guaranteed
+  value after fees, separate conditional and estimated ranges, per-component
+  provenance (source references, evidence tier, verification and expiry
+  dates, conditions and assumptions, named valuation for estimated layers),
+  explanation, link class, and official reference, plus rejected routes with
+  their reasons.
+- Stale, unreviewed, inactive/expired, incompatible, and ineligible routes
+  are never silently dropped: they appear under `rejected_routes` with
+  reasons. Malformed, duplicated, unsupported, or oversized input fails the
+  request (`422`, or `413` when the body exceeds the size limit).
+- The endpoint never opens a link, never reads the vault or private card
+  inventory, and cannot trigger a purchase.
