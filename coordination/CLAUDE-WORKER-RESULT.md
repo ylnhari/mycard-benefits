@@ -323,6 +323,9 @@ Committed locally on `agent/mc024-177-claude`:
 - Manager-review correction: `50991a6` — removes the child-record `label`
   field, adds fail-closed enum/uuid/parent-match/duplicate-id validation at
   the API boundary, and replaces the exact `expiry_date` with a bounded
-  `expiry_signal`.
+  `expiry_signal`; `6b16dd4` records that hash in this file.
+- Correction follow-up: `cca419d` — fixes the Luhn-valid test fixture found
+  by the tracked-diff privacy scan and records the completed live browser
+  verification.
 
 Not merged, rebased, pushed, or published.
