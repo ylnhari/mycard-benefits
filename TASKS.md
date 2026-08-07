@@ -46,7 +46,7 @@ Manager protocol: tasks are assigned one at a time; a worker owns only its named
   - Depends on: MC-001, MC-038
   - Suggested runner: Manager
 
-- [ ] **MC-008: Resolve the --demo versus real-data surprise for My Cards** - Starting with `--demo` must not silently show the wrong data folder; the UI and guide must make the demo/real boundary obvious.
+- [x] **MC-008: Resolve the --demo versus real-data surprise for My Cards** - Starting with `--demo` must not silently show the wrong data folder; the UI and guide must make the demo/real boundary obvious.
   - Acceptance: demo runs display a persistent demo banner and point at `demo-data`; guide explains the boundary (`docs/USER-GUIDE.md` section 3); UI test asserts demo vs non-demo data folders differ.
   - Depends on: MC-001
   - Suggested runner: OpenCode

@@ -141,10 +141,15 @@ folder. You do not need `uv sync` again unless the project has been updated.
 | Use a specific port | `uv run mycard-benefits --port 9123` |
 | Keep your data somewhere else | `uv run mycard-benefits --data-dir D:\MyCardData` |
 
-`--demo` keeps demo activity in a separate `demo-data` folder and labels the page
-as a demo. The public catalog is the same either way. Note that `--demo` also
-points at a different data folder, so your imported cards will not be there —
-start the app without `--demo` when you want to see My Cards.
+`--demo` is a clearly labelled dry run. The page shows a **permanent banner**
+saying so on every screen, demo activity lives in a separate `demo-data` folder,
+and **My Cards is switched off** — a demo run never even opens your real vault.
+The public catalog is the same either way. Start the app without `--demo` when
+you want to see My Cards; your imported cards live under the normal `data`
+folder and only appear there.
+
+If you pass an explicit data folder with `--data-dir`, the app uses that folder
+even with `--demo`, so choose the `--data-dir` deliberately in that case.
 
 If you do not pass `--port`, the app picks one in this order: the
 `MYCARD_BENEFITS_PORT` environment variable, the nearest `ports.json` entry if

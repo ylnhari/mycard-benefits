@@ -45,6 +45,7 @@ def create_app(
         create_private_cards_router(
             settings.data_dir,
             reader=private_card_reader,
+            demo=settings.demo,
         )
     )
     application.mount(
@@ -62,7 +63,9 @@ def create_app(
         )
 
     @application.get("/api/v1/health")
-    async def health(request: Request, nonce: str | None = Query(default=None)) -> dict[str, object]:
+    async def health(
+        request: Request, nonce: str | None = Query(default=None)
+    ) -> dict[str, object]:
         identity: InstallationIdentity = request.app.state.identity
         if nonce is not None:
             try:

@@ -9,6 +9,12 @@
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
+  {% if demo %}
+  <div class="demo-banner" id="demoBanner" role="note">
+    <strong>Synthetic demo run</strong>
+    <span>All data stays in the <code>demo-data</code> folder and My Cards is switched off — your real vault is never opened. Start without <code>--demo</code> to see My Cards.</span>
+  </div>
+  {% endif %}
   <div class="shell">
     <aside class="sidebar" aria-label="Primary navigation">
       <div class="brand"><span aria-hidden="true">◇</span> MyCard <b>Benefits</b></div>

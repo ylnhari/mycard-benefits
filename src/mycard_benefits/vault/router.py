@@ -37,6 +37,7 @@ def create_private_cards_router(
     data_dir: Path,
     *,
     reader: CardReader | None = None,
+    demo: bool = False,
 ) -> APIRouter:
     router = APIRouter(prefix="/api/v1/private", tags=["private cards"])
     vault_path = (data_dir / "private" / "vault.json").resolve()
@@ -44,6 +45,11 @@ def create_private_cards_router(
 
     @router.get("/cards", response_model=PrivateCardList)
     def list_private_cards(response: Response) -> PrivateCardList:
+        if demo:
+            raise HTTPException(
+                status_code=503,
+                detail="Private card list is switched off in demo mode",
+            )
         try:
             raw_cards = read_cards()
             cards = [PrivateCardSummary.model_validate(item) for item in raw_cards]

@@ -263,6 +263,33 @@ def test_private_card_detail_replacement_links_and_unmatched_state_are_safe() ->
     assert "Fix the identifier in the import file or request the card variant" in script
 
 
+def test_demo_run_shows_persistent_banner_and_switches_off_my_cards(tmp_path: Path) -> None:
+    demo_settings = Settings(
+        data_dir=tmp_path / "demo-data",
+        catalog_dir=ROOT / "catalog",
+        port=8777,
+        demo=True,
+    )
+    with TestClient(create_app(demo_settings)) as client:
+        page = client.get("/")
+        assert page.status_code == 200
+        assert 'id="demoBanner"' in page.text
+        assert "Synthetic demo run" in page.text
+        assert "demo-data" in page.text
+        assert "--demo" in page.text
+        cards = client.get("/api/v1/private/cards")
+        assert cards.status_code == 503
+        assert cards.json() == {"detail": "Private card list is switched off in demo mode"}
+        health = client.get("/api/v1/health").json()
+        assert health["app_id"] == "mycard-benefits"
+        assert health["status"] == "ok"
+
+    with _client(tmp_path) as client:
+        page = client.get("/")
+        assert 'id="demoBanner"' not in page.text
+        assert "Synthetic demo run" not in page.text
+
+
 def test_active_surfaces_have_neutral_copy_and_self_contained_startup(tmp_path: Path) -> None:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     guide = (ROOT / "docs" / "USER-GUIDE.md").read_text(encoding="utf-8")

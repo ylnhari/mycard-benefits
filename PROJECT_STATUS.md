@@ -39,6 +39,10 @@ view of the encrypted portfolio.
   card's panel says so honestly without printing the raw identifier.
 - MyCard remains loopback-bound. A personal external launcher may start it and
   provide phone access, but MyCard does not integrate with that tool.
+- `--demo` runs are unmistakable: a persistent banner labels the run on every
+  screen, demo activity stays in a separate `demo-data` folder, My Cards is
+  switched off in demo mode, and the guide explains the boundary. Tests prove
+  demo and normal runs point at different data folders.
 - Discovery-only pilot source work for Tata Neu HDFC Infinity and HDFC Regalia
   Gold. No real benefit claim has been activated.
 - User-first README and guide covering setup, daily use, privacy, Family Finance,
