@@ -51,7 +51,7 @@ Manager protocol: tasks are assigned one at a time; a worker owns only its named
   - Depends on: MC-001
   - Suggested runner: OpenCode
 
-- [ ] **MC-009: Explain why the vault is unavailable with actionable diagnostics** - My Cards must tell the user which of the known causes applies (demo mode, no vault, passphrase-only, wrong data dir) and how to fix it.
+- [x] **MC-009: Explain why the vault is unavailable with actionable diagnostics** - My Cards must tell the user which of the known causes applies (demo mode, no vault, passphrase-only, wrong data dir) and how to fix it.
   - Acceptance: each unavailable cause maps to a distinct rendered message and fix step per `docs/USER-GUIDE.md` section 12; covered by UI tests.
   - Depends on: MC-001
   - Suggested runner: OpenCode

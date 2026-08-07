@@ -43,6 +43,11 @@ view of the encrypted portfolio.
   screen, demo activity stays in a separate `demo-data` folder, My Cards is
   switched off in demo mode, and the guide explains the boundary. Tests prove
   demo and normal runs point at different data folders.
+- My Cards explains why the vault is unavailable instead of failing silently:
+  each known cause (demo mode, no vault yet, passphrase-only vault, wrong data
+  folder, keyring unavailable, locked vault) maps to a distinct safe API
+  diagnostic and a distinct rendered message with an actionable fix, covered
+  by deterministic API and UI tests and documented in the user guide.
 - Discovery-only pilot source work for Tata Neu HDFC Infinity and HDFC Regalia
   Gold. No real benefit claim has been activated.
 - User-first README and guide covering setup, daily use, privacy, Family Finance,

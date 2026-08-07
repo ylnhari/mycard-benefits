@@ -563,11 +563,28 @@ only the first time. After the vault exists, leave `--create` off.
 Fix your file and run the import again without `--create`.
 
 **My Cards says the private vault is unavailable.** The app reached the vault step
-but could not complete it. Usual causes, in order: you started the app with
-`--demo`, so it is looking in the demo data folder; the vault does not exist yet;
-or the vault is passphrase-only rather than keyring-backed, which the browser
-view cannot open. Confirm the vault itself is fine with
-`uv run mycard-vault --keyring verify`.
+but could not complete it. The dashboard tells you which cause applies and what
+to do about it. The causes, in order:
+
+1. **Demo mode** — you started the app with `--demo`. Demo runs stay in the
+   `demo-data` folder, never open your real vault, and switch My Cards off.
+   Stop the run and start again without `--demo`.
+2. **No vault yet** — the data folder the app is using contains no vault. If
+   your vault lives in a different data folder, start the app with that
+   `--data-dir`. Otherwise create the vault once with
+   `uv run mycard-vault --create`, then import.
+3. **Passphrase-only vault** — the vault exists but was created without the
+   operating-system keyring, which this read-only browser view needs. Either
+   store the passphrase in your operating-system keyring or open and import
+   from the command line. Confirm with `uv run mycard-vault --keyring verify`.
+4. **Wrong data folder** — a keyring passphrase is stored for this data folder
+   but no vault file is there, so the app is looking in the wrong place. Start
+   the app with the data folder that actually holds your vault.
+5. **Keyring unavailable or vault did not unlock** — the operating-system
+   credential manager or keychain could not be read, or the vault file is
+   present with a stored passphrase but will not open (damaged file or stale
+   passphrase). Check your credential manager, then run
+   `uv run mycard-vault --keyring verify`.
 
 **My Cards shows "Unmatched variant" instead of a card's real name.** That
 card's product identifier does not match a catalog slug. The row is clearly

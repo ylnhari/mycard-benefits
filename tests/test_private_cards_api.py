@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 
 from mycard_benefits.app import create_app
 from mycard_benefits.config import Settings
+from mycard_benefits.vault.router import VaultUnavailable
 
 
 def _client(tmp_path: Path, reader: object) -> TestClient:
@@ -202,8 +204,116 @@ def test_private_cards_503_when_reader_raises(tmp_path: Path) -> None:
         response = client.get("/api/v1/private/cards")
 
     assert response.status_code == 503
+    detail = response.json()["detail"]
+    assert detail["code"] == "generic"
+    assert detail["message"]
     assert (
         response.headers.get("cache-control") is None
         or response.headers["cache-control"] != "no-store"
     )
     assert "fallback" not in response.text.lower()
+
+
+def test_unavailable_codes_map_to_distinct_structured_details(tmp_path: Path) -> None:
+    for code in (
+        "demo",
+        "vault_missing",
+        "passphrase_only",
+        "wrong_data_dir",
+        "locked",
+        "keyring_unavailable",
+        "generic",
+    ):
+
+        def reader(_code: str = code) -> tuple[dict[str, str], ...]:
+            raise VaultUnavailable(_code)
+
+        with _client(tmp_path, reader) as client:
+            response = client.get("/api/v1/private/cards")
+
+        assert response.status_code == 503
+        detail = response.json()["detail"]
+        assert detail["code"] == code, code
+        assert detail["message"], code
+        assert str(tmp_path) not in response.text, code
+
+
+def test_real_reader_reports_vault_missing_when_no_vault_and_no_keyring_entry(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    class StubKeyring:
+        def get_password(self, service_name: str, username: str) -> str | None:
+            return None
+
+    import mycard_benefits.vault.router as router_module
+
+    monkeypatch.setattr(router_module, "load_keyring", lambda: StubKeyring())
+
+    with _client(tmp_path, None) as client:  # type: ignore[arg-type]
+        response = client.get("/api/v1/private/cards")
+
+    assert response.status_code == 503
+    assert response.json()["detail"]["code"] == "vault_missing"
+
+
+def test_real_reader_reports_wrong_data_dir_when_keyring_knows_this_vault_path(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    class StubKeyring:
+        def get_password(self, service_name: str, username: str) -> str | None:
+            return "SYNTHETIC-ONLY-passphrase"
+
+    import mycard_benefits.vault.router as router_module
+
+    monkeypatch.setattr(router_module, "load_keyring", lambda: StubKeyring())
+
+    with _client(tmp_path, None) as client:  # type: ignore[arg-type]
+        response = client.get("/api/v1/private/cards")
+
+    assert response.status_code == 503
+    assert response.json()["detail"]["code"] == "wrong_data_dir"
+    assert "SYNTHETIC-ONLY-passphrase" not in response.text
+
+
+def test_real_reader_reports_passphrase_only_when_vault_exists_without_keyring_entry(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    vault = tmp_path / "data" / "private" / "vault.json"
+    vault.parent.mkdir(parents=True)
+    vault.write_bytes(b"")
+
+    class StubKeyring:
+        def get_password(self, service_name: str, username: str) -> str | None:
+            return None
+
+    import mycard_benefits.vault.router as router_module
+
+    monkeypatch.setattr(router_module, "load_keyring", lambda: StubKeyring())
+
+    with _client(tmp_path, None) as client:  # type: ignore[arg-type]
+        response = client.get("/api/v1/private/cards")
+
+    assert response.status_code == 503
+    assert response.json()["detail"]["code"] == "passphrase_only"
+
+
+def test_real_reader_reports_locked_when_vault_exists_with_stored_passphrase_but_open_fails(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    vault = tmp_path / "data" / "private" / "vault.json"
+    vault.parent.mkdir(parents=True)
+    vault.write_bytes(b"not a vault")
+
+    class StubKeyring:
+        def get_password(self, service_name: str, username: str) -> str | None:
+            return "SYNTHETIC-ONLY-passphrase"
+
+    import mycard_benefits.vault.router as router_module
+
+    monkeypatch.setattr(router_module, "load_keyring", lambda: StubKeyring())
+
+    with _client(tmp_path, None) as client:  # type: ignore[arg-type]
+        response = client.get("/api/v1/private/cards")
+
+    assert response.status_code == 503
+    assert response.json()["detail"]["code"] == "locked"

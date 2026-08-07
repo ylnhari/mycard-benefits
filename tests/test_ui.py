@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 
 from mycard_benefits.app import create_app
@@ -182,9 +183,25 @@ def test_private_cards_empty_and_unavailable_states_are_explicit_and_actionable(
         in script
     )
     assert "No cards match the current search and lifecycle filter." in script
-    assert "The private vault could not be opened, so no card list can be shown." in script
-    assert "not in demo mode" in script and "operating-system keyring" in script
     assert "no fallback data was used" in script
+    assert "const VAULT_DIAGNOSTICS" in script
+    for code in (
+        "demo",
+        "vault_missing",
+        "passphrase_only",
+        "wrong_data_dir",
+        "locked",
+        "keyring_unavailable",
+        "generic",
+    ):
+        assert f"{code}: {{" in script, code
+    assert "mycard-vault --create" in script
+    assert "operating-system keyring" in script
+    assert "passphrase-only" in script
+    assert "--data-dir" in script
+    assert "credential manager or keychain" in script
+    assert 'typeof body.detail === "object"' in script
+    assert "VAULT_DIAGNOSTICS[code] || VAULT_DIAGNOSTICS.generic" in script
     assert "This card's product identifier has no match in the public catalog." in script
     assert "secret_fields" not in script
     assert 'id="myCardList"' in page and 'aria-live="polite"' in page
@@ -279,7 +296,9 @@ def test_demo_run_shows_persistent_banner_and_switches_off_my_cards(tmp_path: Pa
         assert "--demo" in page.text
         cards = client.get("/api/v1/private/cards")
         assert cards.status_code == 503
-        assert cards.json() == {"detail": "Private card list is switched off in demo mode"}
+        assert cards.json() == {
+            "detail": {"code": "demo", "message": "Private card list is switched off in demo mode"}
+        }
         health = client.get("/api/v1/health").json()
         assert health["app_id"] == "mycard-benefits"
         assert health["status"] == "ok"
@@ -290,7 +309,16 @@ def test_demo_run_shows_persistent_banner_and_switches_off_my_cards(tmp_path: Pa
         assert "Synthetic demo run" not in page.text
 
 
-def test_active_surfaces_have_neutral_copy_and_self_contained_startup(tmp_path: Path) -> None:
+def test_active_surfaces_have_neutral_copy_and_self_contained_startup(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    class StubKeyring:
+        def get_password(self, service_name: str, username: str) -> str | None:
+            return None
+
+    import mycard_benefits.vault.router as router_module
+
+    monkeypatch.setattr(router_module, "load_keyring", lambda: StubKeyring())
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     guide = (ROOT / "docs" / "USER-GUIDE.md").read_text(encoding="utf-8")
     template = (ROOT / "src" / "mycard_benefits" / "templates" / "index.html").read_text(
@@ -326,7 +354,9 @@ def test_active_surfaces_have_neutral_copy_and_self_contained_startup(tmp_path: 
 
         cards_resp = client.get("/api/v1/private/cards")
         assert cards_resp.status_code == 503
-        assert cards_resp.json() == {"detail": "Private card list unavailable"}
+        detail = cards_resp.json()["detail"]
+        assert detail["code"] == "vault_missing"
+        assert detail["message"]
 
 
 def test_unmatched_variant_state_is_friendly_and_never_renders_raw_identifier() -> None:

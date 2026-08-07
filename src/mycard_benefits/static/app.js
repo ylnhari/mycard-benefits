@@ -257,20 +257,83 @@ function renderPrivateCards() {
   }
   cards.forEach((card, index) => target.append(privateCardRow(card, index)));
 }
+const VAULT_DIAGNOSTICS = {
+  demo: {
+    title: "Demo run: My Cards is switched off",
+    text: "This run uses only the demo-data folder and never opens a real vault, so there is no card list to show.",
+    badge: "Demo",
+    status: "Synthetic demo run; no fallback data was used.",
+    note: "Start the app without --demo to open your real vault and see My Cards.",
+    fix: "Stop this run and start it again with: uv run mycard-benefits",
+  },
+  vault_missing: {
+    title: "No vault exists in this data folder",
+    text: "The app looked in its data folder and found no vault there, so there are no cards to list.",
+    badge: "No vault",
+    status: "Private card list could not be opened; no fallback data was used.",
+    note: "If your vault lives under a different data folder, start the app with that folder. Otherwise create the vault once.",
+    fix: "Create it with: uv run mycard-vault --create",
+  },
+  passphrase_only: {
+    title: "Vault is passphrase-only",
+    text: "The vault exists but it was created without the operating-system keyring, so this read-only browser view cannot unlock it.",
+    badge: "Passphrase only",
+    status: "Private card list could not be opened; no fallback data was used.",
+    note: "Store the passphrase in the operating-system keyring, or use the command line to open and import cards.",
+    fix: "Check the vault with: uv run mycard-vault --keyring verify",
+  },
+  wrong_data_dir: {
+    title: "The vault is in a different data folder",
+    text: "A keyring passphrase is stored for this data folder but no vault file is here, so the app is looking in the wrong place.",
+    badge: "Wrong folder",
+    status: "Private card list could not be opened; no fallback data was used.",
+    note: "Start the app with the data folder that actually holds your vault.",
+    fix: "Run: uv run mycard-benefits --data-dir <your data folder>",
+  },
+  locked: {
+    title: "The vault could not be opened",
+    text: "The vault file is present and a keyring passphrase is stored, but the vault did not unlock, so its cards cannot be listed.",
+    badge: "Locked",
+    status: "Private card list could not be opened; no fallback data was used.",
+    note: "The vault file may be damaged, or the stored passphrase no longer matches it.",
+    fix: "Verify with: uv run mycard-vault --keyring verify",
+  },
+  keyring_unavailable: {
+    title: "Operating-system keyring unavailable",
+    text: "The keyring that stores the vault passphrase could not be read, so the vault cannot be opened.",
+    badge: "Keyring unavailable",
+    status: "Private card list could not be opened; no fallback data was used.",
+    note: "Check your operating system's credential manager or keychain and try again.",
+    fix: "After fixing the keyring, reload this page.",
+  },
+  generic: {
+    title: "Private vault unavailable",
+    text: "The private card list could not be opened for an unexpected reason.",
+    badge: "Unavailable",
+    status: "Private card list could not be opened; no fallback data was used.",
+    note: "Retry once; if it persists, verify the vault from the command line.",
+    fix: "Verify with: uv run mycard-vault --keyring verify",
+  },
+};
+
 function setPrivateAccess(title, text, badge, status) {
   document.querySelector("#vaultSummaryTitle").textContent = title;
   document.querySelector("#vaultSummaryText").textContent = text;
   document.querySelector("#myCardsBadge").textContent = badge;
   document.querySelector("#myCardStatus").textContent = status;
 }
-function setPrivateUnavailable(title, text, badge, status) {
-  setPrivateAccess(title, text, badge, status);
+function setPrivateUnavailable(diagnostic) {
+  setPrivateAccess(diagnostic.title, diagnostic.text, diagnostic.badge, diagnostic.status);
   const target = document.querySelector("#myCardList"); clear(target);
-  target.append(node("p", "The private vault could not be opened, so no card list can be shown. Make sure the app is not in demo mode, the vault exists, and it can be unlocked through the operating-system keyring.", "empty-state"));
+  const box = node("div", undefined, "empty-state");
+  box.append(node("p", diagnostic.note));
+  box.append(node("p", diagnostic.fix, "diagnostic-fix"));
+  target.append(box);
 }
 async function loadPrivateCards() {
+  let response;
   try {
-    const response = await fetch("/api/v1/private/cards", { headers: { Accept: "application/json" }, credentials: "same-origin", cache: "no-store" });
+    response = await fetch("/api/v1/private/cards", { headers: { Accept: "application/json" }, credentials: "same-origin", cache: "no-store" });
     if (!response.ok) throw new Error("unavailable");
     const payload = await response.json();
     state.privateCards = Array.isArray(payload.cards) ? payload.cards : [];
@@ -282,7 +345,15 @@ async function loadPrivateCards() {
     for (const lifecycle of Object.keys(payload.lifecycle_counts || {})) lifecycleSelect.append(new Option(`${lifecycle} (${payload.lifecycle_counts[lifecycle]})`, lifecycle));
     renderPrivateCards();
   } catch {
-    setPrivateUnavailable("Private vault unavailable", "The public catalog still works. Check that the app is not in demo mode, that the vault exists, and that it can be unlocked through the OS keyring before retrying.", "Unavailable", "Private card list could not be opened; no fallback data was used.");
+    let code = "generic";
+    if (response && !response.ok) {
+      try {
+        const body = await response.json();
+        if (body && typeof body.detail === "object" && body.detail && typeof body.detail.code === "string") code = body.detail.code;
+      } catch { /* keep the generic fallback */ }
+    }
+    const diagnostic = VAULT_DIAGNOSTICS[code] || VAULT_DIAGNOSTICS.generic;
+    setPrivateUnavailable(diagnostic);
     document.querySelector("#myCardCount").textContent = "—";
     document.querySelector("#myCardCountNote").textContent = "Vault unavailable";
   }

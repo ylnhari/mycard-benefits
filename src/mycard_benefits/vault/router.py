@@ -15,6 +15,25 @@ from .keyring_store import get_keyring_password, keyring_account, load_keyring
 CardReader = Callable[[], tuple[dict[str, str], ...]]
 
 
+class VaultUnavailable(Exception):
+    """A classified, non-sensitive reason the private card list is unavailable."""
+
+    def __init__(self, code: str) -> None:
+        super().__init__(code)
+        self.code = code
+
+
+VAULT_DIAGNOSTIC_MESSAGES: dict[str, str] = {
+    "demo": "Private card list is switched off in demo mode",
+    "vault_missing": "No vault exists in this app's data folder yet",
+    "passphrase_only": "The vault exists but was created without the operating-system keyring",
+    "wrong_data_dir": "A keyring passphrase is stored for this data folder but no vault file is here",
+    "locked": "The vault file exists but could not be opened",
+    "keyring_unavailable": "The operating-system keyring could not be read",
+    "generic": "Private card list unavailable",
+}
+
+
 class _PrivateModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -48,13 +67,40 @@ def create_private_cards_router(
         if demo:
             raise HTTPException(
                 status_code=503,
-                detail="Private card list is switched off in demo mode",
+                detail={
+                    "code": "demo",
+                    "message": VAULT_DIAGNOSTIC_MESSAGES["demo"],
+                },
             )
         try:
             raw_cards = read_cards()
             cards = [PrivateCardSummary.model_validate(item) for item in raw_cards]
-        except (OSError, VaultError, ValueError):
-            raise HTTPException(status_code=503, detail="Private card list unavailable") from None
+        except VaultUnavailable as exc:
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "code": exc.code,
+                    "message": VAULT_DIAGNOSTIC_MESSAGES.get(
+                        exc.code, VAULT_DIAGNOSTIC_MESSAGES["generic"]
+                    ),
+                },
+            ) from None
+        except VaultError:
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "code": "locked",
+                    "message": VAULT_DIAGNOSTIC_MESSAGES["locked"],
+                },
+            ) from None
+        except (OSError, ValueError):
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "code": "generic",
+                    "message": VAULT_DIAGNOSTIC_MESSAGES["generic"],
+                },
+            ) from None
         cards.sort(key=lambda item: (item.lifecycle != "active", item.offering_id, item.created_at))
         response.headers["Cache-Control"] = "no-store"
         response.headers["Pragma"] = "no-cache"
@@ -67,12 +113,17 @@ def create_private_cards_router(
 
 
 def _read_keyring_cards(vault_path: Path) -> tuple[dict[str, str], ...]:
+    try:
+        keyring = load_keyring()
+        passphrase = get_keyring_password(keyring, keyring_account(vault_path))
+    except VaultError:
+        raise VaultUnavailable("keyring_unavailable") from None
     if not vault_path.is_file():
-        raise VaultError("vault is unavailable")
-    keyring = load_keyring()
-    passphrase = get_keyring_password(keyring, keyring_account(vault_path))
+        if passphrase is not None:
+            raise VaultUnavailable("wrong_data_dir")
+        raise VaultUnavailable("vault_missing")
     if passphrase is None:
-        raise VaultError("vault key is unavailable")
+        raise VaultUnavailable("passphrase_only")
     session = VaultStore(vault_path).open(passphrase)
     try:
         return session.list_cards()
