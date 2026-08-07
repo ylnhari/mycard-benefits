@@ -47,10 +47,12 @@ snapshot.
 
 - MC-006 implementation: `a0236b0` on `agent/mc006-opencode` (parent of the
   sync merge; base `cc7ff1e`).
-- Sync merge with the canonical manager branch: `532318f
-  manager/concurrent-integration` merged into `agent/mc006-opencode` (MC-002
-  integration `d337811` + MC-005 integration `532318f`); conflicts were
-  additive and resolved by retaining every section from both sides.
+- Sync merge with the canonical manager branch: `manager/concurrent-integration`
+  (`532318f`) merged into `agent/mc006-opencode` at commit **`730ebba`**
+  (MC-002 integration `d337811` + MC-005 integration `532318f`); conflicts
+  were additive and resolved by retaining every section from both sides.
+  Post-sync gates and the rendered harness ran on the merged snapshot
+  `730ebba`.
 - `src/mycard_benefits/static/app.js` — `UNMATCHED_CARD_LABEL` is now
   "Unmatched variant"; a shared `UNMATCHED_NOTE` constant (fix-the-import /
   request-the-variant guidance) is used by both the row and the detail panel;
@@ -85,10 +87,13 @@ snapshot.
 - `uv run ruff check .` — All checks passed.
 - `uv run mypy src` — Success, no issues in 31 source files (strict).
 - `node --check src/mycard_benefits/static/app.js` — ok.
-- `uv run pytest` — full suite passed, exit 0, including both the MC-005
-  neutral-wording tests and the MC-006 unmatched-variant tests.
+- `uv run pytest` — full suite passed, exit 0: **221 passed**, including both
+  the MC-005 neutral-wording tests and the MC-006 unmatched-variant tests.
 - `uv build` — source distribution and wheel built successfully, exit 0.
 - `git diff --check` — clean.
+- Rendered harness rerun on the merged snapshot: 24/24 checks passed
+  (identical to the pre-merge run), confirming MC-006 behavior and the MC-002
+  detail view survive the MC-005 integration.
 - Pre-commit scan of the change — only `SYNTHETIC-ONLY-`/UUID fixture values;
   no real identifiers, secrets, absolute user paths, or generated/runtime files.
 
@@ -138,5 +143,8 @@ temp data dirs, harness outside the repo). 24/24 checks passed:
 
 ### Commit
 
-Local commits on `agent/mc006-opencode` only; nothing was pushed. Sync merge
-commit hash is recorded in the coordination follow-up note.
+- Implementation: `a0236b0` (MC-006).
+- Sync merge with the canonical manager branch: **`730ebba`** (final commit on
+  `agent/mc006-opencode`).
+- Coordination follow-up: this file.
+- All local to `agent/mc006-opencode`; nothing was pushed.
