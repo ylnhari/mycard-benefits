@@ -875,6 +875,23 @@ def test_child_record_dangling_or_unknown_kind_persisted_externally_fails_closed
     with pytest.raises(VaultAccessError):
         store.open("synthetic passphrase")
 
+
+def test_mac_valid_unknown_child_record_field_fails_closed(tmp_path: Path) -> None:
+    """A valid envelope MAC does not make legacy or arbitrary child metadata safe."""
+    store = _store(tmp_path)
+    session = store.create("synthetic passphrase")
+    card_id = session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-BRAVO"})
+    session.add_child_record(card_id, ChildRecordKind.VOUCHER)
+
+    envelope = json.loads(store.path.read_text(encoding="utf-8"))
+    envelope["child_records"][0]["label"] = "SYNTHETIC-ONLY-UNSAFE-LEGACY-FIELD"
+    dek = vault_core._unwrap_dek(envelope, vault_core._parse_kdf(envelope), "synthetic passphrase")
+    envelope["mac"] = vault_core._envelope_mac(envelope, dek)
+    store.path.write_text(json.dumps(envelope), encoding="utf-8")
+
+    with pytest.raises(VaultAccessError):
+        store.open("synthetic passphrase")
+
     envelope = json.loads(store.path.read_text(encoding="utf-8"))
     envelope["child_records"][0]["kind"] = "not-a-real-kind"
     store.path.write_text(json.dumps(envelope), encoding="utf-8")

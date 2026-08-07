@@ -122,6 +122,23 @@ class PrivateCardList(_PrivateModel):
     cards: list[PrivateCardSummary]
     lifecycle_counts: dict[str, int]
 
+    @model_validator(mode="after")
+    def _validate_unique_card_and_child_ids(self) -> PrivateCardList:
+        """Reject collisions across the complete protected response, not only
+        within one card. A future reader must not be able to alias two card or
+        child records into a single browser payload."""
+        card_ids: set[str] = set()
+        child_ids: set[str] = set()
+        for card in self.cards:
+            if card.card_id in card_ids:
+                raise ValueError("duplicate card id")
+            card_ids.add(card.card_id)
+            for child in card.child_records:
+                if child.child_id in child_ids:
+                    raise ValueError("duplicate child record id")
+                child_ids.add(child.child_id)
+        return self
+
 
 def create_private_cards_router(
     data_dir: Path,
@@ -146,6 +163,15 @@ def create_private_cards_router(
         try:
             raw_cards = read_cards()
             cards = [PrivateCardSummary.model_validate(item) for item in raw_cards]
+            cards.sort(
+                key=lambda item: (item.lifecycle != "active", item.offering_id, item.created_at)
+            )
+            result = PrivateCardList(
+                cards=cards,
+                lifecycle_counts=dict(
+                    sorted(Counter(item.lifecycle for item in cards).items())
+                ),
+            )
         except VaultUnavailable as exc:
             raise HTTPException(
                 status_code=503,
@@ -172,13 +198,9 @@ def create_private_cards_router(
                     "message": VAULT_DIAGNOSTIC_MESSAGES["generic"],
                 },
             ) from None
-        cards.sort(key=lambda item: (item.lifecycle != "active", item.offering_id, item.created_at))
         response.headers["Cache-Control"] = "no-store"
         response.headers["Pragma"] = "no-cache"
-        return PrivateCardList(
-            cards=cards,
-            lifecycle_counts=dict(sorted(Counter(item.lifecycle for item in cards).items())),
-        )
+        return result
 
     return router
 

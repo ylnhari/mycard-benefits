@@ -829,6 +829,9 @@ def _parse_child_records(
             "created_at",
             "updated_at",
         )
+        allowed = {*required, "expiry_date"}
+        if set(raw) - allowed:
+            raise VaultAccessError("encrypted record is invalid")
         if any(not isinstance(raw.get(name), str) for name in required):
             raise VaultAccessError("encrypted record is invalid")
         child_id = raw["child_id"]

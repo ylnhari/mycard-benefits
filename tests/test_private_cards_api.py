@@ -486,6 +486,32 @@ def test_private_cards_fail_closed_on_duplicate_child_record_ids(tmp_path: Path)
     assert response.status_code == 503
 
 
+def test_private_cards_fail_closed_on_duplicate_ids_across_cards(tmp_path: Path) -> None:
+    first = _card_with_children(_child_record())
+    second = _card_with_children(
+        _child_record(parent_card_id="018f47f2-0f86-7b0a-bc7d-f00ba47c0002")
+    )
+    second["card_id"] = "018f47f2-0f86-7b0a-bc7d-f00ba47c0002"
+
+    def duplicate_child_reader() -> tuple[dict[str, object], ...]:
+        return first, second
+
+    with _client(tmp_path, duplicate_child_reader) as client:
+        response = client.get("/api/v1/private/cards")
+
+    assert response.status_code == 503
+
+    duplicate_card = _card_with_children()
+
+    def duplicate_card_reader() -> tuple[dict[str, object], ...]:
+        return first, duplicate_card
+
+    with _client(tmp_path, duplicate_card_reader) as client:
+        response = client.get("/api/v1/private/cards")
+
+    assert response.status_code == 503
+
+
 def test_private_cards_fail_closed_on_invalid_child_identifiers(tmp_path: Path) -> None:
     def reader() -> tuple[dict[str, object], ...]:
         return (_card_with_children(_child_record(child_id="not-a-uuid")),)

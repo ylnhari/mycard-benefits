@@ -64,12 +64,14 @@ view of the encrypted portfolio.
 - Non-secret linked child records (Priority Pass, lounge credentials,
   memberships, vouchers, companion credentials) are modeled in the encrypted
   vault with their own private UUID, parent card-instance UUID, kind, safe
-  display label, lifecycle (`active`/`expired`/`archived`), and optional
-  expiry date; the vault format upgrade is additive and opens a pre-existing
-  vault unchanged. The read-only My Cards API nests each card's child records
-  under the existing `no-store`, envelope-only boundary, and the card detail
-  view renders them with clear empty, populated, expired, and archived states.
-  No write path exists yet; that remains separate protected-flow work.
+  enum-derived display label, lifecycle (`active`/`expired`/`archived`), and
+  optional local expiry date. The read-only browser boundary never returns the
+  exact expiry date; it returns only a bounded `expiry_signal`. The vault
+  format upgrade is additive and opens a pre-existing vault unchanged. The
+  My Cards API nests each card's child records under the existing `no-store`,
+  envelope-only boundary, and the card detail view renders clear empty,
+  populated, expired, and archived states. No write path exists yet; that
+  remains separate protected-flow work.
 - The app itself, not only its docs, states its remote-access boundary: a
   Settings panel explains the loopback-only bind and that any external
   gateway or launcher is separate software, never part of MyCard's identity
