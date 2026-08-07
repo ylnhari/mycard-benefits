@@ -1,4 +1,4 @@
-"""Rover-authenticated, read-only private card envelope API."""
+"""Loopback-local, read-only private card envelope API."""
 
 from __future__ import annotations
 
@@ -6,10 +6,9 @@ from collections import Counter
 from collections.abc import Callable
 from pathlib import Path
 
-from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel, ConfigDict
 
-from ..rover_auth import verify_rover_token
 from .core import VaultError, VaultStore
 from .keyring_store import get_keyring_password, keyring_account, load_keyring
 
@@ -37,7 +36,6 @@ class PrivateCardList(_PrivateModel):
 def create_private_cards_router(
     data_dir: Path,
     *,
-    rover_secret: str | None,
     reader: CardReader | None = None,
 ) -> APIRouter:
     router = APIRouter(prefix="/api/v1/private", tags=["private cards"])
@@ -45,10 +43,7 @@ def create_private_cards_router(
     read_cards = reader or (lambda: _read_keyring_cards(vault_path))
 
     @router.get("/cards", response_model=PrivateCardList)
-    def list_private_cards(request: Request, response: Response) -> PrivateCardList:
-        token = request.cookies.get("rover_proxy")
-        if not verify_rover_token(rover_secret, token):
-            raise HTTPException(status_code=401, detail="Authenticated companion session required")
+    def list_private_cards(response: Response) -> PrivateCardList:
         try:
             raw_cards = read_cards()
             cards = [PrivateCardSummary.model_validate(item) for item in raw_cards]

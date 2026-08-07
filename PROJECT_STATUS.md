@@ -4,8 +4,8 @@ Last updated: 2026-08-07
 
 ## Current milestone
 
-Useful local alpha: real public card-variant identities plus a Rover-protected,
-read-only view of the encrypted local portfolio.
+Useful local alpha: real public card-variant identities plus a local, read-only
+view of the encrypted portfolio.
 
 ## Completed
 
@@ -25,11 +25,11 @@ read-only view of the encrypted local portfolio.
 - Optional, data-isolated Family Finance launcher and bundled setup guide.
 - Public India starter catalog with 68 real product-variant identities plus the
   synthetic fixture. Product presence is not presented as benefit verification.
-- Rover-authenticated read-only My Cards API/UI. It opens the existing vault
-  through the operating-system keyring, returns only card UUID, offering,
-  lifecycle, timestamps, and replacement metadata, and applies `no-store`.
-- MyCard is registered with Rover, remains bound to loopback, and has a verified
-  tailnet proxy for phone access.
+- Loopback-local, read-only My Cards API/UI. It opens the existing vault through
+  the operating-system keyring, returns only card UUID, offering, lifecycle,
+  timestamps, and replacement metadata, and applies `no-store`.
+- MyCard remains loopback-bound. A personal external launcher may start it and
+  provide phone access, but MyCard does not integrate with that tool.
 - Discovery-only pilot source work for Tata Neu HDFC Infinity and HDFC Regalia
   Gold. No real benefit claim has been activated.
 - User-first README and guide covering setup, daily use, privacy, Family Finance,

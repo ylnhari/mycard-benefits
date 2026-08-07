@@ -177,20 +177,13 @@ function setPrivateAccess(title, text, badge, status) {
 async function loadPrivateCards() {
   try {
     const response = await fetch("/api/v1/private/cards", { headers: { Accept: "application/json" }, credentials: "same-origin", cache: "no-store" });
-    if (response.status === 401) {
-      setPrivateAccess("Secure sign-in needed to view My Cards", "The public catalog works here. Your private list appears after you sign in to the Companion Dashboard and open MyCard from there.", "Secure sign-in required", "Sign in to the Companion Dashboard, then open MyCard from its project card.");
-      document.querySelector("#myCardCount").textContent = "—";
-      document.querySelector("#myCardCountNote").textContent = "Open through Companion Dashboard";
-      renderPrivateCards();
-      return;
-    }
     if (!response.ok) throw new Error("unavailable");
     const payload = await response.json();
     state.privateCards = Array.isArray(payload.cards) ? payload.cards : [];
     const active = payload.lifecycle_counts?.active || 0;
     document.querySelector("#myCardCount").textContent = String(state.privateCards.length);
     document.querySelector("#myCardCountNote").textContent = `${active} active · encrypted locally`;
-    setPrivateAccess("Private card list ready", `${state.privateCards.length} card records are mapped to the public catalog. Secret fields remain encrypted and are not returned.`, "Secure dashboard verified", `${state.privateCards.length} cards loaded; ${active} active.`);
+    setPrivateAccess("Private card list ready", `${state.privateCards.length} card records are mapped to the public catalog. Secret fields remain encrypted and are not returned.`, "Local vault available", `${state.privateCards.length} cards loaded; ${active} active.`);
     const lifecycleSelect = document.querySelector("#cardLifecycle");
     for (const lifecycle of Object.keys(payload.lifecycle_counts || {})) lifecycleSelect.append(new Option(`${lifecycle} (${payload.lifecycle_counts[lifecycle]})`, lifecycle));
     renderPrivateCards();

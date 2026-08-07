@@ -1,27 +1,11 @@
 from __future__ import annotations
 
-import hashlib
-import hmac
-import time
 from pathlib import Path
 
 from fastapi.testclient import TestClient
 
 from mycard_benefits.app import create_app
 from mycard_benefits.config import Settings
-from mycard_benefits.rover_auth import verify_rover_token
-
-SECRET = "SYNTHETIC-ONLY-ROVER-SECRET"
-ISSUED_AT = 1_800_000_000
-NONCE = "0123456789abcdef0123456789abcdef"
-
-
-def _token(*, issued_at: int = ISSUED_AT, secret: str = SECRET) -> str:
-    timestamp = str(issued_at)
-    signature = hmac.new(
-        secret.encode(), f"{timestamp}:{NONCE}".encode(), hashlib.sha256
-    ).hexdigest()
-    return f"{timestamp}.{NONCE}.{signature}"
 
 
 def _client(tmp_path: Path, reader: object) -> TestClient:
@@ -29,23 +13,11 @@ def _client(tmp_path: Path, reader: object) -> TestClient:
         data_dir=tmp_path / "data",
         catalog_dir=tmp_path / "catalog",
         port=8777,
-        rover_secret=SECRET,
     )
     return TestClient(create_app(settings, private_card_reader=reader))  # type: ignore[arg-type]
 
 
-def test_rover_token_verifier_matches_current_and_rejects_bad_boundaries() -> None:
-    token = _token()
-    assert verify_rover_token(SECRET, token, now=ISSUED_AT + 60)
-    assert not verify_rover_token(None, token, now=ISSUED_AT)
-    assert not verify_rover_token(SECRET, None, now=ISSUED_AT)
-    assert not verify_rover_token(SECRET, token, now=ISSUED_AT + 86_401)
-    assert not verify_rover_token(SECRET, token, now=ISSUED_AT - 61)
-    assert not verify_rover_token("wrong", token, now=ISSUED_AT)
-    assert not verify_rover_token(SECRET, "malformed", now=ISSUED_AT)
-
-
-def test_private_cards_require_rover_before_reader_runs(tmp_path: Path) -> None:
+def test_private_cards_are_a_local_read_only_api_without_gateway_coupling(tmp_path: Path) -> None:
     called = False
 
     def reader() -> tuple[dict[str, str], ...]:
@@ -56,9 +28,9 @@ def test_private_cards_require_rover_before_reader_runs(tmp_path: Path) -> None:
     with _client(tmp_path, reader) as client:
         response = client.get("/api/v1/private/cards")
 
-    assert response.status_code == 401
-    assert response.json() == {"detail": "Authenticated companion session required"}
-    assert not called
+    assert response.status_code == 200
+    assert response.json() == {"cards": [], "lifecycle_counts": {}}
+    assert called
 
 
 def test_private_cards_return_only_envelope_metadata(tmp_path: Path) -> None:
@@ -82,7 +54,6 @@ def test_private_cards_return_only_envelope_metadata(tmp_path: Path) -> None:
         )
 
     with _client(tmp_path, reader) as client:
-        client.cookies.set("rover_proxy", _token(issued_at=int(time.time())))
         response = client.get("/api/v1/private/cards")
 
     assert response.status_code == 200
@@ -109,7 +80,6 @@ def test_private_cards_fail_closed_on_unexpected_reader_fields(tmp_path: Path) -
         )
 
     with _client(tmp_path, reader) as client:
-        client.cookies.set("rover_proxy", _token(issued_at=int(time.time())))
         response = client.get("/api/v1/private/cards")
 
     assert response.status_code == 503

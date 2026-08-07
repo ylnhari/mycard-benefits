@@ -21,9 +21,9 @@
    and human-review gates are completed.
 7. **Launcher complete; import pending:** optional Family Finance launcher and
    setup guide are verified. Encrypted one-time import is a later milestone.
-8. **Partial:** Rover registration, restart, loopback app health, and proxy state
-   are verified. Rendered remote UI, signed companion pinning, and publication
-   of this slice remain gated.
+8. **Partial:** Loopback app health and optional external-launcher reachability
+   are verified. MyCard does not integrate with the personal launcher; rendered
+   remote UI and publication of this slice remain gated.
 
 Each milestone must be independently testable and leave the previous milestone
 usable. Publication is a separate final gate.

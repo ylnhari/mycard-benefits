@@ -39,7 +39,6 @@ class Settings:
     catalog_dir: Path
     port: int
     demo: bool = False
-    rover_secret: str | None = None
 
     @classmethod
     def from_environment(
@@ -69,5 +68,4 @@ class Settings:
             catalog_dir=catalog_dir,
             port=port,
             demo=demo,
-            rover_secret=os.environ.get("ROVER_SECRET") or None,
         )

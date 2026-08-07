@@ -18,7 +18,9 @@
 - Companion launch is optional and opens separately; absence shows setup docs.
 - Existing Family Finance cards may be imported once through an encrypted,
   previewed bundle; no continuous synchronization follows.
-- Remote access uses an authenticated Rover proxy URL, never client loopback.
+- Remote access may use an owner-chosen authenticated external launcher or
+  gateway, never a widened MyCard bind. MyCard does not identify, configure, or
+  depend on that external tool.
 - Source work may run unattended but may not bypass CAPTCHA, authentication,
   robots restrictions, access controls, rate limits, or terms.
 - Deterministic behavior works without an LLM. Paid calls require explicit
@@ -56,10 +58,11 @@
 - Public product identity and private ownership remain separate. The India
   starter catalog may contain the public variants represented by the local
   import, but it never records who owns them or how many instances exist.
-- My Cards may display authenticated, non-secret envelope metadata only after a
-  valid Rover browser session. The app independently verifies Rover's signed
-  cookie, opens the vault through the OS keyring, returns a bounded allowlist of
-  fields, and forbids caching.
+- My Cards may display non-secret envelope metadata only. The app stays
+  loopback-bound, opens the vault through the OS keyring, returns a bounded
+  allowlist of fields, and forbids caching. An owner-selected external access
+  tool is responsible for any remote authentication and is not integrated into
+  MyCard.
 - Add/edit/delete/reveal/copy remain disabled. Owner aliases, exact expiry,
   uncertain variants, and replacement chains require explicit human
   confirmation rather than inference.

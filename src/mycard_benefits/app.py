@@ -44,7 +44,6 @@ def create_app(
     application.include_router(
         create_private_cards_router(
             settings.data_dir,
-            rover_secret=settings.rover_secret,
             reader=private_card_reader,
         )
     )

@@ -109,8 +109,9 @@ companion is absent or stopped, it opens bundled setup documentation. The
 approved future migration is a previewed one-time encrypted import followed by
 independent stores, not continuous synchronization.
 
-The application binds to loopback. Remote use goes through an authenticated
-Rover proxy URL; the direct app port is never exposed remotely.
+The application binds to loopback. Remote use, if enabled by an owner, goes
+through an authenticated external gateway or launcher; the direct app port is
+never exposed remotely. That tool is not a MyCard dependency.
 
 ## Business neutrality
 

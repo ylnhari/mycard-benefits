@@ -91,10 +91,8 @@ synthetic only.
 
 ## My Cards, read-only
 
-`GET /api/v1/private/cards` and the **My Cards** screen require a current signed
-browser session cookie from the authenticated gateway. The check runs before the
-vault is touched and fails closed on a missing, expired, future-dated, malformed,
-or wrongly-signed cookie. On success the app opens the OS-keyring-encrypted vault
+`GET /api/v1/private/cards` and the **My Cards** screen are local, read-only
+views. The app remains bound to loopback; it opens the OS-keyring-encrypted vault
 server-side and returns envelope metadata only — card UUID, catalog offering,
 lifecycle, created and updated timestamps, and a linked replacement card
 identifier — sent `no-store`, and refused outright if the vault yields any
@@ -116,21 +114,11 @@ safe identifiers, never a decrypted value.
 
 ## Using it from your phone
 
-The app answers only on `127.0.0.1`. Remote access goes through a separate
-authenticated gateway on the same machine (this project uses an authenticated
-Rover proxy): you open the gateway's URL, sign in there, and it forwards the
-request locally. The app's bind never changes — do not set it to `0.0.0.0`, your
-LAN address, or a forwarded router port.
-
-Signing in to the secure Companion Dashboard is also what unlocks **My Cards**,
-on the phone and on the desktop alike: opening the loopback address directly
-gets you the public catalog and a *secure sign-in required* notice. See
-[the User Guide](docs/USER-GUIDE.md#8-using-it-from-your-phone).
-
-The app receives Rover's matching signing secret only through its configuration
-boundary (`ROVER_SECRET` in the process environment or ignored local `.env`). A
-registered Rover launch supplies it on this workstation. It is never a browser
-setting and must never be placed in a URL or committed file.
+The app answers only on `127.0.0.1`. If you want phone access, use any
+authenticated gateway or launcher you control to forward to that loopback
+address. The launcher is external to MyCard; it is not part of this repository
+or this app's identity. The app's bind never changes — do not set it to
+`0.0.0.0`, your LAN address, or a forwarded router port.
 
 ## Family Finance
 

@@ -56,8 +56,7 @@ feature works because it appears in the sidebar.
   name, and network, plus one clearly labelled synthetic example used for
   testing. Search it by bank, card, or network name.
 - **My Cards** — a read-only list of the cards you imported, matched to their
-  catalog product. It opens only in a browser signed in through your
-  authenticated gateway, and it shows product, status, and record dates only.
+  catalog product. It shows product, status, and record dates only.
   See [section 6](#6-your-own-cards-import-and-view).
 - **Benefits** — browse benefits, filtered by card, each with its dates and
   evidence.
@@ -308,11 +307,9 @@ is each one?" — not to show you a card number.
 1. The vault must exist and be unlockable through the OS keyring (above).
 2. The app must be started **without** `--demo`, so it reads your real data
    folder.
-3. **Your browser must be signed in to the secure Companion Dashboard.** The
-   app requires a current signed session cookie issued by that dashboard and
-   checks it before touching the vault at all. Opening the loopback address
-   directly, without that session, gets you the public catalog and a *secure
-   sign-in required* notice on My Cards. See
+3. **The app must be running against your real local data folder.** If you use
+   a separate tool to access MyCard from a phone, that tool is responsible for
+   its own sign-in and remote-access rules; it is not part of MyCard. See
    [section 8](#8-using-it-from-your-phone).
 
 **What it shows, per card:** the product it maps to (bank, network, and full
@@ -374,43 +371,19 @@ the two apps will not continuously sync. Details:
 The app answers only on `127.0.0.1`, which means only the computer it runs on.
 So how do you read it on your phone?
 
-**Through an authenticated gateway** — a separate piece of software already
-running on your computer that requires you to sign in, and then forwards your
-request to the app on your behalf. You open the gateway's own address on your
-phone, sign in there, and the gateway hands you the dashboard.
+**Through an authenticated gateway or launcher you control** — a separate piece
+of software that can forward your phone's request to the local app. You
+configure and sign in to that tool independently; it is not a MyCard account or
+part of MyCard Benefits.
 
 The important part is what does *not* happen: the app's own address never
 changes. It keeps listening on `127.0.0.1` only. The gateway reaches it from
 the same machine, which is allowed; your phone never talks to the app directly.
 
-To set this up: register MyCard Benefits as a project in your gateway (this
-project uses an authenticated Rover proxy), keep the gateway's authentication
-switched on, and open the URL the gateway issues for it. If the gateway's own
-address is not itself on a private, authenticated network, put it behind HTTPS.
-
-Rover and MyCard must use the same signing secret. A registered Rover launch
-normally supplies `ROVER_SECRET` to the app process. If you run the app manually
-behind Rover, copy `.env.example` to the ignored `.env` and set the matching
-value there. Never put that value in a browser field, URL, committed file, or
-chat message.
-
-### Signing in also unlocks My Cards
-
-The gateway is not only about reaching the app from elsewhere — it is the app's
-only source of "I know who this browser is."
-
-When you sign in, the gateway gives your browser a short-lived signed session
-cookie. The app checks that cookie's signature and its age on every request for
-your private card list, and refuses the request outright if the cookie is
-missing, expired, tampered with, or signed by something else. Nothing is read
-from your vault until that check passes. The sessions expire after a day, so
-signing in again is normal.
-
-That is why **My Cards works when you arrive through the Companion Dashboard and
-shows a *secure sign-in required* notice when you open the loopback address
-directly** — even on the same computer. The public catalog works either way. If
-you want the private list on your desktop too, open MyCard from the Companion
-Dashboard's project page rather than typing `127.0.0.1` into the address bar.
+To set this up: register MyCard Benefits in your chosen access tool, keep that
+tool's authentication switched on, and open the URL it issues for it. If that
+tool's address is not itself on a private, authenticated network, put it behind
+HTTPS. MyCard stays a loopback-only app either way.
 
 **Do not do these things**, even if a guide somewhere suggests them:
 
@@ -564,11 +537,6 @@ only the first time. After the vault exists, leave `--create` off.
 
 **An import failed after the vault was created.** The vault is kept on purpose.
 Fix your file and run the import again without `--create`.
-
-**My Cards says "secure sign-in required".** Your browser has no current
-Companion Dashboard session. Sign in there and open MyCard from its project page
-instead of typing the loopback address directly. Sessions expire after a day, so
-this is also what you see the morning after.
 
 **My Cards says the private vault is unavailable.** The app reached the vault step
 but could not complete it. Usual causes, in order: you started the app with

@@ -21,24 +21,19 @@ In My Family Finance, open **Cards**, choose **Companion setup**, and enter:
 
 - On the same computer: the printed loopback URL, such as
   `http://127.0.0.1:8777`.
-- From another device: the authenticated Rover `proxy_url` assigned to the
-  running `mycard-benefits` project. Rover normally emits an HTTP URL; reach it
-  through its literal Tailscale IPv4 address (`100.64.0.0/10`). A non-Tailscale
-  remote hostname or address must use an authenticated HTTPS gateway.
+- From another device: a URL from an external authenticated gateway or project
+  launcher you control. MyCard does not prescribe, identify, or configure that
+  tool. A remote hostname or address must use an authenticated HTTPS gateway.
 
 Then choose **MyCard Benefits companion**. If no URL is configured or the
 configured app cannot be reached, Family Finance opens its bundled setup guide.
 
 ## Remote access boundary
 
-Never expose MyCard Benefits directly or change its bind to `0.0.0.0`. Register
-it as a Rover web project, keep Rover authentication enabled, and use the
-Rover-issued proxy URL. Do not put the Rover secret in either application's
-source, URL, browser storage, or documentation. A Rover proxy port can be
-reallocated; if that happens, update the browser-local companion setting.
-The app reads the matching `ROVER_SECRET` only from its process configuration
-or ignored local `.env`; Rover supplies it when launching the registered project
-on this workstation.
+Never expose MyCard Benefits directly or change its bind to `0.0.0.0`. If you
+use a project launcher or reverse proxy, keep its authentication enabled and
+use its assigned URL. That external tool is not a MyCard dependency; no launcher
+secret belongs in either application's source, URL, browser storage, or docs.
 
 ## Data boundary
 

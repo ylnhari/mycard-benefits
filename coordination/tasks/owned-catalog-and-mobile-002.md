@@ -1,8 +1,12 @@
 # Owned catalog and mobile dashboard slice
 
-Status: completed
+Status: completed (implementation approach superseded)
 Owner: primary integrator
 Date: 2026-08-07
+
+> Historical record: the signed-session coupling described below was removed
+> after owner feedback. MyCard is now independent of the personal launcher;
+> this task remains as audit evidence for the original reviewed slice.
 
 ## Outcome
 
