@@ -34,6 +34,23 @@
 - Affiliate links are disclosed, hideable, paired with an official link, and
   cannot influence recommendation ranking.
 
+## Initial private migration and publication — 2026-08-07
+
+- The owner authorized the first public repository push and synchronization of
+  the optional Family Finance companion commit.
+- The owner-authorized Drive inventory is the source for the initial private
+  migration. Newer consolidated credit/debit entries are treated as current;
+  legacy `CC`/`Dc`-only entries are retained as archived history.
+- Cardholder names from source metadata are represented by private owner aliases
+  where needed. Ambiguous product, owner, duplicate, and lifecycle matches stay
+  marked for confirmation rather than being guessed.
+- The migration extracts card/product identity only. PAN, CVV, PIN, account
+  numbers, scan bytes, and full document text are not copied.
+- This workstation uses an OS-keyring-generated vault passphrase. Real manifests,
+  receipts, vault files, and backups remain ignored and local.
+- Claude Opus is eligible for large end-to-end public-code tasks; its lower
+  subscription quota is a scheduling constraint, not a capability assumption.
+
 ## Technical defaults
 
 - Python/FastAPI, SQLite/SQLAlchemy/Alembic, Jinja and browser JavaScript.

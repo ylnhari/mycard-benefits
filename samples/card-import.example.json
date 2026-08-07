@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "cards": [
+    {
+      "offering_id": "synthetic-example-in",
+      "lifecycle": "active",
+      "secret_fields": {
+        "nickname": "SYNTHETIC-ONLY-primary-card",
+        "notes": "SYNTHETIC-ONLY-example-import"
+      }
+    },
+    {
+      "offering_id": "synthetic-historical-in",
+      "lifecycle": "archived",
+      "secret_fields": {
+        "nickname": "SYNTHETIC-ONLY-archived-card",
+        "notes": "SYNTHETIC-ONLY-example-history"
+      }
+    }
+  ]
+}

@@ -12,6 +12,8 @@ from .core import (
     VaultPermissionError,
     VaultSession,
     VaultStore,
+    validate_offering_id,
+    validate_secret_fields,
 )
 
 __all__ = [
@@ -23,4 +25,6 @@ __all__ = [
     "VaultPermissionError",
     "VaultSession",
     "VaultStore",
+    "validate_offering_id",
+    "validate_secret_fields",
 ]

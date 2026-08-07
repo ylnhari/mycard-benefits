@@ -7,10 +7,10 @@ the application for their own records on their own device. These values are
 high-risk sensitive authentication data. This project does not claim PCI DSS
 compliance and does not support hosted secret storage.
 
-The encrypted vault core exists and is tested, but the current dashboard does
-not expose a vault API or real-card controls. Never enter real data until a
-later build enables those controls only after independent review and reports
-its security self-checks as passing.
+The encrypted vault core and bounded local import CLI exist and are tested. The
+CLI is the only supported real-card write path in this release, and it does not
+print decrypted fields. The dashboard does not expose a vault API or real-card
+controls; do not route real data through the browser or HTTP API.
 
 ## Threat model
 

@@ -4,7 +4,8 @@ Last updated: 2026-08-07
 
 ## Current milestone
 
-Local alpha: reviewed public-data foundations and isolated private-vault core.
+Initial release candidate: reviewed public-data foundations plus a narrow,
+encrypted private-import path.
 
 ## Completed
 
@@ -17,6 +18,10 @@ Local alpha: reviewed public-data foundations and isolated private-vault core.
 - Encrypted vault core with Argon2id key wrapping, AES-GCM records, complete
   envelope authentication, bounded persistence, locking, backups, lifecycle,
   auto-lock, reauthentication, and one-use reveal authorization.
+- Strict one-time JSON manifest import with atomic batch persistence,
+  cleartext-identifier validation, optional OS-keyring unlock, and count-only
+  integrity verification. The owner-authorized local migration completed; its
+  data and receipt remain ignored.
 - Optional, data-isolated Family Finance launcher and bundled setup guide.
 - Discovery-only pilot source map for Tata Neu HDFC Infinity and HDFC Regalia
   Gold. No real claim has been activated.
@@ -24,36 +29,43 @@ Local alpha: reviewed public-data foundations and isolated private-vault core.
   companion flow; DeepSeek module reviews and a separate Terra companion
   follow-up report no unresolved High/Medium findings for completed public-data
   modules and the companion launcher.
-- Final Claude Sonnet vault review reports no High/Medium finding; its three Low
-  cleanup suggestions were applied and passed 49 focused vault tests.
+- Final Claude Sonnet core review and Claude Opus importer review report no
+  unresolved High/Medium finding after remediation and live compatibility
+  verification.
 - The complete initial 120-question decision matrix, later owner revisions, and
   video/purchase-optimizer ideas are persisted in repository documentation.
-- Clean clone of commit `2bb07a0` completed locked setup, 189 tests, and package
-  build; Family Finance companion commit `e90f073` is also locally verified.
+- The prior clean clone of commit `2bb07a0` completed locked setup, 189 tests,
+  and package build; the current release candidate will receive a new clean
+  clone gate before publication. Family Finance companion commit `e90f073` is
+  also locally verified.
 
 ## Next planned slice
 
 - Expose synthetic-only candidate review, research queue, and optimizer
   contracts through protected local API/UI surfaces.
-- Keep real source retrieval, real-card entry, remote identity pinning, and
-  publication behind their separate gates.
+- Add a protected human-facing private-card API/UI over the reviewed vault;
+  the current CLI remains the only real-card write surface.
+- Keep real source retrieval and remote identity pinning behind their separate
+  gates.
 
 ## Not yet safe
 
-- Do not enter real card data. The vault core is independently reviewed, but no
-  protected vault API or real-card UI is enabled.
+- Do not enter or reveal real card data through the browser/API. The reviewed
+  local CLI is the only supported private write path in this release.
 - No live source adapter or scheduler is connected to the network. The queue is
   offline orchestration only, and the catalog contains synthetic facts only.
 - The optimizer core is not exposed through the UI and cannot open purchase or
   affiliate routes.
 - Family Finance performs a privacy-preserving reachability check only; signed
   companion identity pinning remains a later gate.
-- One-time encrypted import, notifications, Rover verification, and publication
-  readiness are not implemented.
-- No public remote, push, or publication has been performed.
+- Family Finance one-time import, notifications, and Rover verification are not
+  implemented. The new Drive-manifest import is local to MyCard Benefits and is
+  not a continuous synchronization bridge.
+- Initial public publication is owner-approved and awaiting the final clean
+  clone, history scan, commit, and push gates.
 
 ## Next delivery gate
 
-Complete a synthetic-only UI/API contract for the reviewed candidate, queue,
-and optimizer cores, with rendered and API tests. Real source retrieval and
-real-card entry stay behind separate gates.
+Publish the reviewed initial repository and companion commit, then complete a
+synthetic-only UI/API contract for the candidate, queue, and optimizer cores.
+Protected real-card browser/API controls remain a later gate.

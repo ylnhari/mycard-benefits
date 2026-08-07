@@ -8,8 +8,9 @@ separates public card knowledge from private card records.
 
 Local alpha. The public synthetic catalog, traceable Q&A, review stores,
 research queue, optimizer core, and encrypted vault core are implemented and
-tested. Real-card entry remains disabled until the vault is independently
-approved and connected through a protected human-facing API/UI.
+tested. A bounded local CLI can create and import a private encrypted vault;
+real-card browser/API controls remain disabled until a protected human-facing
+surface is independently reviewed.
 
 ## Product boundaries
 
@@ -35,6 +36,18 @@ uv run mycard-benefits --demo
 The application binds to `127.0.0.1`. Port precedence is `--port`,
 `MYCARD_BENEFITS_PORT`, nearest `ports.json`, then the documented clone
 fallback. Remote access must use an authenticated gateway.
+
+## Private card import
+
+Real manifests belong only under ignored `imports/`. The importer validates the
+complete batch and persists it in one encrypted vault revision; it never prints
+decrypted fields. Interactive passphrases work with the base install. Optional
+operating-system keyring support is installed with `uv sync --locked --extra
+keyring`.
+
+See [docs/VAULT-IMPORT.md](docs/VAULT-IMPORT.md). The tracked
+[samples/card-import.example.json](samples/card-import.example.json) contains
+synthetic data only.
 
 ## Family Finance
 

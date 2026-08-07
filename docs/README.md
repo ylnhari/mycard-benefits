@@ -30,6 +30,8 @@ unresolved questions.
   ranking, value classes, stacking, and affiliate neutrality.
 - [FAMILY-FINANCE-INTEGRATION.md](FAMILY-FINANCE-INTEGRATION.md) — optional
   companion setup, privacy boundary, failure behavior, and removal.
+- [VAULT-IMPORT.md](VAULT-IMPORT.md) — bounded one-time private manifest import,
+  interactive/keyring unlock, recovery warning, and verification command.
 - [IDEA-LOG.md](IDEA-LOG.md) — durable owner ideas and discovery leads that are
   not approved catalog facts.
 - [DECISION-TRACE.md](DECISION-TRACE.md) — concise trace from the initial

@@ -12,11 +12,12 @@ import hashlib
 import hmac
 import json
 import os
+import re
 import secrets
 import threading
 import time
 import uuid
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime
@@ -56,6 +57,7 @@ _ALLOWED_SECRET_FIELDS: Final = frozenset(
         "billing_postcode",
     }
 )
+_OFFERING_ID: Final = re.compile(r"^[a-z0-9][a-z0-9._-]{0,127}$")
 
 
 class VaultError(Exception):
@@ -288,8 +290,7 @@ class VaultSession:
         with self._lock:
             self._require_unlocked()
             _validate_secret_fields(secret_fields)
-            if not offering_id:
-                raise VaultError("offering_id is required")
+            validate_offering_id(offering_id)
             if not isinstance(lifecycle, CardLifecycle):
                 raise VaultError("invalid lifecycle")
             card_id = _uuid7()
@@ -306,6 +307,50 @@ class VaultSession:
             candidate = {**self._records, card_id: record}
             self._persist(candidate)
             return card_id
+
+    def add_cards(
+        self,
+        cards: Iterable[tuple[str, dict[str, str], CardLifecycle]],
+    ) -> tuple[str, ...]:
+        """Validate and persist a bounded card batch in one vault revision."""
+        with self._lock:
+            self._require_unlocked()
+            pending: list[tuple[str, dict[str, str], CardLifecycle]] = []
+            for card in cards:
+                if len(pending) >= _MAX_RECORDS:
+                    raise VaultError("too many cards")
+                try:
+                    offering_id, secret_fields, lifecycle = card
+                except (TypeError, ValueError):
+                    raise VaultError("invalid card import") from None
+                validate_offering_id(offering_id)
+                if not isinstance(lifecycle, CardLifecycle):
+                    raise VaultError("invalid lifecycle")
+                _validate_secret_fields(secret_fields)
+                pending.append((offering_id, dict(secret_fields), lifecycle))
+            if not pending:
+                raise VaultError("at least one card is required")
+            if len(self._records) + len(pending) > _MAX_RECORDS:
+                raise VaultError("too many cards")
+
+            candidate = dict(self._records)
+            card_ids: list[str] = []
+            for offering_id, secret_fields, lifecycle in pending:
+                card_id = _uuid7()
+                now = _timestamp()
+                record = _Record(
+                    card_id=card_id,
+                    offering_id=offering_id,
+                    lifecycle=lifecycle,
+                    created_at=now,
+                    updated_at=now,
+                    ciphertext=b"",
+                )
+                record = replace(record, ciphertext=self._encrypt_record(record, secret_fields))
+                candidate[card_id] = record
+                card_ids.append(card_id)
+            self._persist(candidate)
+            return tuple(card_ids)
 
     def replace_card(
         self,
@@ -616,7 +661,11 @@ def _parse_records(envelope: dict[str, Any], dek: bytes) -> dict[str, _Record]:
             ciphertext=_unb64(raw["ciphertext"]),
             replacement_card_id=replacement,
         )
-        if not record.offering_id or len(record.ciphertext) < 12 + 16 or card_id in records:
+        try:
+            validate_offering_id(record.offering_id)
+        except VaultError:
+            raise VaultAccessError("encrypted record is invalid") from None
+        if len(record.ciphertext) < 12 + 16 or card_id in records:
             raise VaultAccessError("encrypted record is invalid")
         _validate_timestamp(record.created_at)
         _validate_timestamp(record.updated_at)
@@ -680,6 +729,17 @@ def _validate_secret_fields(values: dict[str, str]) -> None:
         total_characters += len(value)
     if total_characters > _MAX_SECRET_TOTAL_CHARS:
         raise VaultError("secret field values are too large")
+
+
+def validate_secret_fields(values: dict[str, str]) -> None:
+    """Validate a prospective record without persisting or exposing its values."""
+    _validate_secret_fields(values)
+
+
+def validate_offering_id(value: str) -> None:
+    """Protect the cleartext envelope field from receiving arbitrary private text."""
+    if not isinstance(value, str) or _OFFERING_ID.fullmatch(value) is None:
+        raise VaultError("offering_id is invalid")
 
 
 def _atomic_write(path: Path, encoded: bytes, permissions: _PermissionHelper, *, backup: bool) -> None:

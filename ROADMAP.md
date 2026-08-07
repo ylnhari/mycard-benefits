@@ -4,9 +4,10 @@
    substrate.
 2. **Complete, synthetic-only:** public catalog schema, immutable identifiers,
    temporal rules, evaluator, and API.
-3. **Core complete; integration gated:** encrypted vault, recovery, one-use
-   reveal authorization, bounded backup/restore, locking, and integrity checks.
-   Final independent review and the human-facing API/UI remain.
+3. **Core and one-time local import complete; UI integration gated:** encrypted
+   vault, one-use reveal authorization, bounded backup/restore, locking,
+   integrity checks, strict manifest parsing, atomic batch import, and optional
+   OS-keyring unlock are implemented. The human-facing API/UI remains gated.
 4. **Partial:** responsive dashboard, comparisons, evidence views, deterministic
    traceable Q&A, and purchase-route optimizer core. Reminders and optimizer UI
    are not implemented.

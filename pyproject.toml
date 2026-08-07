@@ -37,6 +37,7 @@ dev = [
 
 [project.scripts]
 mycard-benefits = "mycard_benefits.cli:main"
+mycard-vault = "mycard_benefits.vault_cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/mycard_benefits"]
@@ -60,3 +61,7 @@ ignore = ["E501"]
 python_version = "3.12"
 strict = true
 packages = ["mycard_benefits"]
+
+[[tool.mypy.overrides]]
+module = ["keyring", "keyring.*"]
+ignore_missing_imports = true
