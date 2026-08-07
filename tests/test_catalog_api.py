@@ -149,3 +149,41 @@ def test_relationships_endpoint_returns_all(tmp_path: Path) -> None:
         data = response.json()
         assert len(data) == 1
         assert data[0]["from_offering_id"] == "22222222-2222-4222-8222-222222222222"
+
+
+# ---- MC-070: temporal and versioned benefits API tests ----
+
+
+def test_benefits_api_returns_temporal_and_versioning_fields(tmp_path: Path) -> None:
+    with _client(tmp_path) as client:
+        response = client.get("/api/v1/catalog/benefits")
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 1
+        b = data[0]
+        assert b["effective_to"] is None
+        assert b["end_date_known"] is False
+        assert b["rule_version"] == 1
+        assert b["supersedes"] is None
+
+
+def test_benefits_api_include_historical_parameter(tmp_path: Path) -> None:
+    _copy_catalog(tmp_path)
+    path = tmp_path / "benefits" / "synthetic-example-reward.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["status"] = "historical"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    app = FastAPI()
+    app.include_router(create_catalog_router(tmp_path))
+    with TestClient(app) as client:
+        # Default: active rules only -> empty
+        res_default = client.get("/api/v1/catalog/benefits")
+        assert res_default.status_code == 200
+        assert res_default.json() == []
+
+        # With include_historical=true -> returns historical rule
+        res_hist = client.get("/api/v1/catalog/benefits", params={"include_historical": "true"})
+        assert res_hist.status_code == 200
+        assert len(res_hist.json()) == 1
+        assert res_hist.json()[0]["status"] == "historical"

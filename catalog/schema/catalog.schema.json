@@ -131,6 +131,8 @@
         "review_tier": {"enum": ["standard", "enhanced", "high_impact", "ambiguous"]},
         "effective_from": {"$ref": "#/$defs/date"},
         "effective_to": {"$ref": "#/$defs/date"},
+        "rule_version": {"type": "integer", "minimum": 1},
+        "supersedes": {"$ref": "#/$defs/uuid"},
         "eligibility": {"type": "array", "items": {"$ref": "#/$defs/predicate"}},
         "allowance": {"type": "object"},
         "evidence": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/evidence"}},

@@ -42,6 +42,9 @@ class BenefitSummary(_PublicModel):
     review_tier: str
     effective_from: date | None
     effective_to: date | None
+    end_date_known: bool
+    rule_version: int
+    supersedes: str | None = None
     eligibility: list[dict[str, Any]]
     allowance: dict[str, Any] | None
     conflicts_with: list[str]
@@ -164,16 +167,18 @@ def create_catalog_router(catalog_dir: Path) -> APIRouter:
     def list_benefits(
         offering_slug: str | None = None,
         benefit_type: str | None = None,
+        include_historical: bool = False,
         as_of: AsOf = None,
     ) -> list[BenefitSummary]:
         catalog = catalog_or_unavailable()
         effective_date = _effective_date(catalog, as_of)
         offering_id = _offering_id_for_slug(catalog, offering_slug, effective_date)
+        valid_statuses = {"active", "historical", "superseded"} if include_historical else {"active"}
         rules = [
             rule
             for rule in catalog.benefits
-            if rule.status == "active"
-            and _in_range(effective_date, rule.effective_from, rule.effective_to)
+            if rule.status in valid_statuses
+            and (include_historical or _in_range(effective_date, rule.effective_from, rule.effective_to))
             and (offering_id is None or rule.offering_id == offering_id)
             and (benefit_type is None or rule.benefit_type == benefit_type)
         ]
@@ -227,6 +232,9 @@ def _benefit_summary(rule: BenefitRule) -> BenefitSummary:
         review_tier=rule.review_tier,
         effective_from=rule.effective_from,
         effective_to=rule.effective_to,
+        end_date_known=rule.end_date_known,
+        rule_version=rule.rule_version,
+        supersedes=rule.supersedes,
         eligibility=[dict(predicate) for predicate in rule.eligibility],
         allowance=dict(rule.allowance) if rule.allowance is not None else None,
         conflicts_with=list(rule.conflicts_with),

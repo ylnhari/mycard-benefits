@@ -83,10 +83,14 @@ class BenefitRule:
     review_tier: str
     effective_from: date | None
     effective_to: date | None
-    end_date_known: bool
-    rule_version: int
-    supersedes: str | None
     eligibility: tuple[dict[str, Any], ...]
     allowance: dict[str, Any] | None
     evidence: tuple[EvidenceAssertion, ...]
     conflicts_with: tuple[str, ...]
+    end_date_known: bool | None = None
+    rule_version: int = 1
+    supersedes: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.end_date_known is None:
+            object.__setattr__(self, "end_date_known", self.effective_to is not None)

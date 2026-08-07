@@ -55,7 +55,7 @@ class Catalog:
     release: ReleaseMetadata
     offerings: tuple[Offering, ...]
     benefits: tuple[BenefitRule, ...]
-    relationships: tuple[ProductRelationship, ...]
+    relationships: tuple[ProductRelationship, ...] = ()
 
     def offering_by_slug(self, slug: str) -> Offering | None:
         return next((item for item in self.offerings if item.slug == slug), None)
@@ -324,6 +324,22 @@ def _validate_cross_records(
                 raise CatalogLoadError(f"benefit {rule.id}: evidence retrieval is after the release")
             if any(review.reviewed_at > release.generated_at for review in assertion.reviews):
                 raise CatalogLoadError(f"benefit {rule.id}: review is after the release")
+    # ---- supersession integrity ----
+    benefit_by_id = {rule.id: rule for rule in benefits}
+    supersedes_edges: dict[str, list[str]] = {}
+    for rule in benefits:
+        if rule.supersedes is not None:
+            if rule.supersedes == rule.id:
+                raise CatalogLoadError(f"benefit {rule.id}: cannot supersede itself")
+            if rule.supersedes not in benefit_ids:
+                raise CatalogLoadError(f"benefit {rule.id}: supersedes unknown benefit {rule.supersedes}")
+            prior_rule = benefit_by_id[rule.supersedes]
+            if prior_rule.status not in {"superseded", "historical"}:
+                raise CatalogLoadError(
+                    f"benefit {rule.id}: supersedes benefit {rule.supersedes} with status {prior_rule.status!r}"
+                )
+            supersedes_edges[rule.id] = [rule.supersedes]
+    _detect_cycle(supersedes_edges, "benefit supersession chain contains a cycle")
     # ---- relationship graph integrity ----
     _unique((item.id for item in relationships), "relationship IDs")
     edges: set[tuple[str, str, str]] = set()
@@ -341,7 +357,7 @@ def _validate_cross_records(
     for rel in relationships:
         if rel.relationship_type in {"renamed", "legacy"}:
             dag_edges.setdefault(rel.from_offering_id, []).append(rel.to_offering_id)
-    _detect_cycle(dag_edges)
+    _detect_cycle(dag_edges, "relationship graph contains a cycle in renamed/legacy edges")
 
 
 def _require_keys(raw: dict[str, Any], keys: set[str], path: str) -> None:
@@ -439,7 +455,10 @@ def _in_date_range(value: date, start: date | None, end: date | None) -> bool:
     return (start is None or start <= value) and (end is None or value <= end)
 
 
-def _detect_cycle(adjacency: dict[str, list[str]]) -> None:
+def _detect_cycle(
+    adjacency: dict[str, list[str]],
+    error_message: str = "relationship graph contains a cycle in renamed/legacy edges",
+) -> None:
     """Raise CatalogLoadError if the directed graph contains a cycle."""
     WHITE, GRAY, BLACK = 0, 1, 2
     color: dict[str, int] = {node: WHITE for node in adjacency}
@@ -457,9 +476,7 @@ def _detect_cycle(adjacency: dict[str, list[str]]) -> None:
                 color[node] = GRAY
                 for neighbor in adjacency.get(node, []):
                     if color.get(neighbor, WHITE) == GRAY:
-                        raise CatalogLoadError(
-                            "relationship graph contains a cycle in renamed/legacy edges"
-                        )
+                        raise CatalogLoadError(error_message)
                     if color.get(neighbor, WHITE) == WHITE:
                         stack.append(neighbor)
             else:

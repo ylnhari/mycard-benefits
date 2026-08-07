@@ -273,3 +273,78 @@ def test_names_never_infer_relationships(tmp_path: Path) -> None:
     # Two offerings with similar names — no inferred relationship
     assert len(catalog.offerings) == 2
     assert len(catalog.relationships) == 0
+
+
+# ---- MC-070: temporal and versioned benefits tests ----
+
+
+def test_missing_end_date_means_unknown_not_perpetual(tmp_path: Path) -> None:
+    _copy_catalog(tmp_path)
+    catalog = load_catalog(tmp_path)
+    rule = catalog.benefits[0]
+    assert rule.effective_to is None
+    assert rule.end_date_known is False
+    assert rule.rule_version == 1
+    assert rule.supersedes is None
+
+
+def test_expired_and_superseded_rules_remain_historical(tmp_path: Path) -> None:
+    _copy_catalog(tmp_path)
+    path = tmp_path / "benefits" / "synthetic-example-reward.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["status"] = "historical"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    catalog = load_catalog(tmp_path)
+    offering_id = payload["offering_id"]
+    assert catalog.benefits_for(offering_id) == ()
+    historical = catalog.historical_benefits_for(offering_id)
+    assert len(historical) == 1
+    assert historical[0].status == "historical"
+
+
+def test_supersession_validation_and_cycle_prevention(tmp_path: Path) -> None:
+    _copy_catalog(tmp_path)
+    path = tmp_path / "benefits" / "synthetic-example-reward.json"
+    v1_payload = json.loads(path.read_text(encoding="utf-8"))
+    v1_id = v1_payload["id"]
+    v1_payload["status"] = "superseded"
+    v1_payload["rule_version"] = 1
+    path.write_text(json.dumps(v1_payload), encoding="utf-8")
+
+    v2_id = "88888888-8888-4888-8888-888888888888"
+    v2_payload = dict(v1_payload)
+    v2_payload["id"] = v2_id
+    v2_payload["status"] = "active"
+    v2_payload["rule_version"] = 2
+    v2_payload["supersedes"] = v1_id
+    v2_path = tmp_path / "benefits" / "synthetic-example-reward-v2.json"
+    v2_path.write_text(json.dumps(v2_payload), encoding="utf-8")
+
+    catalog = load_catalog(tmp_path)
+    active = catalog.benefits_for(v1_payload["offering_id"])
+    assert len(active) == 1
+    assert active[0].id == v2_id
+    assert active[0].rule_version == 2
+    assert active[0].supersedes == v1_id
+
+    # Test self-supersession failure
+    v2_payload["supersedes"] = v2_id
+    v2_path.write_text(json.dumps(v2_payload), encoding="utf-8")
+    with pytest.raises(CatalogLoadError, match="cannot supersede itself"):
+        load_catalog(tmp_path)
+
+    # Test superseding active rule failure
+    v1_payload["status"] = "active"
+    v1_path = tmp_path / "benefits" / "synthetic-example-reward.json"
+    v1_path.write_text(json.dumps(v1_payload), encoding="utf-8")
+    v2_payload["supersedes"] = v1_id
+    v2_path.write_text(json.dumps(v2_payload), encoding="utf-8")
+    with pytest.raises(CatalogLoadError, match="supersedes benefit .* with status 'active'"):
+        load_catalog(tmp_path)
+
+    # Test superseding unknown rule failure
+    v2_payload["supersedes"] = "99999999-9999-4999-8999-999999999999"
+    v2_path.write_text(json.dumps(v2_payload), encoding="utf-8")
+    with pytest.raises(CatalogLoadError, match="unknown benefit"):
+        load_catalog(tmp_path)

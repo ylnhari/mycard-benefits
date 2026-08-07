@@ -89,3 +89,8 @@
   enforcement). Names never auto-infer inheritance; item 14 of the
   questionnaire decisions is now enforced by loader validation and regression
   tests.
+- Benefit rules are temporal and versioned (`end_date_known`, `rule_version`, `supersedes`).
+  A missing end date (`effective_to: null`) evaluates as unknown (`end_date_known: False`),
+  never perpetual. Expired and superseded rules remain stored as historical records
+  rather than being silently dropped; loader validates supersession links and enforces
+  DAG cycle prevention for supersession chains.

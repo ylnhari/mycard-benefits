@@ -29,6 +29,9 @@ view of the encrypted portfolio.
 - Reviewed product-relationship graph with DAG-enforced integrity for renamed,
   legacy, cloned, and reskinned products. Relationships are explicit reviewed
   data; names never auto-infer inheritance.
+- Temporal and versioned benefit rules (`end_date_known`, `rule_version`, `supersedes`).
+  Missing end dates are treated as unknown (never perpetual); expired and superseded rules
+  remain as historical records; supersession chains are DAG-validated.
 - Loopback-local, read-only My Cards API/UI. It opens the existing vault through
   the operating-system keyring, returns only card UUID, offering, lifecycle,
   timestamps, and replacement metadata, and applies `no-store`. The view renders
