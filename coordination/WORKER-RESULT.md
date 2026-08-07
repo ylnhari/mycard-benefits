@@ -1,10 +1,10 @@
 # Integrated worker results
 
 Status: COMPLETE
-Task: MC-006
+Task: MC-008, MC-009
 Runner: OpenCode
 Provider/model: `opencode/deepseek-v4-flash-free`
-Branch: `agent/mc006-opencode`
+Branch: `agent/mc008-009-opencode`
 Manager branch: `manager/concurrent-integration`
 Push authorized: no
 
@@ -148,3 +148,132 @@ temp data dirs, harness outside the repo). 24/24 checks passed:
   `agent/mc006-opencode`).
 - Coordination follow-up: this file.
 - All local to `agent/mc006-opencode`; nothing was pushed.
+
+## MC-008 — demo versus real-data boundary
+
+Verdict: `MC_008_WORKER_PASS`
+
+`--demo` runs are now unmistakable: a persistent banner labels the run on every
+screen (desktop and mobile, both themes), demo activity stays in the separate
+`demo-data` folder, and My Cards is switched off in demo mode — the private
+cards endpoint returns a fixed 503 and no vault is ever opened, even if a
+reader were injected. The user guide explains the boundary and the explicit
+`--data-dir` interaction.
+
+### Implementation commits and files
+
+- Implementation: `d5405ff` on `agent/mc008-009-opencode` (branched from the
+  manager checkpoint `4eeb303`, fast-forwarded via
+  `git merge manager/concurrent-integration` with no conflicts).
+- `src/mycard_benefits/templates/index.html` — persistent `#demoBanner`
+  (`role="note"`, "Synthetic demo run", demo-data / `--demo` copy) rendered for
+  every view when `demo` is set.
+- `src/mycard_benefits/static/app.css` — `.demo-banner` using the existing
+  theme variables (works in dark and light).
+- `src/mycard_benefits/vault/router.py` — `create_private_cards_router` gained
+  a `demo` flag; in demo mode the endpoint short-circuits before any reader
+  runs with `503 "Private card list is switched off in demo mode"`.
+- `src/mycard_benefits/app.py` — passes `settings.demo` into the router.
+- `tests/test_config.py` — demo vs non-demo `from_environment` point at
+  `demo-data` vs `data` (differing folders) and explicit `--data-dir` still
+  wins.
+- `tests/test_ui.py` —
+  `test_demo_run_shows_persistent_banner_and_switches_off_my_cards` (banner in
+  demo, absent otherwise, demo API 503, health unchanged).
+- `docs/USER-GUIDE.md` section 3, `README.md`, `PROJECT_STATUS.md`, `TASKS.md`
+  (MC-008 marked done) updated in the same commit.
+
+## MC-009 — vault unavailable diagnostics
+
+Verdict: `MC_009_WORKER_PASS`
+
+My Cards no longer fails with one generic message. The private cards API
+classifies every known cause into a safe, structured detail
+(`detail: {code, message}`) and the UI renders a distinct title, badge, status,
+explanation, and fix step for each: `demo`, `vault_missing`, `passphrase_only`,
+`wrong_data_dir`, `locked`, `keyring_unavailable`, and `generic`. No path,
+secret, identifier, or decrypted value ever appears in the diagnostic copy.
+
+### Implementation commits and files
+
+- Implementation: `8fc9e2c` on `agent/mc008-009-opencode`.
+- `src/mycard_benefits/vault/router.py` — `VaultUnavailable` exception with a
+  machine-readable code; `VAULT_DIAGNOSTIC_MESSAGES` (safe one-line summaries);
+  `_read_keyring_cards` now classifies: missing file + no keyring entry →
+  `vault_missing`; missing file + keyring entry for this exact vault path →
+  `wrong_data_dir`; existing file + no keyring entry → `passphrase_only`;
+  keyring backend failure → `keyring_unavailable`; open failure with stored
+  passphrase → `locked` (VaultError) or `generic` (OSError/ValueError).
+- `src/mycard_benefits/static/app.js` — `VAULT_DIAGNOSTICS` map with distinct
+  title/text/badge/status/note/fix per code; `setPrivateUnavailable` renders
+  the note and fix into `#myCardList`; the fetch error path parses the
+  structured detail code and falls back to `generic`.
+- `src/mycard_benefits/static/app.css` — `.diagnostic-fix`.
+- `tests/test_private_cards_api.py` — structured-detail test for all seven
+  codes via injected readers (plus tmp-path non-leak), and deterministic real
+  reader classification tests for `vault_missing`, `wrong_data_dir`,
+  `passphrase_only`, and `locked` using a stub keyring (no real keyring
+  writes); the reader-raises test now asserts the `generic` code.
+- `tests/test_ui.py` — per-code UI copy assertions, structured demo API detail,
+  and the neutral-copy startup test now stubs the keyring so its
+  `vault_missing` assertion is deterministic on any host.
+- `docs/USER-GUIDE.md` section 12 rewritten per cause with fix steps;
+  `PROJECT_STATUS.md`, `TASKS.md` (MC-009 marked done) updated in the same
+  commit.
+
+### Commands and outcomes (final snapshot `8fc9e2c`)
+
+- `uv run ruff check .` — All checks passed.
+- `uv run mypy src` — Success, no issues in 31 source files (strict).
+- `node --check src/mycard_benefits/static/app.js` — ok.
+- `uv run pytest` — full suite passed, exit 0: **229 passed**, including the
+  MC-002/005/006 tests plus the new MC-008 and MC-009 tests.
+- `uv build` — source distribution and wheel built successfully, exit 0.
+- `git diff --check` — clean.
+- Pre-commit scan of both changes — only `SYNTHETIC-ONLY-`/UUID fixture
+  values; no real identifiers, secrets, absolute user paths, or
+  generated/runtime files.
+
+### Rendered evidence
+
+Browser-verified with system Chrome headless over CDP against nine
+loopback-only harness servers (ports 8791-8799, injected synthetic readers and
+temp data dirs, harness outside the repo). No repository changes were made by
+the harness.
+
+- MC-009 suite (`verify4.js`): 15/15 passed — all seven diagnostics render
+  distinct titles/badges/fix steps with the "no fallback data was used" status
+  and no raw ids/paths/ports in any diagnostic; light theme on two states;
+  mobile (demo + passphrase-only) with no horizontal overflow; same-origin API
+  checks confirm the seven structured 503 codes; populated and empty
+  regressions intact; zero console errors or 404s. Screenshots
+  `mc009-*.png` (all states desktop dark, two light, two mobile).
+- MC-008 suite (`verify-demo.js`): 13/13 passed — banner persistent across
+  views on desktop dark/light and mobile with no overflow; catalog loads in
+  demo (68 variants); demo API 503 with the switch-off detail; non-demo run
+  has no banner and still serves 4 envelope rows with `no-store`.
+  Screenshots `mc008-demo-*.png`.
+- MC-006 regression (`verify3.js`): 24/24 passed on the MC-009 snapshot
+  (updated only for the intentional new generic-diagnostic copy).
+- MC-002/005 behavior retained: matched/unmatched detail panels, keyboard
+  flow, neutral wording all re-verified.
+
+### Risks
+
+- Rendered verification used injected synthetic readers and a stub keyring
+  rather than the real OS-keyring path (no keyring writes performed); the real
+  classification path is covered by the deterministic API tests with
+  monkeypatched keyring functions.
+- `wrong_data_dir` is only positively detectable when the OS keyring still
+  holds a passphrase for this exact vault path; the `vault_missing` copy also
+  mentions the `--data-dir` possibility for the other case.
+- Harness and servers run from the temp directory only; nothing was added to
+  the repository.
+
+### Commit
+
+- MC-008: `d5405ff` — "Complete MC-008 demo and real-data boundary".
+- MC-009: `8fc9e2c` — "Complete MC-009 vault unavailable diagnostics".
+- Coordination follow-up: this file.
+- All local to `agent/mc008-009-opencode` (base: manager checkpoint
+  `4eeb303`); nothing was pushed.
