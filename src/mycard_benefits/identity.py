@@ -1,4 +1,4 @@
-"""Per-installation signing identity used to reject wrong-port companions."""
+"""Per-installation signing identity used to reject wrong-port launch requests."""
 
 from __future__ import annotations
 

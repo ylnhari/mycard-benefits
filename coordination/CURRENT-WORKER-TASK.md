@@ -1,52 +1,25 @@
-# Current worker task
+# Integration status
 
-Status: READY
-Task: MC-002
-Assigned runner: OpenCode
-Required provider/model: `opencode/deepseek-v4-flash-free`
-Branch: `agent/mc002-opencode`
-Manager review required: yes
-Commit authorized: local task-branch commit after every gate passes
-Push authorized: no
+Status: INTEGRATING
 
-Read this file and `AGENTS.md` completely. Execute **only MC-002** in this
-worktree. MC-001 and MC-003 are already integrated at the branch base. Do not
-access any other worktree or private data directory.
+The manager integration branch is the canonical trace. Worker worktrees remain
+isolated while a task is in progress; before every subsequent task handoff, the
+manager merges the completed dependency, gives the worker the resulting commit,
+and requires a rebase plus a full gate rerun before review. No push or
+publication is authorized.
 
-## Outcome
+## Integrated and validated
 
-Selecting an imported My Cards row must open a keyboard-reachable, read-only
-detail view that shows only the matched public offering name, issuer/bank,
-network, lifecycle, created and updated dates, and replacement relationship.
-Do not reveal or return PAN, CVV, PIN, expiry, cardholder, nickname, notes,
-owner data, raw vault fields, or an unmatched raw offering identifier.
+- MC-001: readable My Cards list — `efebf51de139c94704555d8929578e13bc73c937`
+- MC-003: production catalog cleanup — `1c65944e5fa50230c17db4214e3b5b278e6a4d68`
+- MC-002: card record detail view — `59bbebb`, integrated at `d337811`
 
-## Scope and boundaries
+## Awaiting integration
 
-- Use only `SYNTHETIC-ONLY-` fixtures and temporary test data. Never read
-  `data/`, `imports/`, vaults, backups, `.env`, browser profiles, or real cards.
-- Preserve the loopback-only and no-store read-only boundary. Do not implement
-  protected writes, reveal/copy, lifecycle editing, MC-005 wording work, or any
-  other task.
-- Change only objectively necessary app/static/template/API-test/UI-test files,
-  user docs/living status if behavior changes, and this result file.
-- A detail route or client-side panel is acceptable; choose the smallest design
-  that stays envelope-only and usable on desktop/mobile, dark/light, keyboard.
+- MC-005: neutral MyCard wording — `f7bb1bd46bc800f112ea44b6af404be2b89aeb41`.
+  Independent gates passed; manager is resolving the integration record.
+- MC-006: unmatched variant state — active in the dedicated OpenCode worktree.
+  It must synchronize with this branch and rerun all gates before manager review.
 
-## Required evidence
-
-1. Every matched card row has a clear, keyboard-reachable detail action.
-2. The detail view contains only public-catalog data plus the existing safe
-   envelope fields; test the exact response/rendered DOM for secret absence.
-3. Replacement links are shown safely. An unmatched card has an honest, safe
-   detail/unavailable state with no raw slug dump.
-4. Test normal, empty, unavailable, unmatched, and replacement cases.
-5. Browser-verify desktop/mobile and dark/light; record keyboard behavior and
-   console findings.
-6. Run Ruff, strict mypy, full pytest, package build, JavaScript syntax check,
-   and `git diff --check`.
-
-Overwrite `coordination/WORKER-RESULT.md` with actual model, exact files,
-commands/outcomes, rendered evidence, risks, commit ID, and final verdict
-`MC-002_WORKER_PASS` or `MC-002_WORKER_BLOCKED`. Commit locally only after all
-gates pass; never push.
+This file is manager-owned. Workers must use their explicitly assigned task
+record and may not edit another worktree or private data directory.
