@@ -50,6 +50,10 @@ Output artifact: `docs/research/lounge-and-meet-greet-verification-2026-08-07.md
 - `uv build`: Passed (Built source distribution and wheel)
 - `git diff --check`: Passed (0 whitespace/formatting issues)
 
+## Commit Sequence & Hash
+
+- Commit Hash: `64dd5f4` ("Verify pilot lounge and airport service candidates (MC-085)")
+
 ## Identified Risks
 
 None. Research candidates are isolated to `docs/research/` and do not activate catalog truth. No private data, vaults, credentials, or browser identities were accessed.
