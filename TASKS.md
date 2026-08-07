@@ -441,7 +441,7 @@ Manager protocol: tasks are assigned one at a time; a worker owns only its named
   - Depends on: MC-085
   - Suggested runner: Claude
 
-- [x] **MC-085: Verify lounge and meet-and-greet candidates for the pilots** - Confirm each airport-lounge and meet-and-greet candidate against current Priority Pass/DreamFolks, network, and issuer terms.
+- [ ] **MC-085: Verify lounge and meet-and-greet candidates for the pilots** - Confirm each airport-lounge and meet-and-greet candidate against current Priority Pass/DreamFolks, network, and issuer terms.
   - Acceptance: each candidate carries a current official tier-1-5 URL, retrieval time, hash, and effective dates; no candidate is active until human review per item 59.
   - Depends on: none
   - Suggested runner: Claude

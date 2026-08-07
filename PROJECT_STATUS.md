@@ -38,8 +38,7 @@ view of the encrypted portfolio.
   is strictly derived at runtime from source_policy_class and exposed in API responses. Tier 6
   discovery-only sources are strictly forbidden from being approved.
 - Re-verified official lounge, airport service, travel edge, and meet-and-greet research candidates
-  for the Tata Neu Infinity and Regalia Gold pilots with official source URLs (Tier 2/3), content hashes,
-  retrieval timestamps, and spend-gate eligibility rules (`docs/research/lounge-and-meet-greet-verification-2026-08-07.md`).
+  for the Tata Neu Infinity and Regalia Gold pilots (under candidate review queue, pending human approval) with exact PDF/landing page byte hashes (Tier 2/3), retrieval timestamps, explicit effective date ranges, and corrected Visa/RuPay network candidate boundaries (`docs/research/lounge-and-meet-greet-verification-2026-08-07.md`).
 - Loopback-local, read-only My Cards API/UI. It opens the existing vault through
   the operating-system keyring, returns only card UUID, offering, lifecycle,
   timestamps, and replacement metadata, and applies `no-store`. The view renders
