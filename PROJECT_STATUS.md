@@ -31,10 +31,12 @@ view of the encrypted portfolio.
   timestamps, and replacement metadata, and applies `no-store`. The view renders
   each card as a readable row joined to public catalog product, issuer/bank,
   network, lifecycle, and record dates; unmatched identifiers appear as a
-  clearly labeled "Unmatched card variant" row, and search and lifecycle
+  clearly labeled "Unmatched variant" row — never a raw slug — with import-fix
+  and request-a-variant guidance, and search and lifecycle
   filtering return exact subsets. A keyboard-reachable "View details" action
   expands an envelope-only detail panel with product, issuer, network,
-  lifecycle, record dates, and the replacement relationship.
+  lifecycle, record dates, and the replacement relationship; an unmatched
+  card's panel says so honestly without printing the raw identifier.
 - MyCard remains loopback-bound. A personal external launcher may start it and
   provide phone access, but MyCard does not integrate with that tool.
 - Discovery-only pilot source work for Tata Neu HDFC Infinity and HDFC Regalia

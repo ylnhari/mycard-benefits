@@ -138,7 +138,8 @@ function renderComparison() {
 document.querySelector("#benefitOffering").addEventListener("change", renderBenefits);
 for (const select of document.querySelectorAll("#compareA, #compareB")) select.addEventListener("change", renderComparison);
 
-const UNMATCHED_CARD_LABEL = "Unmatched card variant";
+const UNMATCHED_CARD_LABEL = "Unmatched variant";
+const UNMATCHED_NOTE = "This card's product identifier has no match in the public catalog. Fix the identifier in the import file or request the card variant; its product name will appear once the match succeeds.";
 function offeringForCard(card) {
   return state.offerings.find(candidate => candidate.slug === card.offering_id);
 }
@@ -196,7 +197,7 @@ function cardDetailSection(card, index) {
   const replaces = replacementOfText(card);
   if (replaces) list.append(detailRow("Replaces", replaces));
   section.append(heading, list);
-  if (!offering) section.append(node("p", "This card's product identifier has no match in the public catalog. Fix the identifier in the import file or request the card variant; its product name will appear once the match succeeds.", "unmatched-note"));
+  if (!offering) section.append(node("p", UNMATCHED_NOTE, "unmatched-note"));
   return section;
 }
 function toggleCardDetail(button, section, heading) {
@@ -216,14 +217,14 @@ function privateCardRow(card, index) {
   head.append(title, node("span", card.lifecycle, privateCardBadge(card.lifecycle)));
   item.append(head);
   item.append(node("p", privateCardDates(card), "quiet-copy"));
-  if (!matched) item.append(node("p", "This card's product identifier has no match in the public catalog. Its product name will appear once the identifier matches or the card variant is added.", "unmatched-note"));
+  if (!matched) item.append(node("p", UNMATCHED_NOTE, "unmatched-note"));
   if (card.replacement_card_id) item.append(node("p", "Replacement history is linked.", "allowance"));
   const section = cardDetailSection(card, index);
   const button = node("button", "View details", "secondary card-detail-toggle");
   button.type = "button";
   button.setAttribute("aria-expanded", "false");
   button.setAttribute("aria-controls", section.id);
-  button.setAttribute("aria-label", `View details for ${matched ? offering.display_name : "unmatched card"}`);
+  button.setAttribute("aria-label", `View details for ${matched ? offering.display_name : "unmatched variant"}`);
   button.addEventListener("click", () => toggleCardDetail(button, section, section.querySelector("h4")));
   section.addEventListener("keydown", event => {
     if (event.key === "Escape") {

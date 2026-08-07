@@ -100,7 +100,8 @@ identifier — sent `no-store`, and refused outright if the vault yields any
 unexpected field. The browser joins that envelope to the public catalog so each
 card renders as a row with the product name, issuer/bank, network, lifecycle, and
 record dates; an identifier with no catalog match appears under a clearly labeled
-"Unmatched card variant" row rather than a raw slug. Each row has a keyboard-
+"Unmatched variant" row rather than a raw slug, with guidance to fix the import
+or request the catalog variant. Each row has a keyboard-
 reachable **View details** action that expands a read-only detail panel with the
 same safe fields — product, issuer, network, lifecycle, record dates, and any
 replacement relationship — resolved entirely from the envelope plus the public

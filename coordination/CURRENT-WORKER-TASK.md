@@ -1,25 +1,25 @@
 # Current worker task
 
 Status: READY
-Task: MC-002
+Task: MC-006
 Assigned runner: OpenCode
 Required provider/model: `opencode/deepseek-v4-flash-free`
-Branch: `agent/mc002-opencode`
+Branch: `agent/mc006-opencode`
 Manager review required: yes
 Commit authorized: local task-branch commit after every gate passes
 Push authorized: no
 
-Read this file and `AGENTS.md` completely. Execute **only MC-002** in this
-worktree. MC-001 and MC-003 are already integrated at the branch base. Do not
-access any other worktree or private data directory.
+Read this file and `AGENTS.md` completely. Execute **only MC-006** in this
+worktree. The branch base is the reviewed, integrated MC-002 branch
+(`cc7ff1e`). Do not access any other worktree or private data directory.
 
 ## Outcome
 
-Selecting an imported My Cards row must open a keyboard-reachable, read-only
-detail view that shows only the matched public offering name, issuer/bank,
-network, lifecycle, created and updated dates, and replacement relationship.
-Do not reveal or return PAN, CVV, PIN, expiry, cardholder, nickname, notes,
-owner data, raw vault fields, or an unmatched raw offering identifier.
+Cards whose offering identifier cannot be matched to the public catalog must
+never display a raw slug/identifier. In both My Cards rows and the card-detail
+view, show a clear, friendly "Unmatched variant" state with guidance to correct
+the import or request a supported variant. Do not expose private card data or
+raw internal identifiers.
 
 ## Scope and boundaries
 
@@ -30,23 +30,25 @@ owner data, raw vault fields, or an unmatched raw offering identifier.
   other task.
 - Change only objectively necessary app/static/template/API-test/UI-test files,
   user docs/living status if behavior changes, and this result file.
-- A detail route or client-side panel is acceptable; choose the smallest design
-  that stays envelope-only and usable on desktop/mobile, dark/light, keyboard.
+- Preserve existing MC-002 behavior: matched rows, keyboard-reachable detail
+  panel, Escape focus return, replacement naming, empty/unavailable states.
 
 ## Required evidence
 
-1. Every matched card row has a clear, keyboard-reachable detail action.
-2. The detail view contains only public-catalog data plus the existing safe
-   envelope fields; test the exact response/rendered DOM for secret absence.
-3. Replacement links are shown safely. An unmatched card has an honest, safe
-   detail/unavailable state with no raw slug dump.
-4. Test normal, empty, unavailable, unmatched, and replacement cases.
-5. Browser-verify desktop/mobile and dark/light; record keyboard behavior and
-   console findings.
-6. Run Ruff, strict mypy, full pytest, package build, JavaScript syntax check,
+1. No rendered row, detail panel, or aria-label ever shows the raw offering
+   identifier or card id; unmatched cards show a friendly "Unmatched variant"
+   state with import-fix and request-a-variant guidance in both row and detail.
+2. The private cards API stays envelope-only for unmatched offerings; the raw
+   slug appears exactly once (as the envelope `offering_id`), never repeated in
+   extra fields or messages.
+3. Focused UI tests assert the friendly label, the guidance strings, and the
+   absence of any text-node rendering of slug/offering_id/card_id.
+4. Browser-verify desktop/mobile and dark/light for matched and unmatched rows,
+   including the detail panel; record keyboard behavior and console findings.
+5. Run Ruff, strict mypy, full pytest, package build, JavaScript syntax check,
    and `git diff --check`.
 
 Overwrite `coordination/WORKER-RESULT.md` with actual model, exact files,
 commands/outcomes, rendered evidence, risks, commit ID, and final verdict
-`MC-002_WORKER_PASS` or `MC-002_WORKER_BLOCKED`. Commit locally only after all
+`MC-006_WORKER_PASS` or `MC-006_WORKER_BLOCKED`. Commit locally only after all
 gates pass; never push.

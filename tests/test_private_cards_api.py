@@ -161,6 +161,39 @@ def test_private_cards_accept_unmatched_offerings_and_never_return_secret_values
         assert secret not in text
 
 
+def test_unmatched_offering_response_is_envelope_only_and_never_repeats_slug(
+    tmp_path: Path,
+) -> None:
+    def reader() -> tuple[dict[str, str], ...]:
+        return (
+            {
+                "card_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0003",
+                "offering_id": "not-a-catalog-slug",
+                "lifecycle": "expired",
+                "created_at": "2026-01-02T00:00:00Z",
+                "updated_at": "2026-02-03T00:00:00Z",
+            },
+        )
+
+    with _client(tmp_path, reader) as client:
+        response = client.get("/api/v1/private/cards")
+
+    assert response.status_code == 200
+    row = response.json()["cards"][0]
+    assert row["offering_id"] == "not-a-catalog-slug"
+    assert set(row) == {
+        "card_id",
+        "offering_id",
+        "lifecycle",
+        "created_at",
+        "updated_at",
+        "replacement_card_id",
+    }
+    assert response.text.count("not-a-catalog-slug") == 1, (
+        "the raw offering identifier must never leak into any extra field"
+    )
+
+
 def test_private_cards_503_when_reader_raises(tmp_path: Path) -> None:
     def reader() -> tuple[dict[str, str], ...]:
         raise OSError("vault unavailable")
