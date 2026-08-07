@@ -36,7 +36,7 @@ Manager protocol: tasks are assigned one at a time; a worker owns only its named
   - Depends on: MC-004, MC-005
   - Suggested runner: OpenCode
 
-- [ ] **MC-006: Render unmatched offering identifiers as a clear state, never a bare slug dump** - Cards whose offering id has no catalog slug must show a labeled "unmatched variant" state with guidance, not raw identifiers.
+- [x] **MC-006: Render unmatched offering identifiers as a clear state, never a bare slug dump** - Cards whose offering id has no catalog slug must show a labeled "unmatched variant" state with guidance, not raw identifiers.
   - Acceptance: unmatched rows display explanatory text and a documented path (fix import or request a variant) per `docs/USER-GUIDE.md` section 6; UI test covers the unmatched state.
   - Depends on: MC-001
   - Suggested runner: OpenCode

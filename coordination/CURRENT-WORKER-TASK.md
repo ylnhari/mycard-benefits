@@ -18,8 +18,10 @@ publication is authorized.
 
 - MC-005: neutral MyCard wording — `f7bb1bd46bc800f112ea44b6af404be2b89aeb41`.
   Independent gates passed; manager is resolving the integration record.
-- MC-006: unmatched variant state — active in the dedicated OpenCode worktree.
-  It must synchronize with this branch and rerun all gates before manager review.
+- MC-006: unmatched variant state — completed in the dedicated OpenCode
+  worktree (`agent/mc006-opencode`), synchronized with this branch via merge;
+  all gates rerun on the merged snapshot and passed. Awaiting manager
+  integration review.
 
 This file is manager-owned. Workers must use their explicitly assigned task
 record and may not edit another worktree or private data directory.

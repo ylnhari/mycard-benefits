@@ -142,7 +142,7 @@ def test_private_cards_rows_join_public_catalog_metadata_without_secret_fallback
     assert "offering.issuer_id" in script and "offering.network_id.replaceAll" in script
     assert "offering.display_name" in script
     assert "UNMATCHED_CARD_LABEL" in script
-    assert '"Unmatched card variant"' in script
+    assert '"Unmatched variant"' in script
     assert "card.offering_id.replaceAll" not in script
     assert "Local card" not in script
     assert "function privateCardDates" in script
@@ -272,7 +272,13 @@ def test_active_surfaces_have_neutral_copy_and_self_contained_startup(tmp_path: 
     script = (ROOT / "src" / "mycard_benefits" / "static" / "app.js").read_text(encoding="utf-8")
     router = (ROOT / "src" / "mycard_benefits" / "vault" / "router.py").read_text(encoding="utf-8")
 
-    forbidden = ("Rover sign-in", "Rover login", "Companion Dashboard", "rover_proxy", "rover_secret")
+    forbidden = (
+        "Rover sign-in",
+        "Rover login",
+        "Companion Dashboard",
+        "rover_proxy",
+        "rover_secret",
+    )
     for content in (readme, guide, template, script, router):
         for term in forbidden:
             assert term.lower() not in content.lower()
@@ -294,3 +300,39 @@ def test_active_surfaces_have_neutral_copy_and_self_contained_startup(tmp_path: 
         cards_resp = client.get("/api/v1/private/cards")
         assert cards_resp.status_code == 503
         assert cards_resp.json() == {"detail": "Private card list unavailable"}
+
+
+def test_unmatched_variant_state_is_friendly_and_never_renders_raw_identifier() -> None:
+    script = (ROOT / "src" / "mycard_benefits" / "static" / "app.js").read_text(encoding="utf-8")
+
+    assert 'const UNMATCHED_CARD_LABEL = "Unmatched variant";' in script
+    assert "const UNMATCHED_NOTE =" in script
+    assert 'node("p", UNMATCHED_NOTE, "unmatched-note")' in script, (
+        "the friendly guidance note must be used by the row"
+    )
+    assert script.count('node("p", UNMATCHED_NOTE, "unmatched-note")') == 2
+    assert (
+        'aria-label", `View details for ${matched ? offering.display_name : "unmatched variant"}`'
+        in script
+    )
+    assert '"unmatched card"' not in script
+    for fragment in (
+        'node("p", card.offering_id)',
+        'node("h3", card.offering_id)',
+        'node("dd", card.offering_id)',
+        'node("p", offering?.slug)',
+        'node("h3", offering?.slug)',
+        'node("dd", offering?.slug)',
+        'node("p", card.card_id)',
+        'node("h3", card.card_id)',
+        'node("dd", card.card_id)',
+        'node("p", card.replacement_card_id)',
+    ):
+        assert fragment not in script, fragment
+    assert script.count("card.offering_id") == 2, (
+        "only offeringForCard and cardSearchText may read it"
+    )
+    assert script.count("offering?.slug") == 1, "only cardSearchText may read the slug"
+    assert script.count("card.card_id") == 3, (
+        "cardSearchText plus the two replacement lookups are the only readers"
+    )

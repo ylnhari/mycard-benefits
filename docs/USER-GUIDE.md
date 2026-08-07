@@ -244,8 +244,10 @@ Full step-by-step instructions, including every field and every option, are in
    variant — the identifier shown in the catalog, such as
    `hdfc-regalia-gold-credit`. When it matches, My Cards shows the card's proper
    product name, bank, and network. A card whose identifier has no match appears
-   under the clearly labeled "Unmatched card variant" row until the identifier is
-   fixed or the variant is added to the catalog.
+   under the clearly labeled "Unmatched variant" row, never as a raw slug or
+   identifier, until the identifier is fixed or the variant is added to the
+   catalog. The row tells you exactly how: correct the identifier in your import
+   file, or request the missing variant in the catalog.
 3. Create the vault and import the file in one step:
 
    ```powershell
@@ -317,7 +319,9 @@ is each one?" — not to show you a card number.
 network, and full product name, pulled from the public catalog), its status, when
 the record was added and last updated, and a note if a replacement card is linked
 to it. A card whose identifier has no catalog match appears in a clearly labeled
-"Unmatched card variant" row — never as a bare identifier. There are also a
+"Unmatched variant" row — never as a bare identifier or slug — with guidance on
+the two ways to fix it (correct the import identifier, or request the catalog
+variant). There are also a
 status filter and a search box that matches product, bank, network, status, and
 the record's safe identifiers.
 
@@ -328,7 +332,8 @@ was added and updated, and the replacement relationship — whether this card wa
 replaced by another one, or replaced an earlier card, named when both records
 are present. The panel never adds a new field and never shows a secret; Escape
 or the button closes it and returns focus to the row. An unmatched card's panel
-says so honestly, without printing the raw identifier, and points at the two
+says so honestly under an "Unmatched variant" heading, without printing the raw
+identifier or slug, and points at the two
 ways to fix it (fix the import identifier, or request the catalog variant).
 
 **What it never shows, and never sends to your browser:** the card number, CVV,
@@ -559,7 +564,7 @@ or the vault is passphrase-only rather than keyring-backed, which the browser
 view cannot open. Confirm the vault itself is fine with
 `uv run mycard-vault --keyring verify`.
 
-**My Cards shows "Unmatched card variant" instead of a card's real name.** That
+**My Cards shows "Unmatched variant" instead of a card's real name.** That
 card's product identifier does not match a catalog slug. The row is clearly
 labeled so you can still tell the record apart, and no raw identifier is shown.
 Fix the identifier in your import file, or ask for the missing card variant to be
