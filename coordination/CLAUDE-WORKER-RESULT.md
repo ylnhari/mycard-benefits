@@ -292,6 +292,13 @@ fields it reads did, and those field names are asserted directly).
 
 ## Commit
 
-Committed locally on `agent/mc024-177-claude`. Not merged, rebased, pushed,
-or published. Exact commit hash: recorded by the commit that follows this
-file in the same change (see `git log -1` on this branch).
+Committed locally on `agent/mc024-177-claude`:
+
+- Initial submission: `d0c76f1537a0e59ced135256a808e100077edb55` (plus
+  `d988f0c` recording that hash in this file).
+- Manager-review correction: `50991a6` — removes the child-record `label`
+  field, adds fail-closed enum/uuid/parent-match/duplicate-id validation at
+  the API boundary, and replaces the exact `expiry_date` with a bounded
+  `expiry_signal`.
+
+Not merged, rebased, pushed, or published.
