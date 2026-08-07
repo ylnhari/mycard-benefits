@@ -42,8 +42,9 @@ the original private sources.
   inventory plus a count-only receipt. The tool and all outputs are intentionally
   ignored; validate them locally before using them.
 - The temporary plaintext PDF test directory was removed and verified absent.
-- The reviewed OpenCode MC-098 branch has been integrated. The Claude and
-  MC-085 branches remain unmerged because their review findings are unresolved.
+- The reviewed OpenCode, Claude, and MC-085 worker work is integrated on the
+  canonical line. The historical worker branches remain remote only as audit
+  references; no unresolved worker review finding remains.
 
 ## Synchronization receipt
 
@@ -56,61 +57,40 @@ verified after the publication scan:
 - `agent/mc085-antigravity`: `3059e68` (unapproved WIP);
 - `agent/mc098-opencode`: `2f6d34e` (integrated reference branch).
 
-This receipt metadata is included by the recorded publication gate and is the
-only follow-up update to `main` and `manager/concurrent-integration`. Future
-work starts from `main`; no worker branch is a prerequisite.
+This receipt metadata is included by the recorded publication gate. Subsequent
+local completion work awaits its own exact publication gate. Future work starts
+from `main`; no worker branch is a prerequisite.
 
 ## Worker branches and review disposition
 
 ### Claude — `agent/mc024-177-claude`
 
-Current recorded HEAD: `eb4e470`.
+Historical worker HEAD: `eb4e470`.
 
 Delivered MC-024 child records and MC-177 self-contained/launcher-independent
 copy, followed by a privacy correction that removed free-text child labels and
 kept exact child expiry out of the browser. The worker is idle and its worktree
 is clean.
 
-Do not integrate yet. Independent review still requires:
-
-1. Validate `child_id` uniqueness across the entire returned card list, not
-   only inside one card; also reject duplicate `card_id` values.
-2. Strictly allowlist persisted child-record keys in
-   `vault/core.py`. A legacy `label` or any unknown field must fail closed even
-   when the envelope MAC is valid.
-3. Update `PROJECT_STATUS.md` and any other living text that still promises a
-   safe display label or browser-visible exact expiry date. The intended
-   contract is an enum-derived UI label plus a bounded server-computed
-   `expiry_signal`.
-
-The prior independent run passed Ruff, strict mypy, the full test suite,
-JavaScript syntax, build, and diff check. Re-run all gates after the missing
-fail-closed fixes.
+Integrated and independently hardened. The canonical line now rejects duplicate
+card IDs and child IDs across the entire API list, rejects every persisted
+child-record key outside the exact allowlist even with a valid envelope MAC,
+and documents an enum-derived label plus bounded `expiry_signal` rather than a
+browser-visible exact expiry. Focused and full gates passed.
 
 ### Antigravity — `agent/mc085-antigravity`
 
-Current recorded HEAD: `3059e68`; correction implementation is in `42543c1`.
+Historical worker HEAD: `3059e68`; correction implementation is in `42543c1`.
 
 The corrected artifact now reproduces the HDFC source hashes and honestly
 blocks unsupported RuPay/issuer linkage. The worktree is clean and the current
 full test suite passed in independent review.
 
-Do not integrate yet. Independent review still requires:
-
-1. Reconcile the research summary counts/status buckets with the individual
-   rows. One RuPay international-lounge row is `official_candidate` but is
-   counted under a different bucket.
-2. Hash the content-bearing official Visa offer API response, or explicitly
-   state that the existing hash covers only the JavaScript shell. Keep the
-   corrected Visa Infinite eligibility/spend/date facts and do not infer either
-   pilot is eligible.
-3. Replace the stale/wrong final-result commit reference with the actual result
-   commit.
-4. Replace `Identified Risks: None` with the real residual risks: blocked RuPay
-   source/linkage, unresolved Visa-to-pilot linkage, and the conservative Travel
-   Edge review state.
-5. Normalize task/coordination state to `awaiting manager review` until these
-   items pass. Do not mark MC-085 complete prematurely.
+Integrated after independent evidence reconciliation. The summary now has eight
+rows (five `official_candidate`, two `blocked`, one `not_found`); the Visa
+record hashes the content-bearing official offer API rather than its shell; the
+worker result cites its true final commit and the residual RuPay, Visa-linkage,
+and Travel Edge risks. No candidate became active catalog truth.
 
 ### OpenCode — `agent/mc098-opencode`
 
@@ -153,10 +133,7 @@ diagnostics.
 
 1. Start at `CONTINUE-HERE.md` on the canonical main line. Antigravity may work
    independently; no external agent or orchestration harness is required.
-2. Keep the unapproved Claude and Antigravity branches unmerged. A next agent
-   working independently can implement their listed fixes directly on the
-   manager branch or use those commits as reference after a fresh diff review.
-3. Complete MC-206 using the existing consolidated inventory:
+2. Complete MC-206 using the existing consolidated inventory:
    - preserve current vault history;
    - import/reconcile through supported vault APIs, never by hand-editing the
      vault file;
@@ -165,10 +142,10 @@ diagnostics.
      paths;
    - keep every unconfirmed catalog match provisional;
    - render the owner's locally imported cards in My Cards.
-4. Run focused tests, then Ruff, strict mypy, full pytest, JavaScript syntax,
+3. Run focused tests, then Ruff, strict mypy, full pytest, JavaScript syntax,
    `uv build`, `git diff --check`, tracked secret/private-path scans, and rendered
    desktop/mobile plus light/dark verification.
-5. Update `TASKS.md`, `PROJECT_STATUS.md`, this handoff, and the relevant worker
+4. Update `TASKS.md`, `PROJECT_STATUS.md`, this handoff, and the relevant worker
    result/coordination state in the same final local commit. A later push still
    requires a fresh exact gate even if the current synchronization succeeds.
 

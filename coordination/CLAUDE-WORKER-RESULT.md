@@ -328,4 +328,6 @@ Committed locally on `agent/mc024-177-claude`:
   by the tracked-diff privacy scan and records the completed live browser
   verification.
 
-Not merged, rebased, pushed, or published.
+The worker itself did not merge, rebase, push, or publish. The manager later
+integrated this work, added global card/child identifier uniqueness and a
+MAC-valid unknown-key rejection test, and re-ran the full gate suite.

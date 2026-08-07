@@ -12,8 +12,8 @@ Google Antigravity will work independently.
 4. Do not repeat the questionnaire, rescan Drive/Family Finance/the workbook,
    or start external agents merely to continue. Antigravity may implement and
    test the remaining work by itself.
-5. Treat the Claude and MC-085 branches as unapproved references. Do not merge
-   them unchanged; their remaining review findings are listed in the handoff.
+5. The former Claude and MC-085 worker branches are retained only as historical
+   audit references; their reviewed work is already on the canonical line.
 6. Never commit or place private card values in prompts. The already captured
    private inventory remains encrypted under ignored local paths and must be
    consumed only through supported local APIs.

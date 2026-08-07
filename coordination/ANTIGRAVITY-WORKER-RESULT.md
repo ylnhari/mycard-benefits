@@ -1,7 +1,7 @@
 # Antigravity Worker Result — MC-085 (Correction)
 
 Task: MC-085 (Verify lounge and meet-and-greet candidates for the pilots)
-Status: ANTIGRAVITY_MC085_CORRECTION_COMPLETE
+Status: integrated after independent manager review
 Runner: Antigravity (Gemini 3.6 Flash High with Public Web verification)
 Branch: `agent/mc085-antigravity`
 Push authorized: no
@@ -12,7 +12,7 @@ Re-verified all domestic lounge, international lounge, airport service, travel e
 
 All manager independent review findings have been resolved:
 1. Re-fetched every cited official source and recorded reproducible SHA-256 hashes of exact retrieved bytes. Linked each HDFC PDF directly to its candidate row.
-2. Factually corrected the Visa row (`https://www.visa.co.in/en_in/visa-offers-and-perks/visa-meet-assist/168650`, sha256=`35032b130155a187f2b554752af28d8723c8f3971de08af47dd37b2d040b7f88`). The official page describes complimentary Meet & Assist for select Visa Infinite cardholders with international face-to-face spend > USD 1,000 in the prior 12 months (effective 2025-04-01 to 2027-03-31). Because neither pilot card is proven Visa Infinite-eligible for this offer, status is marked `not_found`.
+2. The manager re-hashed the content-bearing Visa offer API (`https://www.visa.co.in/offers/api/offer/168650?locale=en_in&siteId=www.visa.co.in`, sha256=`1326d1bb3376e7d50bb9fd08f98275b5e9960447e84f69570b6d0511c60b2779`, 5,929 bytes). The official offer describes complimentary Meet & Assist for select Visa Infinite cardholders with international face-to-face spend > USD 1,000 in the prior 12 months (effective 2025-04-01 to 2027-03-31). Neither pilot is proven eligible, so the row remains `not_found`.
 3. Corrected the RuPay Select row (`https://www.rupay.co.in/lounges`). Automated script received HTTP 403 Forbidden; specific HDFC card airport concierge linkage is unverified and marked `blocked`.
 4. Removed trailing whitespace from research lines 3–6; `git diff --check` passes with zero errors.
 5. Pytest suite ran cleanly with **246 passed** (0 failed).
@@ -36,8 +36,8 @@ Output artifact: `docs/research/lounge-and-meet-greet-verification-2026-08-07.md
    - Bytes: 899,086 | SHA-256: `d8da03f067f5247bbaf47aa86280f0c84ecefc65de19bb23595b117d8a578208`
 7. `https://www.rupay.co.in/lounges`
    - Bytes: HTTP 403 Forbidden | Status: `blocked`
-8. `https://www.visa.co.in/en_in/visa-offers-and-perks/visa-meet-assist/168650`
-   - Bytes: 2,280 | SHA-256: `35032b130155a187f2b554752af28d8723c8f3971de08af47dd37b2d040b7f88`
+8. `https://www.visa.co.in/offers/api/offer/168650?locale=en_in&siteId=www.visa.co.in`
+   - Bytes: 5,929 | SHA-256: `1326d1bb3376e7d50bb9fd08f98275b5e9960447e84f69570b6d0511c60b2779`
 
 ## Quality Gates Verification
 
@@ -52,8 +52,10 @@ Output artifact: `docs/research/lounge-and-meet-greet-verification-2026-08-07.md
 
 - Initial commit: `64dd5f4`
 - Follow-up correction commit: `42543c1` ("Fix MC-085: byte hashes, direct PDF links, corrected Visa/RuPay facts, clean diff")
-- Final result update commit: `3b888e0` / `[PENDING]`
+- Final worker result update commit: `3059e68`
 
 ## Identified Risks
 
-None. Research candidates are isolated under `docs/research/` and do not activate catalog truth.
+- RuPay's automated source remains blocked and does not prove HDFC concierge linkage.
+- The Visa offer remains `not_found` for these pilots until an issuer-to-Visa-Infinite eligibility link is independently proven.
+- Regalia Gold Travel Edge remains conservatively `blocked`; it is not catalog truth or an active user entitlement.

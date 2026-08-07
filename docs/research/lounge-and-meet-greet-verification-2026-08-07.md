@@ -32,21 +32,22 @@
 
 | Benefit Category | Candidate Fact (Independently Worded) | Official Source URL | Source Tier | Content Hash (SHA-256 of Exact Retrieved Bytes) | Retrieval Time | Effective Dates / End Date Status | Eligibility & Spend Conditions | Locator | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| Visa Meet & Assist | Complimentary Meet & Assist airport service for select Visa Infinite cardholders meeting international spend threshold. | `https://www.visa.co.in/en_in/visa-offers-and-perks/visa-meet-assist/168650` | Tier 3 (Network Rules) | `35032b130155a187f2b554752af28d8723c8f3971de08af47dd37b2d040b7f88` | `2026-08-07T10:00:47Z` | Effective 2025-04-01 to 2027-03-31 (`effective_to: 2027-03-31`) | International face-to-face spend > USD 1,000 in preceding 12 months. Requires specific Visa Infinite issuer eligibility; neither pilot card is proven eligible for this specific complimentary offer. | Visa Perks Portal -> Offer 168650 Terms | `not_found` |
+| Visa Meet & Assist | Complimentary Meet & Assist airport service for select Visa Infinite cardholders meeting international spend threshold. | `https://www.visa.co.in/offers/api/offer/168650?locale=en_in&siteId=www.visa.co.in` | Tier 3 (Network Rules) | `1326d1bb3376e7d50bb9fd08f98275b5e9960447e84f69570b6d0511c60b2779` | `2026-08-07T10:46:30Z` | Effective 2025-04-01 to 2027-03-31 (`effective_to: 2027-03-31`) | International face-to-face spend > USD 1,000 in preceding 12 months. Requires specific Visa Infinite issuer eligibility; neither pilot card is proven eligible for this specific complimentary offer. | Content-bearing Visa Offer API -> Offer 168650 `offerCopy` / terms | `not_found` |
 
 ---
 
 ## 4. Summary & Verification Notes
 
-- **Verified Official Candidates Count:** 4 (`official_candidate` status)
+- **Verified Official Candidates Count:** 5 (`official_candidate` status)
   - Tata Neu Infinity Domestic Lounge Access PDF (`1c8925b15782ab6e04dd6dc804a622ccda509fcf0db4ed49ab0e64454b33791c`)
   - Tata Neu Infinity Priority Pass PDF (`13fb3e51c2ca10ba91ff262e7ec554efc22803380003cc2fe681d4421b1668e5`)
   - Regalia Gold Domestic Lounge T&Cs PDF (`39d3bf8aee91f086f2559c272286c60a3136f3d5ef3ab7de890d4b2b312647e9`)
   - Regalia Gold Priority Pass PDF (`737ee0feed10437092c8e1c46896adafcd44f7b46d6ff345841fc6f21890ef00`)
+  - Tata Neu Infinity RuPay Select International Lounge landing page (`df04886c5b39b03b4fe347a31303f95ec2908bbf020138834a73c00918bd88e3`)
 - **Blocked / Needs Review Count:** 2
   - Regalia Gold Travel Edge PDF: Carries internal non-public label on a publicly served PDF (`d8da03f067f5247bbaf47aa86280f0c84ecefc65de19bb23595b117d8a578208`), marked `blocked` pending human approval.
   - RuPay Select Concierge: Automated retrieval returned HTTP 403 Forbidden; marked `blocked`.
-- **Not Found / Conditional Count:** 2
+- **Not Found / Conditional Count:** 1
   - Visa Meet & Assist Offer 168650: Factually corrected to complimentary Visa Infinite offer (>USD 1,000 intl spend, 2025-04-01 to 2027-03-31); marked `not_found` for pilot cards due to unproven Visa Infinite tier eligibility linkage.
-  - Tata Neu Infinity RuPay Select International Lounge Access: Product landing page verified (`df04886c5b39b03b4fe347a31303f95ec2908bbf020138834a73c00918bd88e3`), but network-level list is blocked by HTTP 403.
+- **Status total:** 8 rows = 5 `official_candidate` + 2 `blocked` + 1 `not_found`.
 - **Stacking Invariant:** No automatic entitlement or network stacking is inferred without explicit issuer-level terms.

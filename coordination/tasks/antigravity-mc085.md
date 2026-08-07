@@ -1,10 +1,10 @@
 # Antigravity task — MC-085 lounge and meet-and-greet verification
 
-Status: assigned
+Status: integrated after independent manager review
 Worker: Antigravity with Chrome/browser verification
 Branch: `agent/mc085-antigravity`
 Base: `33a866c2c402b976cb59b03af2ae6c803df51d18`
-Push authorized: no
+Push authorized: only under the repository publication gate
 
 Read `AGENTS.md`, `PRODUCT_REQUIREMENTS.md`, `TASKS.md`,
 `docs/SOURCE-POLICY.md`, `docs/EVIDENCE.md`,

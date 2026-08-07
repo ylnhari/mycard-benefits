@@ -1,10 +1,10 @@
 # Claude batch — MC-024 and MC-177
 
-Status: assigned
+Status: integrated after independent manager review
 Worker: Claude Code Sonnet with Chrome integration
 Branch: `agent/mc024-177-claude`
 Base: `33a866c2c402b976cb59b03af2ae6c803df51d18`
-Push authorized: no
+Push authorized: only under the repository publication gate
 
 Read `AGENTS.md`, `PRODUCT_REQUIREMENTS.md`, `DECISIONS.md`, `PROJECT_STATUS.md`,
 `TASKS.md`, `docs/USER-GUIDE.md`, and

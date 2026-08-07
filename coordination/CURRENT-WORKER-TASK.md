@@ -23,15 +23,18 @@ branch remains isolated until a separate review accepts it.
   integrated and manager-validated at `7a939a2`
 - MC-098: bounded ephemeral optimizer API — worker implementation ending at
   `cb7d08f`, independently validated and integrated through `7070a22`
+- MC-024 and MC-177: linked child records and self-contained remote-access
+  copy — Claude sequence ending at `eb4e470`, independently hardened on the
+  canonical line with cross-card uniqueness and persisted-key allowlisting
+- MC-085: lounge and meet-and-greet candidate evidence — Antigravity sequence
+  ending at `3059e68`, independently reconciled against the official Visa
+  offer API; all items remain candidate/review states, never active catalog truth
 
-## Review-blocked or remaining work
+## Remaining work
 
-- Claude Sonnet: MC-024 and MC-177 on `agent/mc024-177-claude`.
-- Antigravity Gemini 3.6 Flash High: MC-085 on `agent/mc085-antigravity`.
 - Manager: MC-206 encrypted local source consolidation and safe last-four
   projection. Private source data is not delegated.
 
-The first two branches above have unresolved independent-review findings in the
-handoff and must not be merged unchanged. This file is manager-owned. A future
-agent may work directly from the canonical line; it must not edit another dirty
-worktree or expose the ignored private data directory.
+The historical worker branches stay remote for audit only; a future agent works
+directly from the canonical line and must not expose the ignored private data
+directory.
