@@ -1,0 +1,8 @@
+{
+  "id": "77777777-7777-4777-8777-777777777777",
+  "from_offering_id": "22222222-2222-4222-8222-222222222222",
+  "to_offering_id": "22222222-2222-4222-8222-222222222233",
+  "relationship_type": "reskinned",
+  "review_state": "approved",
+  "effective_from": "2026-01-01"
+}

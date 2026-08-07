@@ -32,6 +32,24 @@ class Offering:
 
 
 @dataclass(frozen=True)
+class ProductRelationship:
+    """A reviewed, explicit edge between two public offerings.
+
+    Relationship types: renamed, legacy, cloned, reskinned.
+    Relationships are reviewed data with provenance — never inferred from
+    product names or slugs alone.
+    """
+
+    id: str
+    from_offering_id: str
+    to_offering_id: str
+    relationship_type: str
+    effective_from: date | None
+    effective_to: date | None
+    review_state: str
+
+
+@dataclass(frozen=True)
 class HumanReview:
     """An immutable, attributable human decision about one evidence assertion."""
 

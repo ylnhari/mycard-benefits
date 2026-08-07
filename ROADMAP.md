@@ -3,8 +3,10 @@
 1. **Complete:** foundation, governance, clean-clone server, and durable agent
    substrate.
 2. **Partial, usable:** public catalog schema, immutable identifiers, temporal
-   rules, evaluator, API, and 68 real India product variants. Synthetic records
-   are isolated to tests. Officially verified benefit coverage remains sparse.
+   rules, evaluator, API, 68 real India product variants, and a reviewed
+   product-relationship graph (renamed/legacy/cloned/reskinned). Synthetic
+   records are isolated to tests. Officially verified benefit coverage remains
+   sparse.
 3. **Read-only UI complete; writes gated:** encrypted
    vault, one-use reveal authorization, bounded backup/restore, locking,
    integrity checks, strict manifest parsing, atomic batch import, and optional

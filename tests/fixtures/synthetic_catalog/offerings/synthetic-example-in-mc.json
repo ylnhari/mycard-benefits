@@ -1,0 +1,11 @@
+{
+  "id": "22222222-2222-4222-8222-222222222233",
+  "slug": "synthetic-example-in-mc",
+  "display_name": "Synthetic Example India Mastercard",
+  "issuer_id": "synthetic-issuer",
+  "product_variant_id": "synthetic-tier",
+  "network_id": "mastercard",
+  "market": "IN",
+  "aliases": ["Synthetic India MC"],
+  "effective_from": "2026-01-01"
+}

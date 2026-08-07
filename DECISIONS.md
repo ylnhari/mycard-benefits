@@ -79,3 +79,13 @@
 - AES-256-GCM data encryption; Argon2id passphrase wrapping; optional OS keyring.
 - Stable public offering slug plus immutable UUID; private UUIDv7 card instances.
 - Source agents propose; independent reviewers approve.
+
+## Catalog integrity — 2026-08-07
+
+- Product relationships (renamed, legacy, cloned, reskinned) are modeled as
+  explicit reviewed edges in a `relationships/` catalog directory. The loader
+  validates graph integrity: no self-references, no dangling offering
+  references, no duplicate edges, and no cycles in renamed/legacy edges (DAG
+  enforcement). Names never auto-infer inheritance; item 14 of the
+  questionnaire decisions is now enforced by loader validation and regression
+  tests.

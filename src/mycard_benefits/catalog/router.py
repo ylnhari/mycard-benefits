@@ -14,7 +14,7 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, ConfigDict
 
 from .loader import Catalog, CatalogLoadError, load_catalog
-from .model import BenefitRule, EvidenceAssertion, Offering
+from .model import BenefitRule, EvidenceAssertion, Offering, ProductRelationship
 
 
 class _PublicModel(BaseModel):
@@ -63,9 +63,20 @@ class OfferingSummary(_PublicModel):
     effective_to: date | None
 
 
+class RelationshipSummary(_PublicModel):
+    id: str
+    from_offering_id: str
+    to_offering_id: str
+    relationship_type: str
+    effective_from: date | None
+    effective_to: date | None
+    review_state: str
+
+
 class OfferingDetail(OfferingSummary):
     as_of: date
     benefits: list[BenefitSummary]
+    relationships: list[RelationshipSummary]
 
 
 class CatalogUnavailable(_PublicModel):
@@ -142,6 +153,11 @@ def create_catalog_router(catalog_dir: Path) -> APIRouter:
             **_offering_summary(offering).model_dump(),
             as_of=effective_date,
             benefits=[_benefit_summary(rule) for rule in catalog.benefits_for(offering.id, effective_date)],
+            relationships=[
+                _relationship_summary(rel)
+                for rel in catalog.relationships
+                if rel.from_offering_id == offering.id or rel.to_offering_id == offering.id
+            ],
         )
 
     @router.get("/benefits", response_model=list[BenefitSummary], responses={503: {"model": CatalogUnavailable}})
@@ -162,6 +178,11 @@ def create_catalog_router(catalog_dir: Path) -> APIRouter:
             and (benefit_type is None or rule.benefit_type == benefit_type)
         ]
         return [_benefit_summary(rule) for rule in rules]
+
+    @router.get("/relationships", response_model=list[RelationshipSummary], responses={503: {"model": CatalogUnavailable}})
+    def list_relationships() -> list[RelationshipSummary]:
+        catalog = catalog_or_unavailable()
+        return [_relationship_summary(rel) for rel in catalog.relationships]
 
     return router
 
@@ -229,3 +250,15 @@ def _evidence_summary(assertion: EvidenceAssertion) -> EvidenceSummary:
 
 def _in_range(value: date, start: date | None, end: date | None) -> bool:
     return (start is None or start <= value) and (end is None or value <= end)
+
+
+def _relationship_summary(rel: ProductRelationship) -> RelationshipSummary:
+    return RelationshipSummary(
+        id=rel.id,
+        from_offering_id=rel.from_offering_id,
+        to_offering_id=rel.to_offering_id,
+        relationship_type=rel.relationship_type,
+        effective_from=rel.effective_from,
+        effective_to=rel.effective_to,
+        review_state=rel.review_state,
+    )

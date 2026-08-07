@@ -41,7 +41,7 @@ def test_list_and_detail_are_date_aware_and_deterministic(tmp_path: Path) -> Non
 
         assert default.status_code == dated.status_code == 200
         assert default.json() == dated.json()
-        assert default.json()[0]["slug"] == OFFERING_SLUG
+        assert OFFERING_SLUG in [item["slug"] for item in default.json()]
 
         detail = client.get(f"/api/v1/catalog/offerings/{OFFERING_SLUG}", params={"as_of": "2026-08-06"})
         assert detail.status_code == 200
@@ -117,9 +117,35 @@ def _copy_catalog(destination: Path) -> None:
     for relative in (
         "schema/release.json",
         "offerings/synthetic-example-in.json",
+        "offerings/synthetic-example-in-mc.json",
         "benefits/synthetic-example-reward.json",
+        "relationships/synthetic-example-relationship.json",
     ):
         source = SYNTHETIC_CATALOG_ROOT / relative
         target = destination / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
+
+
+# ---- MC-021: relationship API tests ----
+
+
+def test_offering_detail_includes_relationships(tmp_path: Path) -> None:
+    with _client(tmp_path) as client:
+        detail = client.get(f"/api/v1/catalog/offerings/{OFFERING_SLUG}")
+        assert detail.status_code == 200
+        body = detail.json()
+        assert "relationships" in body
+        assert len(body["relationships"]) == 1
+        rel = body["relationships"][0]
+        assert rel["relationship_type"] == "reskinned"
+        assert rel["review_state"] == "approved"
+
+
+def test_relationships_endpoint_returns_all(tmp_path: Path) -> None:
+    with _client(tmp_path) as client:
+        response = client.get("/api/v1/catalog/relationships")
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 1
+        assert data[0]["from_offering_id"] == "22222222-2222-4222-8222-222222222222"

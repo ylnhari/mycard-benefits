@@ -12,7 +12,14 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-from .model import BenefitRule, EvidenceAssertion, HumanReview, Offering, ReleaseMetadata
+from .model import (
+    BenefitRule,
+    EvidenceAssertion,
+    HumanReview,
+    Offering,
+    ProductRelationship,
+    ReleaseMetadata,
+)
 
 
 class CatalogLoadError(ValueError):
@@ -32,6 +39,8 @@ _BENEFIT_TYPES = {
     "voucher", "meet_and_greet", "lounge", "priority_pass", "other",
 }
 _RULE_STATUS = {"active", "historical", "needs_review", "superseded"}
+_RELATIONSHIP_TYPES = {"renamed", "legacy", "cloned", "reskinned"}
+_RELATIONSHIP_REVIEW_STATE = {"approved", "needs_review"}
 _CONFIDENCE = {"high", "medium", "low"}
 _REVIEW_STATE = {"approved", "needs_review", "reviewed", "rejected", "superseded"}
 _REVIEW_TIERS = {"standard", "enhanced", "high_impact", "ambiguous"}
@@ -46,6 +55,7 @@ class Catalog:
     release: ReleaseMetadata
     offerings: tuple[Offering, ...]
     benefits: tuple[BenefitRule, ...]
+    relationships: tuple[ProductRelationship, ...]
 
     def offering_by_slug(self, slug: str) -> Offering | None:
         return next((item for item in self.offerings if item.slug == slug), None)
@@ -67,8 +77,12 @@ def load_catalog(root: str | Path) -> Catalog:
     release = _parse_release(release_raw, "schema/release.json")
     offerings = tuple(_parse_offering(raw, path) for path, raw in _read_many(root / "offerings"))
     benefits = tuple(_parse_benefit(raw, path) for path, raw in _read_many(root / "benefits", allow_empty=True))
-    _validate_cross_records(release, offerings, benefits)
-    return Catalog(release=release, offerings=offerings, benefits=benefits)
+    relationships = tuple(
+        _parse_relationship(raw, path)
+        for path, raw in _read_many(root / "relationships", allow_empty=True)
+    )
+    _validate_cross_records(release, offerings, benefits, relationships)
+    return Catalog(release=release, offerings=offerings, benefits=benefits, relationships=relationships)
 
 
 def _read_many(directory: Path, allow_empty: bool = False) -> Iterable[tuple[str, dict[str, Any]]]:
@@ -161,6 +175,31 @@ def _parse_benefit(raw: dict[str, Any], path: str) -> BenefitRule:
     return rule
 
 
+def _parse_relationship(raw: dict[str, Any], path: str) -> ProductRelationship:
+    required = {"id", "from_offering_id", "to_offering_id", "relationship_type", "review_state"}
+    _require_exact_keys(raw, required, {"effective_from", "effective_to"}, path)
+    rel_type = _nonempty(raw["relationship_type"], path, "relationship_type")
+    if rel_type not in _RELATIONSHIP_TYPES:
+        raise CatalogLoadError(f"{path}: unsupported relationship_type {rel_type!r}")
+    review_state = _nonempty(raw["review_state"], path, "review_state")
+    if review_state not in _RELATIONSHIP_REVIEW_STATE:
+        raise CatalogLoadError(f"{path}: unsupported relationship review_state {review_state!r}")
+    from_id = _uuid(raw["from_offering_id"], path, "from_offering_id")
+    to_id = _uuid(raw["to_offering_id"], path, "to_offering_id")
+    if from_id == to_id:
+        raise CatalogLoadError(f"{path}: relationship must not reference itself")
+    effective_from, effective_to = _date_range(raw, path)
+    return ProductRelationship(
+        id=_uuid(raw["id"], path, "id"),
+        from_offering_id=from_id,
+        to_offering_id=to_id,
+        relationship_type=rel_type,
+        effective_from=effective_from,
+        effective_to=effective_to,
+        review_state=review_state,
+    )
+
+
 def _assertion(raw: dict[str, Any], path: str) -> EvidenceAssertion:
     required = {"id", "source_policy_class", "url", "content_sha256", "retrieved_at", "confidence", "review_state", "reviews"}
     _require_exact_keys(raw, required, {"effective_from", "effective_to"}, path)
@@ -248,6 +287,7 @@ def _validate_cross_records(
     release: ReleaseMetadata,
     offerings: tuple[Offering, ...],
     benefits: tuple[BenefitRule, ...],
+    relationships: tuple[ProductRelationship, ...] = (),
 ) -> None:
     _unique((item.id for item in offerings), "offering IDs")
     _unique((item.slug for item in offerings), "offering slugs")
@@ -266,6 +306,24 @@ def _validate_cross_records(
                 raise CatalogLoadError(f"benefit {rule.id}: evidence retrieval is after the release")
             if any(review.reviewed_at > release.generated_at for review in assertion.reviews):
                 raise CatalogLoadError(f"benefit {rule.id}: review is after the release")
+    # ---- relationship graph integrity ----
+    _unique((item.id for item in relationships), "relationship IDs")
+    edges: set[tuple[str, str, str]] = set()
+    for rel in relationships:
+        if rel.from_offering_id not in offering_ids:
+            raise CatalogLoadError(f"relationship {rel.id}: unknown from_offering_id")
+        if rel.to_offering_id not in offering_ids:
+            raise CatalogLoadError(f"relationship {rel.id}: unknown to_offering_id")
+        edge = (rel.from_offering_id, rel.to_offering_id, rel.relationship_type)
+        if edge in edges:
+            raise CatalogLoadError(f"relationship {rel.id}: duplicate edge")
+        edges.add(edge)
+    # DAG enforcement for renamed and legacy edges — no cycles allowed
+    dag_edges: dict[str, list[str]] = {}
+    for rel in relationships:
+        if rel.relationship_type in {"renamed", "legacy"}:
+            dag_edges.setdefault(rel.from_offering_id, []).append(rel.to_offering_id)
+    _detect_cycle(dag_edges)
 
 
 def _require_keys(raw: dict[str, Any], keys: set[str], path: str) -> None:
@@ -361,3 +419,31 @@ def _unique(values: Iterable[str], label: str) -> None:
 
 def _in_date_range(value: date, start: date | None, end: date | None) -> bool:
     return (start is None or start <= value) and (end is None or value <= end)
+
+
+def _detect_cycle(adjacency: dict[str, list[str]]) -> None:
+    """Raise CatalogLoadError if the directed graph contains a cycle."""
+    WHITE, GRAY, BLACK = 0, 1, 2
+    color: dict[str, int] = {node: WHITE for node in adjacency}
+    for targets in adjacency.values():
+        for t in targets:
+            color.setdefault(t, WHITE)
+
+    for start in list(color):
+        if color[start] != WHITE:
+            continue
+        stack = [start]
+        while stack:
+            node = stack[-1]
+            if color[node] == WHITE:
+                color[node] = GRAY
+                for neighbor in adjacency.get(node, []):
+                    if color.get(neighbor, WHITE) == GRAY:
+                        raise CatalogLoadError(
+                            "relationship graph contains a cycle in renamed/legacy edges"
+                        )
+                    if color.get(neighbor, WHITE) == WHITE:
+                        stack.append(neighbor)
+            else:
+                stack.pop()
+                color[node] = BLACK

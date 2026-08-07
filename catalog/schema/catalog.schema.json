@@ -1,12 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://mycard-benefits.invalid/schema/catalog-1.1.0.json",
+  "$id": "https://mycard-benefits.invalid/schema/catalog-1.2.0.json",
   "title": "MyCard Benefits public catalog records",
   "description": "Public catalog authoring contract. Runtime Python validation remains authoritative.",
   "oneOf": [
     {"$ref": "#/$defs/release"},
     {"$ref": "#/$defs/offering"},
-    {"$ref": "#/$defs/benefit"}
+    {"$ref": "#/$defs/benefit"},
+    {"$ref": "#/$defs/relationship"}
   ],
   "$defs": {
     "uuid": {"type": "string", "format": "uuid"},
@@ -134,6 +135,22 @@
         "allowance": {"type": "object"},
         "evidence": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/evidence"}},
         "conflicts_with": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/uuid"}}
+      }
+    },
+    "relationship": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "from_offering_id", "to_offering_id", "relationship_type", "review_state"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/uuid"},
+        "from_offering_id": {"$ref": "#/$defs/uuid"},
+        "to_offering_id": {"$ref": "#/$defs/uuid"},
+        "relationship_type": {"enum": ["renamed", "legacy", "cloned", "reskinned"]},
+        "review_state": {"enum": ["approved", "needs_review"]},
+        "effective_from": {"$ref": "#/$defs/date"},
+        "effective_to": {"$ref": "#/$defs/date"}
       }
     }
   }

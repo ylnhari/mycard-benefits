@@ -185,8 +185,91 @@ def test_production_catalog_contains_no_synthetic_records_or_invalid_urls() -> N
 
 
 def _copy_catalog(destination: Path) -> None:
-    for relative in ("schema/release.json", "offerings/synthetic-example-in.json", "benefits/synthetic-example-reward.json"):
+    for relative in (
+        "schema/release.json",
+        "offerings/synthetic-example-in.json",
+        "offerings/synthetic-example-in-mc.json",
+        "benefits/synthetic-example-reward.json",
+        "relationships/synthetic-example-relationship.json",
+    ):
         source = SYNTHETIC_CATALOG_ROOT / relative
         target = destination / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
+
+
+# ---- MC-021: relationship graph tests ----
+
+
+def test_relationship_graph_loads_and_validates(tmp_path: Path) -> None:
+    _copy_catalog(tmp_path)
+    catalog = load_catalog(tmp_path)
+    assert len(catalog.relationships) == 1
+    rel = catalog.relationships[0]
+    assert rel.relationship_type == "reskinned"
+    assert rel.from_offering_id == "22222222-2222-4222-8222-222222222222"
+    assert rel.to_offering_id == "22222222-2222-4222-8222-222222222233"
+    assert rel.review_state == "approved"
+
+
+def test_relationship_self_reference_rejected(tmp_path: Path) -> None:
+    _copy_catalog(tmp_path)
+    path = tmp_path / "relationships" / "synthetic-example-relationship.json"
+    payload = json.loads(path.read_text())
+    payload["to_offering_id"] = payload["from_offering_id"]
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(CatalogLoadError, match="must not reference itself"):
+        load_catalog(tmp_path)
+
+
+def test_relationship_unknown_offering_rejected(tmp_path: Path) -> None:
+    _copy_catalog(tmp_path)
+    path = tmp_path / "relationships" / "synthetic-example-relationship.json"
+    payload = json.loads(path.read_text())
+    payload["to_offering_id"] = "99999999-9999-4999-8999-999999999999"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(CatalogLoadError, match="unknown to_offering_id"):
+        load_catalog(tmp_path)
+
+
+def test_relationship_cycle_rejected(tmp_path: Path) -> None:
+    _copy_catalog(tmp_path)
+    # Add a reverse renamed edge to create A → B → A cycle
+    reverse = {
+        "id": "88888888-8888-4888-8888-888888888888",
+        "from_offering_id": "22222222-2222-4222-8222-222222222233",
+        "to_offering_id": "22222222-2222-4222-8222-222222222222",
+        "relationship_type": "renamed",
+        "review_state": "approved",
+    }
+    # First change the existing edge to renamed so both are DAG-checked
+    path = tmp_path / "relationships" / "synthetic-example-relationship.json"
+    payload = json.loads(path.read_text())
+    payload["relationship_type"] = "renamed"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    reverse_path = tmp_path / "relationships" / "reverse.json"
+    reverse_path.write_text(json.dumps(reverse), encoding="utf-8")
+    with pytest.raises(CatalogLoadError, match="cycle"):
+        load_catalog(tmp_path)
+
+
+def test_relationship_bad_review_state_rejected(tmp_path: Path) -> None:
+    _copy_catalog(tmp_path)
+    path = tmp_path / "relationships" / "synthetic-example-relationship.json"
+    payload = json.loads(path.read_text())
+    payload["review_state"] = "rejected"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(CatalogLoadError, match="unsupported relationship review_state"):
+        load_catalog(tmp_path)
+
+
+def test_names_never_infer_relationships(tmp_path: Path) -> None:
+    """Similarly-named offerings must not produce auto-inferred edges."""
+    _copy_catalog(tmp_path)
+    # Remove all explicit relationships
+    for f in (tmp_path / "relationships").glob("*.json"):
+        f.unlink()
+    catalog = load_catalog(tmp_path)
+    # Two offerings with similar names — no inferred relationship
+    assert len(catalog.offerings) == 2
+    assert len(catalog.relationships) == 0

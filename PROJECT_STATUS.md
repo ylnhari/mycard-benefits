@@ -26,6 +26,9 @@ view of the encrypted portfolio.
 - Public India starter catalog with 68 real product-variant identities. Product
   presence is not presented as benefit verification; synthetic fixtures are
   isolated from runtime catalog views and APIs.
+- Reviewed product-relationship graph with DAG-enforced integrity for renamed,
+  legacy, cloned, and reskinned products. Relationships are explicit reviewed
+  data; names never auto-infer inheritance.
 - Loopback-local, read-only My Cards API/UI. It opens the existing vault through
   the operating-system keyring, returns only card UUID, offering, lifecycle,
   timestamps, and replacement metadata, and applies `no-store`. The view renders
