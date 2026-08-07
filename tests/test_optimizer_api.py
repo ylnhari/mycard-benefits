@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from datetime import date, timedelta
 from decimal import Decimal
@@ -551,6 +552,7 @@ def test_oversized_inputs_are_rejected_before_the_engine(tmp_path: Path) -> None
         with _client(tmp_path) as client:
             response = client.post("/api/v1/optimizer/routes", json=payload)
         assert response.status_code == 422, label
+        assert response.headers["cache-control"] == "no-store", label
 
     oversized_body = _request(
         routes=[_route("X", [_component("x", label="X" * (MAX_REQUEST_BYTES + 1))])]
@@ -558,7 +560,175 @@ def test_oversized_inputs_are_rejected_before_the_engine(tmp_path: Path) -> None
     with _client(tmp_path) as client:
         response = client.post("/api/v1/optimizer/routes", json=oversized_body)
     assert response.status_code == 413
+    assert response.headers["cache-control"] == "no-store"
     assert response.json()["detail"] == "request body exceeds the size limit"
+
+
+def test_oversized_content_length_is_rejected_without_reading(
+    tmp_path: Path,
+) -> None:
+    with _client(tmp_path) as client:
+        response = client.post(
+            "/api/v1/optimizer/routes",
+            content=b"x" * (MAX_REQUEST_BYTES + 1),
+            headers={"content-type": "application/json"},
+        )
+
+    assert response.status_code == 413
+    assert response.headers["cache-control"] == "no-store"
+    assert response.json()["detail"] == "request body exceeds the size limit"
+
+
+def test_chunked_body_is_bounded_while_streaming(tmp_path: Path) -> None:
+    app = create_app(
+        Settings(data_dir=tmp_path / "data", catalog_dir=tmp_path / "catalog", port=8777)
+    )
+    scope = _optimizer_scope(content_length=None)
+    chunk = b"x" * 16 * 1024
+    total_chunks = (MAX_REQUEST_BYTES // len(chunk)) * 4
+    consumed = 0
+
+    async def receive() -> dict[str, Any]:
+        nonlocal consumed
+        if consumed < total_chunks:
+            consumed += 1
+            return {"type": "http.request", "body": chunk, "more_body": consumed < total_chunks}
+        return {"type": "http.request", "body": b"", "more_body": False}
+
+    sent: list[dict[str, Any]] = []
+
+    async def send(message: dict[str, Any]) -> None:
+        sent.append(message)
+
+    asyncio.run(app(scope, receive, send))
+
+    start = next(message for message in sent if message["type"] == "http.response.start")
+    assert start["status"] == 413
+    headers = {key.decode(): value.decode() for key, value in start["headers"]}
+    assert headers["cache-control"] == "no-store"
+    assert consumed < total_chunks
+    assert consumed * len(chunk) <= MAX_REQUEST_BYTES + len(chunk)
+
+
+def test_openapi_documents_request_and_error_schemas(tmp_path: Path) -> None:
+    app = create_app(
+        Settings(data_dir=tmp_path / "data", catalog_dir=tmp_path / "catalog", port=8777)
+    )
+    schema = app.openapi()
+    operation = schema["paths"]["/api/v1/optimizer/routes"]["post"]
+
+    request_body = operation["requestBody"]
+    assert request_body["required"] is True
+    assert request_body["content"]["application/json"]["schema"] == {
+        "$ref": "#/components/schemas/OptimizerRequest"
+    }
+
+    responses = operation["responses"]
+    assert responses["200"]["content"]["application/json"]["schema"] == {
+        "$ref": "#/components/schemas/OptimizationResultResponse"
+    }
+    assert responses["413"]["content"]["application/json"]["schema"] == {
+        "$ref": "#/components/schemas/OversizeErrorResponse"
+    }
+    assert responses["422"]["content"]["application/json"]["schema"] == {
+        "$ref": "#/components/schemas/ValidationErrorResponse"
+    }
+
+    schemas = schema["components"]["schemas"]
+    assert "OptimizerRequest" in schemas
+    assert "OptimizationResultResponse" in schemas
+    assert "OversizeErrorResponse" in schemas
+    assert "ValidationErrorResponse" in schemas
+
+
+def test_no_store_is_set_on_error_responses(tmp_path: Path) -> None:
+    with _client(tmp_path) as client:
+        structural = client.post(
+            "/api/v1/optimizer/routes",
+            content=b"not json",
+            headers={"content-type": "application/json"},
+        )
+        semantic = client.post(
+            "/api/v1/optimizer/routes",
+            json=_request(routes=[_route("SYNTHETIC-ONLY-DUP"), _route("SYNTHETIC-ONLY-DUP")]),
+        )
+
+    assert structural.status_code == 422
+    assert structural.headers["cache-control"] == "no-store"
+    assert semantic.status_code == 422
+    assert semantic.headers["cache-control"] == "no-store"
+
+
+def test_duplicate_collection_entries_fail_closed(tmp_path: Path) -> None:
+    duplicate_payloads: list[tuple[str, dict[str, Any]]] = [
+        (
+            "duplicate link class",
+            _request(scenario=_scenario(allowed_link_classes=["official", "official"])),
+        ),
+        (
+            "duplicate approved origin",
+            _request(
+                scenario=_scenario(approved_official_origins=[SYNTHETIC_ORIGIN, SYNTHETIC_ORIGIN])
+            ),
+        ),
+        (
+            "duplicate approved origin after canonicalization",
+            _request(
+                scenario=_scenario(
+                    approved_official_origins=[
+                        "https://Example.invalid",
+                        "https://example.invalid",
+                    ]
+                )
+            ),
+        ),
+        (
+            "duplicate compatible reference",
+            _request(
+                routes=[
+                    _route(
+                        "X",
+                        [
+                            _component("left", compatible_with=["right", "right"]),
+                            _component("right", compatible_with=["left"]),
+                        ],
+                    )
+                ]
+            ),
+        ),
+        (
+            "duplicate component id",
+            _request(routes=[_route("X", [_component("dup"), _component("dup")])]),
+        ),
+    ]
+    for label, payload in duplicate_payloads:
+        with _client(tmp_path) as client:
+            response = client.post("/api/v1/optimizer/routes", json=payload)
+        assert response.status_code == 422, label
+        detail = response.json()["detail"]
+        assert isinstance(detail, list) and detail, label
+        assert MARKER not in str(detail), label
+        assert response.headers["cache-control"] == "no-store", label
+
+
+def _optimizer_scope(*, content_length: int | None) -> dict[str, Any]:
+    headers = [(b"host", b"testserver"), (b"content-type", b"application/json")]
+    if content_length is not None:
+        headers.append((b"content-length", str(content_length).encode("ascii")))
+    return {
+        "type": "http",
+        "asgi": {"version": "3.0", "spec_version": "2.3"},
+        "http_version": "1.1",
+        "method": "POST",
+        "scheme": "http",
+        "path": "/api/v1/optimizer/routes",
+        "raw_path": b"/api/v1/optimizer/routes",
+        "query_string": b"",
+        "root_path": "",
+        "headers": headers,
+        "client": ("127.0.0.1", 12345),
+        "server": ("127.0.0.1", 8000),
+    }
 
 
 def test_no_persistence_or_logging_of_request_values(
