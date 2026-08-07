@@ -75,6 +75,7 @@ class RelationshipSummary(_PublicModel):
     effective_from: date | None
     effective_to: date | None
     review_state: str
+    evidence: list[EvidenceSummary]
 
 
 class OfferingDetail(OfferingSummary):
@@ -174,12 +175,13 @@ def create_catalog_router(catalog_dir: Path) -> APIRouter:
         catalog = catalog_or_unavailable()
         effective_date = _effective_date(catalog, as_of)
         offering_id = _offering_id_for_slug(catalog, offering_slug, effective_date)
-        valid_statuses = {"active", "historical", "superseded"} if include_historical else {"active"}
         rules = [
             rule
             for rule in catalog.benefits
-            if rule.status in valid_statuses
-            and (include_historical or _in_range(effective_date, rule.effective_from, rule.effective_to))
+            if (
+                (rule.status == "active" and _in_range(effective_date, rule.effective_from, rule.effective_to))
+                or (include_historical and rule.status in {"historical", "superseded"})
+            )
             and (offering_id is None or rule.offering_id == offering_id)
             and (benefit_type is None or rule.benefit_type == benefit_type)
         ]
@@ -271,4 +273,5 @@ def _relationship_summary(rel: ProductRelationship) -> RelationshipSummary:
         effective_from=rel.effective_from,
         effective_to=rel.effective_to,
         review_state=rel.review_state,
+        evidence=[_evidence_summary(assertion) for assertion in rel.evidence],
     )

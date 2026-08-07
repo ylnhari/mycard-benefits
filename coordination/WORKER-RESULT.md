@@ -277,3 +277,61 @@ the harness.
 - Coordination follow-up: this file.
 - All local to `agent/mc008-009-opencode` (base: manager checkpoint
   `4eeb303`); nothing was pushed.
+
+## MC-021, MC-070, MC-093 — catalog integrity batch
+
+Status: COMPLETE
+Runner: Antigravity
+Branch: `agent/mc021-070-093-antigravity`
+Push authorized: no
+
+### Task commit sequence
+
+1. **MC-021**: `6d5a0be` — Add reviewed product-relationship graph with DAG integrity.
+2. **MC-070 checkpoint**: `891e5bd` — Checkpoint MC-070 partial implementation.
+3. **MC-070 final**: `8f20253` — Make benefits temporal and versioned with unknown end-date handling.
+4. **MC-093**: `5682386` — Enforce full provenance metadata per assertion with source tiering.
+5. **Follow-up correction**: `61e68d7` — Address manager acceptance-review findings for MC-021, MC-070, and MC-093.
+
+### MC-021 — reviewed relationship graph
+
+- Verdict: `MC-021_WORKER_PASS`.
+- Modeled explicit, reviewed product relationships (`renamed`, `legacy`,
+  `cloned`, `reskinned`) under `relationships/`. Every relationship requires
+  non-empty evidence; approved relationships require approved medium- or
+  high-confidence evidence with an approving human review. Loader validation
+  rejects self-references, dangling offerings, duplicate edges, and cycles for
+  `renamed` and `legacy`. Product names never imply inheritance. Relationship
+  evidence summaries are exposed through the catalog relationship and offering
+  APIs.
+
+### MC-070 — temporal and versioned benefits
+
+- Verdict: `MC-070_WORKER_PASS`.
+- Added `rule_version` and `supersedes`. `end_date_known` is derived from
+  `effective_to`, preventing contradictory authoring. Supersession links must
+  use the same offering and benefit type, advance the version number, target a
+  historical or superseded rule, and remain acyclic. Active rules still obey
+  `as_of` when historical results are requested; historical and superseded
+  facts remain discoverable.
+
+### MC-093 — provenance per assertion
+
+- Verdict: `MC-093_WORKER_PASS`.
+- `source_tier` is derived at runtime from `source_policy_class` and exposed in
+  API responses, but is not an authoring-schema field. Tier-6
+  (`discovery_only`) evidence cannot be approved. Approved assertions require
+  complete source, retrieval, content-hash, confidence, and human-review
+  provenance.
+
+### Worker verification
+
+- `uv run ruff check .` — passed.
+- `uv run mypy src` — passed in strict mode for 31 source files.
+- `uv run pytest` — 236 passed, 1 warning.
+- `node --check src/mycard_benefits/static/app.js` — passed.
+- `uv build` — passed.
+- `git diff --check` — passed.
+- An invalid synthetic UUID in the first test run was corrected before the
+  complete passing run. No private data or secrets were accessed, and nothing
+  was pushed.

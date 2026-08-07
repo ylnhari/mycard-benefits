@@ -4,5 +4,24 @@
   "to_offering_id": "22222222-2222-4222-8222-222222222233",
   "relationship_type": "reskinned",
   "review_state": "approved",
-  "effective_from": "2026-01-01"
+  "effective_from": "2026-01-01",
+  "evidence": [
+    {
+      "id": "77777777-7777-4777-8777-777777777778",
+      "source_policy_class": "issuer_document",
+      "url": "https://example.invalid/synthetic-relationship-terms",
+      "content_sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "retrieved_at": "2026-08-01T10:00:00Z",
+      "confidence": "high",
+      "review_state": "approved",
+      "reviews": [
+        {
+          "id": "77777777-7777-4777-8777-777777777779",
+          "reviewer_id": "SYNTHETIC-ONLY-REVIEWER",
+          "reviewed_at": "2026-08-02T10:00:00Z",
+          "decision": "approved"
+        }
+      ]
+    }
+  ]
 }

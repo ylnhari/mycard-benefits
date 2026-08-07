@@ -113,7 +113,7 @@ Manager protocol: tasks are assigned one at a time; a worker owns only its named
   - Depends on: MC-031
   - Suggested runner: Manager
 
-- [ ] **MC-021: Add a reviewed relationship graph for renamed, legacy, cloned, and reskinned products** - Model public product relationships from a reviewed graph, never inferred from names alone.
+- [x] **MC-021: Add a reviewed relationship graph for renamed, legacy, cloned, and reskinned products** - Model public product relationships from a reviewed graph, never inferred from names alone.
   - Acceptance: catalog relationship entries are reviewed data with provenance; loader validates graph integrity; names never auto-infer inheritance per item 14.
   - Depends on: none
   - Suggested runner: OpenCode
@@ -364,7 +364,7 @@ Manager protocol: tasks are assigned one at a time; a worker owns only its named
   - Depends on: MC-067
   - Suggested runner: OpenCode
 
-- [ ] **MC-070: Keep benefits temporal and versioned** - Expired rules stay historical, never silently disappear; a missing end date means unknown, not perpetual.
+- [x] **MC-070: Keep benefits temporal and versioned** - Expired rules stay historical, never silently disappear; a missing end date means unknown, not perpetual.
   - Acceptance: expired facts render as historical; missing end date shows "unknown" not "ongoing"; tests cover both per item 53 and `PRODUCT_REQUIREMENTS.md` "Benefit scope".
   - Depends on: none
   - Suggested runner: OpenCode
@@ -481,7 +481,7 @@ Manager protocol: tasks are assigned one at a time; a worker owns only its named
   - Depends on: MC-093
   - Suggested runner: OpenCode
 
-- [ ] **MC-093: Attach full provenance metadata to every assertion** - Source URL and tier, effective dates, retrieval time, content hash, confidence, and review state on every catalog fact.
+- [x] **MC-093: Attach full provenance metadata to every assertion** - Source URL and tier, effective dates, retrieval time, content hash, confidence, and review state on every catalog fact.
   - Acceptance: no approved assertion lacks full provenance; loader validates the invariant per `docs/SOURCE-POLICY.md` "Provenance requirements".
   - Depends on: none
   - Suggested runner: OpenCode

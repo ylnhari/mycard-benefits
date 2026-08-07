@@ -234,19 +234,19 @@ def test_relationship_unknown_offering_rejected(tmp_path: Path) -> None:
 
 def test_relationship_cycle_rejected(tmp_path: Path) -> None:
     _copy_catalog(tmp_path)
-    # Add a reverse renamed edge to create A → B → A cycle
+    path = tmp_path / "relationships" / "synthetic-example-relationship.json"
+    payload = json.loads(path.read_text())
+    payload["relationship_type"] = "renamed"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
     reverse = {
         "id": "88888888-8888-4888-8888-888888888888",
         "from_offering_id": "22222222-2222-4222-8222-222222222233",
         "to_offering_id": "22222222-2222-4222-8222-222222222222",
         "relationship_type": "renamed",
         "review_state": "approved",
+        "evidence": payload["evidence"],
     }
-    # First change the existing edge to renamed so both are DAG-checked
-    path = tmp_path / "relationships" / "synthetic-example-relationship.json"
-    payload = json.loads(path.read_text())
-    payload["relationship_type"] = "renamed"
-    path.write_text(json.dumps(payload), encoding="utf-8")
     reverse_path = tmp_path / "relationships" / "reverse.json"
     reverse_path.write_text(json.dumps(reverse), encoding="utf-8")
     with pytest.raises(CatalogLoadError, match="cycle"):
@@ -260,6 +260,16 @@ def test_relationship_bad_review_state_rejected(tmp_path: Path) -> None:
     payload["review_state"] = "rejected"
     path.write_text(json.dumps(payload), encoding="utf-8")
     with pytest.raises(CatalogLoadError, match="unsupported relationship review_state"):
+        load_catalog(tmp_path)
+
+
+def test_relationship_requires_valid_approved_evidence(tmp_path: Path) -> None:
+    _copy_catalog(tmp_path)
+    path = tmp_path / "relationships" / "synthetic-example-relationship.json"
+    payload = json.loads(path.read_text())
+    payload["evidence"][0]["review_state"] = "needs_review"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(CatalogLoadError, match="approved relationship requires approved medium/high-confidence evidence"):
         load_catalog(tmp_path)
 
 
@@ -333,6 +343,28 @@ def test_supersession_validation_and_cycle_prevention(tmp_path: Path) -> None:
     v2_path.write_text(json.dumps(v2_payload), encoding="utf-8")
     with pytest.raises(CatalogLoadError, match="cannot supersede itself"):
         load_catalog(tmp_path)
+
+    # Test cross-offering supersession failure
+    v2_payload["supersedes"] = v1_id
+    v2_payload["offering_id"] = "22222222-2222-4222-8222-222222222233"
+    v2_path.write_text(json.dumps(v2_payload), encoding="utf-8")
+    with pytest.raises(CatalogLoadError, match="from a different offering"):
+        load_catalog(tmp_path)
+    v2_payload["offering_id"] = v1_payload["offering_id"]
+
+    # Test cross-benefit-type supersession failure
+    v2_payload["benefit_type"] = "lounge"
+    v2_path.write_text(json.dumps(v2_payload), encoding="utf-8")
+    with pytest.raises(CatalogLoadError, match="of a different benefit_type"):
+        load_catalog(tmp_path)
+    v2_payload["benefit_type"] = v1_payload["benefit_type"]
+
+    # Test rule_version must be strictly greater failure
+    v2_payload["rule_version"] = 1
+    v2_path.write_text(json.dumps(v2_payload), encoding="utf-8")
+    with pytest.raises(CatalogLoadError, match="must be strictly greater than superseded rule_version"):
+        load_catalog(tmp_path)
+    v2_payload["rule_version"] = 2
 
     # Test superseding active rule failure
     v1_payload["status"] = "active"

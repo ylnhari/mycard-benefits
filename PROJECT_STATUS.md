@@ -26,15 +26,17 @@ view of the encrypted portfolio.
 - Public India starter catalog with 68 real product-variant identities. Product
   presence is not presented as benefit verification; synthetic fixtures are
   isolated from runtime catalog views and APIs.
-- Reviewed product-relationship graph with DAG-enforced integrity for renamed,
-  legacy, cloned, and reskinned products. Relationships are explicit reviewed
-  data; names never auto-infer inheritance.
-- Temporal and versioned benefit rules (`end_date_known`, `rule_version`, `supersedes`).
-  Missing end dates are treated as unknown (never perpetual); expired and superseded rules
-  remain as historical records; supersession chains are DAG-validated.
-- Full provenance metadata enforced on every catalog assertion: source URL/tier (1-6),
-  retrieved timestamp, content hash, confidence, review state, and approved reviews.
-  Tier 6 discovery-only sources are strictly forbidden from being approved.
+- Reviewed product-relationship graph with DAG-enforced integrity and required evidence
+  assertions for renamed, legacy, cloned, and reskinned products. Relationships are explicit
+  reviewed data with provenance; names never auto-infer inheritance.
+- Temporal and versioned benefit rules (`rule_version`, `supersedes`). Missing end dates are
+  treated as unknown (`end_date_known: False`), strictly derived from `effective_to`; expired
+  and superseded rules remain discoverable as history; supersession chains enforce matching offering,
+  matching benefit type, and strictly increasing rule version.
+- Full provenance metadata enforced on every catalog assertion: source URL, retrieved timestamp,
+  content hash, confidence, review state, and approved human reviews. The numeric source_tier (1-6)
+  is strictly derived at runtime from source_policy_class and exposed in API responses. Tier 6
+  discovery-only sources are strictly forbidden from being approved.
 - Loopback-local, read-only My Cards API/UI. It opens the existing vault through
   the operating-system keyring, returns only card UUID, offering, lifecycle,
   timestamps, and replacement metadata, and applies `no-store`. The view renders

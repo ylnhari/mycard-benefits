@@ -149,6 +149,8 @@ def test_relationships_endpoint_returns_all(tmp_path: Path) -> None:
         data = response.json()
         assert len(data) == 1
         assert data[0]["from_offering_id"] == "22222222-2222-4222-8222-222222222222"
+        assert len(data[0]["evidence"]) >= 1
+        assert data[0]["evidence"][0]["source_url"].startswith("https://")
 
 
 # ---- MC-070: temporal and versioned benefits API tests ----
@@ -171,22 +173,35 @@ def test_benefits_api_include_historical_parameter(tmp_path: Path) -> None:
     _copy_catalog(tmp_path)
     path = tmp_path / "benefits" / "synthetic-example-reward.json"
     payload = json.loads(path.read_text(encoding="utf-8"))
-    payload["status"] = "historical"
+
+    # Active rule effective from 2026-01-01 to 2026-06-01
+    payload["status"] = "active"
+    payload["effective_from"] = "2026-01-01"
+    payload["effective_to"] = "2026-06-01"
     path.write_text(json.dumps(payload), encoding="utf-8")
+
+    # Historical rule
+    hist_payload = dict(payload)
+    hist_payload["id"] = "99999999-9999-4999-8999-999999999999"
+    hist_payload["status"] = "historical"
+    hist_path = tmp_path / "benefits" / "synthetic-example-reward-hist.json"
+    hist_path.write_text(json.dumps(hist_payload), encoding="utf-8")
 
     app = FastAPI()
     app.include_router(create_catalog_router(tmp_path))
     with TestClient(app) as client:
-        # Default: active rules only -> empty
-        res_default = client.get("/api/v1/catalog/benefits")
+        # Querying as of 2026-08-01: active rule is expired (outside date range)
+        res_default = client.get("/api/v1/catalog/benefits", params={"as_of": "2026-08-01"})
         assert res_default.status_code == 200
         assert res_default.json() == []
 
-        # With include_historical=true -> returns historical rule
-        res_hist = client.get("/api/v1/catalog/benefits", params={"include_historical": "true"})
+        # With include_historical=true: active rule is STILL excluded (outside date range), but historical rule is returned!
+        res_hist = client.get("/api/v1/catalog/benefits", params={"include_historical": "true", "as_of": "2026-08-01"})
         assert res_hist.status_code == 200
-        assert len(res_hist.json()) == 1
-        assert res_hist.json()[0]["status"] == "historical"
+        data = res_hist.json()
+        assert len(data) == 1
+        assert data[0]["id"] == "99999999-9999-4999-8999-999999999999"
+        assert data[0]["status"] == "historical"
 
 
 # ---- MC-093: provenance metadata API tests ----

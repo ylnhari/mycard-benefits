@@ -32,24 +32,6 @@ class Offering:
 
 
 @dataclass(frozen=True)
-class ProductRelationship:
-    """A reviewed, explicit edge between two public offerings.
-
-    Relationship types: renamed, legacy, cloned, reskinned.
-    Relationships are reviewed data with provenance — never inferred from
-    product names or slugs alone.
-    """
-
-    id: str
-    from_offering_id: str
-    to_offering_id: str
-    relationship_type: str
-    effective_from: date | None
-    effective_to: date | None
-    review_state: str
-
-
-@dataclass(frozen=True)
 class HumanReview:
     """An immutable, attributable human decision about one evidence assertion."""
 
@@ -90,6 +72,25 @@ class EvidenceAssertion:
 
 
 @dataclass(frozen=True)
+class ProductRelationship:
+    """A reviewed, explicit edge between two public offerings.
+
+    Relationship types: renamed, legacy, cloned, reskinned.
+    Relationships are reviewed data with provenance — never inferred from
+    product names or slugs alone.
+    """
+
+    id: str
+    from_offering_id: str
+    to_offering_id: str
+    relationship_type: str
+    effective_from: date | None
+    effective_to: date | None
+    review_state: str
+    evidence: tuple[EvidenceAssertion, ...]
+
+
+@dataclass(frozen=True)
 class BenefitRule:
     id: str
     offering_id: str
@@ -103,10 +104,9 @@ class BenefitRule:
     allowance: dict[str, Any] | None
     evidence: tuple[EvidenceAssertion, ...]
     conflicts_with: tuple[str, ...]
-    end_date_known: bool = False
     rule_version: int = 1
     supersedes: str | None = None
 
-    def __post_init__(self) -> None:
-        if not self.end_date_known and self.effective_to is not None:
-            object.__setattr__(self, "end_date_known", True)
+    @property
+    def end_date_known(self) -> bool:
+        return self.effective_to is not None

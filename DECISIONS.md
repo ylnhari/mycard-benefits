@@ -83,18 +83,21 @@
 ## Catalog integrity — 2026-08-07
 
 - Product relationships (renamed, legacy, cloned, reskinned) are modeled as
-  explicit reviewed edges in a `relationships/` catalog directory. The loader
-  validates graph integrity: no self-references, no dangling offering
-  references, no duplicate edges, and no cycles in renamed/legacy edges (DAG
-  enforcement). Names never auto-infer inheritance; item 14 of the
-  questionnaire decisions is now enforced by loader validation and regression
-  tests.
-- Benefit rules are temporal and versioned (`end_date_known`, `rule_version`, `supersedes`).
-  A missing end date (`effective_to: null`) evaluates as unknown (`end_date_known: False`),
-  never perpetual. Expired and superseded rules remain stored as historical records
-  rather than being silently dropped; loader validates supersession links and enforces
-  DAG cycle prevention for supersession chains.
+  explicit reviewed edges in a `relationships/` catalog directory with required
+  evidence assertions and human review records. The loader validates graph integrity
+  and evidence provenance: no self-references, no dangling offering references,
+  no duplicate edges, DAG cycle enforcement for renamed/legacy edges, and approved
+  relationships require approved medium/high-confidence evidence assertions. Names
+  never auto-infer inheritance (enforces questionnaire decision item 14).
+- Benefit rules are temporal and versioned (`rule_version`, `supersedes`).
+  `end_date_known` is strictly derived from `effective_to` (`effective_to is not None`),
+  preventing contradictory values. Expired and superseded rules remain stored as historical
+  records; supersession links require matching offering_id, matching benefit_type, strictly
+  increasing rule_version (`rule_version > prior_rule.rule_version`), and DAG cycle prevention.
+  With `include_historical=true`, active rules still respect `as_of` date range filtering,
+  while historical/superseded rules remain discoverable as history.
 - Every catalog assertion requires complete provenance metadata: source URL, content SHA-256 hash,
-  retrieved timestamp, confidence level, review state, approved human reviews, and source policy tier (1-6).
-  Loader enforces that no approved assertion lacks full provenance and rejects tier 6 (`discovery_only`)
-  sources from ever holding an `approved` review state.
+  retrieved timestamp, confidence level, review state, and approved human reviews. The numeric
+  `source_tier` (1–6) is strictly derived at runtime from `source_policy_class` and exposed in API
+  responses; it is omitted from authoring JSON schemas. Loader enforces that no approved assertion
+  lacks full provenance and rejects tier 6 (`discovery_only`) sources from ever holding an `approved` review state.

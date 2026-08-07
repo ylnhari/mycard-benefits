@@ -165,7 +165,6 @@ def _parse_benefit(raw: dict[str, Any], path: str) -> BenefitRule:
     if review_tier not in _REVIEW_TIERS:
         raise CatalogLoadError(f"{path}: unsupported review_tier {review_tier!r}")
     effective_from, effective_to = _date_range(raw, path)
-    end_date_known = effective_to is not None
     rule_version_raw = raw.get("rule_version", 1)
     if not isinstance(rule_version_raw, int) or rule_version_raw < 1:
         raise CatalogLoadError(f"{path}: rule_version must be a positive integer")
@@ -183,10 +182,9 @@ def _parse_benefit(raw: dict[str, Any], path: str) -> BenefitRule:
         id=_uuid(raw["id"], path, "id"), offering_id=_uuid(raw["offering_id"], path, "offering_id"),
         benefit_type=benefit_type, title=_nonempty(raw["title"], path, "title"), status=status, review_tier=review_tier,
         effective_from=effective_from, effective_to=effective_to,
-        end_date_known=end_date_known, rule_version=rule_version_raw, supersedes=supersedes,
-        eligibility=eligibility,
-        allowance=allowance, evidence=evidence,
+        eligibility=eligibility, allowance=allowance, evidence=evidence,
         conflicts_with=tuple(_string_list(raw["conflicts_with"], path, "conflicts_with")),
+        rule_version=rule_version_raw, supersedes=supersedes,
     )
     if status == "active":
         _validate_active_review_gate(rule, path)
@@ -194,7 +192,7 @@ def _parse_benefit(raw: dict[str, Any], path: str) -> BenefitRule:
 
 
 def _parse_relationship(raw: dict[str, Any], path: str) -> ProductRelationship:
-    required = {"id", "from_offering_id", "to_offering_id", "relationship_type", "review_state"}
+    required = {"id", "from_offering_id", "to_offering_id", "relationship_type", "review_state", "evidence"}
     _require_exact_keys(raw, required, {"effective_from", "effective_to"}, path)
     rel_type = _nonempty(raw["relationship_type"], path, "relationship_type")
     if rel_type not in _RELATIONSHIP_TYPES:
@@ -206,8 +204,11 @@ def _parse_relationship(raw: dict[str, Any], path: str) -> ProductRelationship:
     to_id = _uuid(raw["to_offering_id"], path, "to_offering_id")
     if from_id == to_id:
         raise CatalogLoadError(f"{path}: relationship must not reference itself")
+    evidence = tuple(_assertion(item, path) for item in _object_list(raw["evidence"], path, "evidence"))
+    if not evidence:
+        raise CatalogLoadError(f"{path}: relationship evidence must not be empty")
     effective_from, effective_to = _date_range(raw, path)
-    return ProductRelationship(
+    rel = ProductRelationship(
         id=_uuid(raw["id"], path, "id"),
         from_offering_id=from_id,
         to_offering_id=to_id,
@@ -215,7 +216,11 @@ def _parse_relationship(raw: dict[str, Any], path: str) -> ProductRelationship:
         effective_from=effective_from,
         effective_to=effective_to,
         review_state=review_state,
+        evidence=evidence,
     )
+    if review_state == "approved":
+        _validate_approved_relationship_evidence(rel, path)
+    return rel
 
 
 def _assertion(raw: dict[str, Any], path: str) -> EvidenceAssertion:
@@ -292,6 +297,26 @@ def _validate_active_review_gate(rule: BenefitRule, path: str) -> None:
         )
 
 
+def _validate_approved_relationship_evidence(rel: ProductRelationship, path: str) -> None:
+    if any(not assertion.reviews for assertion in rel.evidence):
+        raise CatalogLoadError(f"{path}: approved relationship evidence requires a human review record")
+    active_evidence = [
+        item
+        for item in rel.evidence
+        if item.review_state == "approved" and item.confidence in {"high", "medium"}
+    ]
+    if not active_evidence:
+        raise CatalogLoadError(f"{path}: approved relationship requires approved medium/high-confidence evidence")
+    reviewers = {
+        review.reviewer_id
+        for assertion in active_evidence
+        for review in assertion.reviews
+        if review.decision == "approved"
+    }
+    if not reviewers:
+        raise CatalogLoadError(f"{path}: approved relationship requires at least 1 approved human review")
+
+
 def _predicate(raw: dict[str, Any], path: str) -> dict[str, Any]:
     _require_keys(raw, {"field", "operator"}, path)
     field = _nonempty(raw["field"], path, "eligibility.field")
@@ -336,6 +361,18 @@ def _validate_cross_records(
             if rule.supersedes not in benefit_ids:
                 raise CatalogLoadError(f"benefit {rule.id}: supersedes unknown benefit {rule.supersedes}")
             prior_rule = benefit_by_id[rule.supersedes]
+            if prior_rule.offering_id != rule.offering_id:
+                raise CatalogLoadError(
+                    f"benefit {rule.id}: cannot supersede rule {rule.supersedes} from a different offering"
+                )
+            if prior_rule.benefit_type != rule.benefit_type:
+                raise CatalogLoadError(
+                    f"benefit {rule.id}: cannot supersede rule {rule.supersedes} of a different benefit_type ({prior_rule.benefit_type!r} vs {rule.benefit_type!r})"
+                )
+            if rule.rule_version <= prior_rule.rule_version:
+                raise CatalogLoadError(
+                    f"benefit {rule.id}: rule_version ({rule.rule_version}) must be strictly greater than superseded rule_version ({prior_rule.rule_version})"
+                )
             if prior_rule.status not in {"superseded", "historical"}:
                 raise CatalogLoadError(
                     f"benefit {rule.id}: supersedes benefit {rule.supersedes} with status {prior_rule.status!r}"
