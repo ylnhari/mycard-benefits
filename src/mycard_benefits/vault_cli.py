@@ -10,7 +10,7 @@ import os
 import secrets
 import sys
 from pathlib import Path
-from typing import Protocol
+from typing import Protocol, cast
 
 from .config import Settings
 from .vault import VaultError, VaultStore
@@ -114,7 +114,7 @@ def _load_keyring() -> _Keyring:
         import keyring
     except ImportError as exc:
         raise VaultError("keyring support is not installed") from exc
-    return keyring
+    return cast(_Keyring, keyring)
 
 
 def _keyring_account(vault_path: Path) -> str:
