@@ -187,3 +187,18 @@ def test_benefits_api_include_historical_parameter(tmp_path: Path) -> None:
         assert res_hist.status_code == 200
         assert len(res_hist.json()) == 1
         assert res_hist.json()[0]["status"] == "historical"
+
+
+# ---- MC-093: provenance metadata API tests ----
+
+
+def test_benefits_api_returns_evidence_source_tier(tmp_path: Path) -> None:
+    with _client(tmp_path) as client:
+        response = client.get("/api/v1/catalog/benefits")
+        assert response.status_code == 200
+        evidence = response.json()[0]["evidence"][0]
+        assert evidence["source_policy_class"] == "issuer_document"
+        assert evidence["source_tier"] == 2
+        assert evidence["source_url"].startswith("https://")
+        assert len(evidence["content_sha256"]) == 64
+        assert evidence["approved_review_count"] >= 1

@@ -243,6 +243,8 @@ def _assertion(raw: dict[str, Any], path: str) -> EvidenceAssertion:
     if any(item.reviewed_at < retrieved_at for item in reviews):
         raise CatalogLoadError(f"{path}: a review cannot predate its evidence retrieval")
     decisions = {item.decision for item in reviews}
+    if review_state == "approved" and source_class == "discovery_only":
+        raise CatalogLoadError(f"{path}: discovery_only (tier 6) evidence cannot be approved")
     if review_state == "approved" and not reviews:
         raise CatalogLoadError(f"{path}: approved evidence requires a human review record")
     if review_state == "approved" and ("approved" not in decisions or "rejected" in decisions):

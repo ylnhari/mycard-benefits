@@ -94,3 +94,7 @@
   never perpetual. Expired and superseded rules remain stored as historical records
   rather than being silently dropped; loader validates supersession links and enforces
   DAG cycle prevention for supersession chains.
+- Every catalog assertion requires complete provenance metadata: source URL, content SHA-256 hash,
+  retrieved timestamp, confidence level, review state, approved human reviews, and source policy tier (1-6).
+  Loader enforces that no approved assertion lacks full provenance and rejects tier 6 (`discovery_only`)
+  sources from ever holding an `approved` review state.

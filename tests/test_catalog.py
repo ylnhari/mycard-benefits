@@ -348,3 +348,32 @@ def test_supersession_validation_and_cycle_prevention(tmp_path: Path) -> None:
     v2_path.write_text(json.dumps(v2_payload), encoding="utf-8")
     with pytest.raises(CatalogLoadError, match="unknown benefit"):
         load_catalog(tmp_path)
+
+
+# ---- MC-093: provenance metadata per assertion tests ----
+
+
+def test_evidence_provenance_tier_computation(tmp_path: Path) -> None:
+    _copy_catalog(tmp_path)
+    catalog = load_catalog(tmp_path)
+    assertion = catalog.benefits[0].evidence[0]
+    # issuer_document is tier 2
+    assert assertion.source_policy_class == "issuer_document"
+    assert assertion.source_tier == 2
+    assert assertion.url.startswith("https://")
+    assert assertion.content_sha256
+    assert assertion.retrieved_at
+    assert assertion.confidence == "high"
+    assert assertion.review_state == "approved"
+    assert len(assertion.reviews) >= 1
+
+
+def test_approved_discovery_only_evidence_rejected(tmp_path: Path) -> None:
+    _copy_catalog(tmp_path)
+    path = tmp_path / "benefits" / "synthetic-example-reward.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["evidence"][0]["source_policy_class"] = "discovery_only"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(CatalogLoadError, match="discovery_only .* cannot be approved"):
+        load_catalog(tmp_path)

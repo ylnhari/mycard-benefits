@@ -23,6 +23,7 @@ class _PublicModel(BaseModel):
 
 class EvidenceSummary(_PublicModel):
     source_policy_class: str
+    source_tier: int
     source_url: str
     content_sha256: str
     retrieved_at: str
@@ -245,6 +246,7 @@ def _benefit_summary(rule: BenefitRule) -> BenefitSummary:
 def _evidence_summary(assertion: EvidenceAssertion) -> EvidenceSummary:
     return EvidenceSummary(
         source_policy_class=assertion.source_policy_class,
+        source_tier=assertion.source_tier,
         source_url=assertion.url,
         content_sha256=assertion.content_sha256,
         retrieved_at=assertion.retrieved_at.isoformat(),

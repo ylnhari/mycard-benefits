@@ -59,6 +59,16 @@ class HumanReview:
     decision: str
 
 
+_SOURCE_TIERS = {
+    "administering_terms": 1,
+    "issuer_document": 2,
+    "network_rule": 3,
+    "merchant_terms": 4,
+    "regulatory_context": 5,
+    "discovery_only": 6,
+}
+
+
 @dataclass(frozen=True)
 class EvidenceAssertion:
     id: str
@@ -71,6 +81,12 @@ class EvidenceAssertion:
     confidence: str
     review_state: str
     reviews: tuple[HumanReview, ...]
+    source_tier: int = 6
+
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self, "source_tier", _SOURCE_TIERS.get(self.source_policy_class, 6)
+        )
 
 
 @dataclass(frozen=True)
@@ -87,10 +103,10 @@ class BenefitRule:
     allowance: dict[str, Any] | None
     evidence: tuple[EvidenceAssertion, ...]
     conflicts_with: tuple[str, ...]
-    end_date_known: bool | None = None
+    end_date_known: bool = False
     rule_version: int = 1
     supersedes: str | None = None
 
     def __post_init__(self) -> None:
-        if self.end_date_known is None:
-            object.__setattr__(self, "end_date_known", self.effective_to is not None)
+        if not self.end_date_known and self.effective_to is not None:
+            object.__setattr__(self, "end_date_known", True)

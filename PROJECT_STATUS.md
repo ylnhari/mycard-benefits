@@ -32,6 +32,9 @@ view of the encrypted portfolio.
 - Temporal and versioned benefit rules (`end_date_known`, `rule_version`, `supersedes`).
   Missing end dates are treated as unknown (never perpetual); expired and superseded rules
   remain as historical records; supersession chains are DAG-validated.
+- Full provenance metadata enforced on every catalog assertion: source URL/tier (1-6),
+  retrieved timestamp, content hash, confidence, review state, and approved reviews.
+  Tier 6 discovery-only sources are strictly forbidden from being approved.
 - Loopback-local, read-only My Cards API/UI. It opens the existing vault through
   the operating-system keyring, returns only card UUID, offering, lifecycle,
   timestamps, and replacement metadata, and applies `no-store`. The view renders

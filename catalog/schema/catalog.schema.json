@@ -46,6 +46,7 @@
             "regulatory_context", "discovery_only"
           ]
         },
+        "source_tier": {"type": "integer", "minimum": 1, "maximum": 6},
         "url": {"type": "string", "format": "uri"},
         "content_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
         "retrieved_at": {"$ref": "#/$defs/timestamp"},
