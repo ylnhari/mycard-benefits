@@ -66,16 +66,18 @@ def load_catalog(root: str | Path) -> Catalog:
     release_raw = _read_json(root / "schema" / "release.json")
     release = _parse_release(release_raw, "schema/release.json")
     offerings = tuple(_parse_offering(raw, path) for path, raw in _read_many(root / "offerings"))
-    benefits = tuple(_parse_benefit(raw, path) for path, raw in _read_many(root / "benefits"))
+    benefits = tuple(_parse_benefit(raw, path) for path, raw in _read_many(root / "benefits", allow_empty=True))
     _validate_cross_records(release, offerings, benefits)
     return Catalog(release=release, offerings=offerings, benefits=benefits)
 
 
-def _read_many(directory: Path) -> Iterable[tuple[str, dict[str, Any]]]:
+def _read_many(directory: Path, allow_empty: bool = False) -> Iterable[tuple[str, dict[str, Any]]]:
     if not directory.is_dir():
+        if allow_empty:
+            return
         raise CatalogLoadError(f"missing catalog directory: {directory}")
     files = sorted(directory.glob("*.json"))
-    if not files:
+    if not files and not allow_empty:
         raise CatalogLoadError(f"catalog directory has no JSON records: {directory}")
     for path in files:
         yield str(path), _read_json(path)

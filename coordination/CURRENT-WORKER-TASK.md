@@ -4,11 +4,12 @@ Status: READY
 Task: MC-003
 Assigned runner: Antigravity
 Manager review required: yes
-Commit or push authorized: no
+Commit authorized: local task-branch commit after all gates pass
+Push authorized: no
 
 ## Worker start instruction
 
-Read this entire file and execute only MC-003. Work directly in this repository. Do not start another backlog item. When finished, overwrite `coordination/WORKER-RESULT.md` using the required format below and set its status to `COMPLETE` or `BLOCKED`.
+Read this entire file and execute only MC-003 in the `agent/mc003-antigravity` worktree. Do not start another backlog item. When finished, overwrite `coordination/WORKER-RESULT.md` using the required format below and set its status to `COMPLETE` or `BLOCKED`. Create one local commit on the current task branch only when every acceptance item passes. Never push.
 
 Before working, record the actual agent harness, provider, and model in the result. Read `AGENTS.md` and the instruction files it directly requires, the MC-003 entry in `TASKS.md`, current Git status/diff, and only the public source/tests/docs relevant to this task.
 
@@ -24,7 +25,7 @@ The worktree contains an approved but uncommitted MC-004 change set. Preserve it
 - Do not use real user/card data in tests. Synthetic fixtures must retain the `SYNTHETIC-ONLY-` convention.
 - Do not research the internet; this task is separation of existing fixture data from production surfaces.
 - Do not change Rover, Family Finance, shared-agent repositories, global configuration, or another repository.
-- Do not commit, push, tag, publish, rewrite history, or edit `TASKS.md`, `dashboard.html`, or `coordination/MC-004-ANTIGRAVITY-REVIEW.md`.
+- Do not push, tag, publish, rewrite history, or edit `TASKS.md`, `dashboard.html`, or `coordination/MC-004-ANTIGRAVITY-REVIEW.md`.
 - Do not begin MC-001, MC-005, MC-177, or another task.
 
 ## Permitted implementation area
@@ -64,4 +65,4 @@ Do not merely answer in chat. Overwrite `coordination/WORKER-RESULT.md`.
 
 - Use `Status: COMPLETE` only when every acceptance item passes.
 - Use `Status: BLOCKED` otherwise.
-- Include exact files changed during this task, exact commands and outcomes, browser evidence, remaining risks, and the final verdict `MC-003_WORKER_PASS` or `MC-003_WORKER_BLOCKED`.
+- Include exact files changed during this task, exact commands and outcomes, browser evidence, remaining risks, branch name, commit ID, and the final verdict `MC-003_WORKER_PASS` or `MC-003_WORKER_BLOCKED`.
