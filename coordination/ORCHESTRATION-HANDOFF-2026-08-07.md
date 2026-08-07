@@ -45,6 +45,21 @@ the original private sources.
 - The reviewed OpenCode MC-098 branch has been integrated. The Claude and
   MC-085 branches remain unmerged because their review findings are unresolved.
 
+## Synchronization receipt
+
+The first non-force synchronization to the existing public `origin` was
+verified after the publication scan:
+
+- `main` and `manager/concurrent-integration`: `2d4c26f` before this receipt
+  metadata commit;
+- `agent/mc024-177-claude`: `eb4e470` (unapproved WIP);
+- `agent/mc085-antigravity`: `3059e68` (unapproved WIP);
+- `agent/mc098-opencode`: `2f6d34e` (integrated reference branch).
+
+This receipt metadata is included by the recorded publication gate and is the
+only follow-up update to `main` and `manager/concurrent-integration`. Future
+work starts from `main`; no worker branch is a prerequisite.
+
 ## Worker branches and review disposition
 
 ### Claude — `agent/mc024-177-claude`
