@@ -207,3 +207,36 @@ def test_private_cards_keep_read_only_boundary_and_browser_cache_policy() -> Non
     assert ".unmatched-note" in style
     assert 'placeholder="Product, bank, network, or status"' in template
     assert "PAN, CVV, PIN" in template
+
+
+def test_active_surfaces_have_neutral_copy_and_self_contained_startup(tmp_path: Path) -> None:
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    guide = (ROOT / "docs" / "USER-GUIDE.md").read_text(encoding="utf-8")
+    template = (ROOT / "src" / "mycard_benefits" / "templates" / "index.html").read_text(
+        encoding="utf-8"
+    )
+    script = (ROOT / "src" / "mycard_benefits" / "static" / "app.js").read_text(encoding="utf-8")
+    router = (ROOT / "src" / "mycard_benefits" / "vault" / "router.py").read_text(encoding="utf-8")
+
+    forbidden = ("Rover sign-in", "Rover login", "Companion Dashboard", "rover_proxy", "rover_secret")
+    for content in (readme, guide, template, script, router):
+        for term in forbidden:
+            assert term.lower() not in content.lower()
+
+    assert "MyCard <b>Benefits</b>" in template
+    assert "Public catalog · private vault" in template
+    assert "Local-first" in template
+
+    with _client(tmp_path) as client:
+        page = client.get("/")
+        assert page.status_code == 200
+        assert "MyCard" in page.text and "Benefits" in page.text
+        assert "Public catalog · private vault" in page.text
+
+        health = client.get("/api/v1/health").json()
+        assert health["status"] == "ok"
+        assert health["app_id"] == "mycard-benefits"
+
+        cards_resp = client.get("/api/v1/private/cards")
+        assert cards_resp.status_code == 503
+        assert cards_resp.json() == {"detail": "Private card list unavailable"}
