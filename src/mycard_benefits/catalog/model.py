@@ -83,6 +83,9 @@ class BenefitRule:
     review_tier: str
     effective_from: date | None
     effective_to: date | None
+    end_date_known: bool
+    rule_version: int
+    supersedes: str | None
     eligibility: tuple[dict[str, Any], ...]
     allowance: dict[str, Any] | None
     evidence: tuple[EvidenceAssertion, ...]

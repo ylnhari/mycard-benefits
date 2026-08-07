@@ -69,6 +69,14 @@ class Catalog:
             and _in_date_range(as_of, rule.effective_from, rule.effective_to)
         )
 
+    def historical_benefits_for(self, offering_id: str) -> tuple[BenefitRule, ...]:
+        """Return expired, superseded, and historical rules for an offering."""
+        return tuple(
+            rule for rule in self.benefits
+            if rule.offering_id == offering_id
+            and rule.status in {"historical", "superseded"}
+        )
+
 
 def load_catalog(root: str | Path) -> Catalog:
     """Load only JSON catalog assets and reject invalid/review-only active claims."""
@@ -145,7 +153,8 @@ def _parse_offering(raw: dict[str, Any], path: str) -> Offering:
 
 def _parse_benefit(raw: dict[str, Any], path: str) -> BenefitRule:
     required = {"id", "offering_id", "benefit_type", "title", "status", "review_tier", "eligibility", "evidence", "conflicts_with"}
-    _require_exact_keys(raw, required, {"effective_from", "effective_to", "allowance"}, path)
+    optional = {"effective_from", "effective_to", "allowance", "rule_version", "supersedes"}
+    _require_exact_keys(raw, required, optional, path)
     benefit_type = _nonempty(raw["benefit_type"], path, "benefit_type")
     if benefit_type not in _BENEFIT_TYPES:
         raise CatalogLoadError(f"{path}: unsupported benefit_type {benefit_type!r}")
@@ -156,6 +165,13 @@ def _parse_benefit(raw: dict[str, Any], path: str) -> BenefitRule:
     if review_tier not in _REVIEW_TIERS:
         raise CatalogLoadError(f"{path}: unsupported review_tier {review_tier!r}")
     effective_from, effective_to = _date_range(raw, path)
+    end_date_known = effective_to is not None
+    rule_version_raw = raw.get("rule_version", 1)
+    if not isinstance(rule_version_raw, int) or rule_version_raw < 1:
+        raise CatalogLoadError(f"{path}: rule_version must be a positive integer")
+    supersedes = None
+    if "supersedes" in raw and raw["supersedes"] is not None:
+        supersedes = _uuid(raw["supersedes"], path, "supersedes")
     eligibility = tuple(_predicate(item, path) for item in _object_list(raw["eligibility"], path, "eligibility"))
     evidence = tuple(_assertion(item, path) for item in _object_list(raw["evidence"], path, "evidence"))
     if not evidence:
@@ -166,7 +182,9 @@ def _parse_benefit(raw: dict[str, Any], path: str) -> BenefitRule:
     rule = BenefitRule(
         id=_uuid(raw["id"], path, "id"), offering_id=_uuid(raw["offering_id"], path, "offering_id"),
         benefit_type=benefit_type, title=_nonempty(raw["title"], path, "title"), status=status, review_tier=review_tier,
-        effective_from=effective_from, effective_to=effective_to, eligibility=eligibility,
+        effective_from=effective_from, effective_to=effective_to,
+        end_date_known=end_date_known, rule_version=rule_version_raw, supersedes=supersedes,
+        eligibility=eligibility,
         allowance=allowance, evidence=evidence,
         conflicts_with=tuple(_string_list(raw["conflicts_with"], path, "conflicts_with")),
     )
