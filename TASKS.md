@@ -56,6 +56,11 @@ Manager protocol: tasks are assigned one at a time; a worker owns only its named
   - Depends on: MC-001
   - Suggested runner: OpenCode
 
+- [ ] **MC-206: Consolidate the owner's real card records once and show safe last-four identifiers** - Reconcile the authorized local Family Finance export, Drive workbook, and card-document folders into one ignored encrypted local inventory so future runs do not repeatedly scan those sources. Preserve every available source field privately, retain provisional matches for later correction, and expose only a validated masked last-four identifier with existing non-secret envelope metadata in My Cards.
+  - Acceptance: source snapshots and reconciliation output are encrypted and ignored; the import is idempotent and non-destructive; count-only receipts prove coverage without values; ambiguous records remain explicitly provisional; full PAN, CVV, PIN, cardholder name, expiry, source text, and private paths never enter Git, logs, prompts, screenshots, or browser responses; API/UI tests prove only masked last four is rendered; desktop/mobile and dark/light states are visibly verified.
+  - Depends on: MC-001, MC-196, MC-197
+  - Suggested runner: Manager
+
 ### Variant, lifecycle, expiry, replacement, and owner reconciliation
 
 - [ ] **MC-010: Build the previewed owner/variant/lifecycle/replacement reconciliation workflow** - Deliver the next delivery gate in `PROJECT_STATUS.md`: a human-confirmed reconciliation flow for owner, exact variant, expiry, lifecycle, and old-to-replacement relationships without secret-field reveal or direct browser writes.

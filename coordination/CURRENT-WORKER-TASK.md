@@ -1,6 +1,6 @@
 # Integration status
 
-Status: READY_FOR_NEXT_ASSIGNMENT
+Status: CONCURRENT_BATCH_ACTIVE
 
 The manager integration branch is the canonical trace. Worker worktrees remain
 isolated while a task is in progress; before every subsequent task handoff, the
@@ -24,7 +24,11 @@ publication is authorized.
 
 ## Awaiting integration
 
-- None. OpenCode and Antigravity are idle after their completed batches.
+- Claude Sonnet: MC-024 and MC-177 on `agent/mc024-177-claude`.
+- OpenCode DeepSeek V4 Flash Free: MC-098 on `agent/mc098-opencode`.
+- Antigravity Gemini 3.6 Flash High: MC-085 on `agent/mc085-antigravity`.
+- Manager: MC-206 encrypted local source consolidation and safe last-four
+  projection. Private source data is not delegated.
 
 This file is manager-owned. Workers must use their explicitly assigned task
 record and may not edit another worktree or private data directory.
