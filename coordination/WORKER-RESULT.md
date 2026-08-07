@@ -48,7 +48,7 @@ None.
 
 ## Commit
 
-Commit ID: `d1f4e5bb99c8426bd5129749b9812c0d1479f16d` on branch `agent/mc003-antigravity`. Never pushed.
+Final commit ID: `1c65944e5fa50230c17db4214e3b5b278e6a4d68` on branch `agent/mc003-antigravity`; it supersedes the earlier result-only commit `d1f4e5bb99c8426bd5129749b9812c0d1479f16d`. Never pushed.
 
 ## Verdict
 
