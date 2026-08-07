@@ -1,0 +1,10 @@
+{
+  "id": "8f4fc7eb-f070-59c0-926c-029897a8093c",
+  "slug": "rbl-play-credit",
+  "display_name": "RBL Bank Play Credit Card",
+  "issuer_id": "rbl-bank",
+  "product_variant_id": "play-credit",
+  "network_id": "unknown",
+  "market": "IN",
+  "aliases": []
+}

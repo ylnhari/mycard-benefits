@@ -1,0 +1,10 @@
+{
+  "id": "37b6f95f-247f-5b9f-917a-9c210db92f61",
+  "slug": "au-priority-pass-membership",
+  "display_name": "AU Priority Pass Membership",
+  "issuer_id": "au-small-finance-bank",
+  "product_variant_id": "priority-pass-membership",
+  "network_id": "priority-pass",
+  "market": "IN",
+  "aliases": []
+}

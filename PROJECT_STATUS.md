@@ -4,8 +4,8 @@ Last updated: 2026-08-07
 
 ## Current milestone
 
-Published local-first alpha: reviewed public-data foundations plus a narrow,
-encrypted private-import path.
+Useful local alpha: real public card-variant identities plus a Rover-protected,
+read-only view of the encrypted local portfolio.
 
 ## Completed
 
@@ -23,12 +23,25 @@ encrypted private-import path.
   integrity verification. The owner-authorized local migration completed; its
   data and receipt remain ignored.
 - Optional, data-isolated Family Finance launcher and bundled setup guide.
-- Discovery-only pilot source map for Tata Neu HDFC Infinity and HDFC Regalia
-  Gold. No real claim has been activated.
+- Public India starter catalog with 68 real product-variant identities plus the
+  synthetic fixture. Product presence is not presented as benefit verification.
+- Rover-authenticated read-only My Cards API/UI. It opens the existing vault
+  through the operating-system keyring, returns only card UUID, offering,
+  lifecycle, timestamps, and replacement metadata, and applies `no-store`.
+- MyCard is registered with Rover, remains bound to loopback, and has a verified
+  tailnet proxy for phone access.
+- Discovery-only pilot source work for Tata Neu HDFC Infinity and HDFC Regalia
+  Gold. No real benefit claim has been activated.
+- User-first README and guide covering setup, daily use, privacy, Family Finance,
+  mobile access, verification states, and maintainer-only audit files.
 - Rendered desktop/mobile and dark/light checks for the public dashboard and
   companion flow; DeepSeek module reviews and a separate Terra companion
   follow-up report no unresolved High/Medium findings for completed public-data
   modules and the companion launcher.
+- OpenCode DeepSeek V4 Flash independently reviewed the owned-catalog and
+  protected My Cards slice after remediation. Its final verdict is
+  `REVIEW_APPROVED`; Ruff, strict mypy, all 208 tests, package builds, repeated
+  ordering checks, and deterministic 68-file catalog regeneration passed.
 - Final Claude Sonnet core review and Claude Opus importer review report no
   unresolved High/Medium finding after remediation and live compatibility
   verification.
@@ -43,31 +56,39 @@ encrypted private-import path.
 
 ## Next planned slice
 
-- Expose synthetic-only candidate review, research queue, and optimizer
-  contracts through protected local API/UI surfaces.
-- Add a protected human-facing private-card API/UI over the reviewed vault;
-  the current CLI remains the only real-card write surface.
-- Keep real source retrieval and remote identity pinning behind their separate
-  gates.
+- Reconcile private owner aliases, exact product variants, expiry states, and
+  old-to-replacement relationships through a previewed human confirmation flow.
+- Add protected add/edit/archive/replace controls; the CLI remains the only
+  real-card write surface until that review completes.
+- Convert official-source pilot research into reviewable benefit candidates.
+- Expose candidate review, research queue, and optimizer contracts through
+  protected local API/UI surfaces.
 
 ## Not yet safe
 
-- Do not enter or reveal real card data through the browser/API. The reviewed
-  local CLI is the only supported private write path in this release.
+- The browser is read-only. Do not enter card numbers or use it to add, edit,
+  delete, reveal, or copy private fields; the reviewed local CLI is still the
+  only supported private write path.
+- Import status is provisional: 20 records are marked active and 60 archived,
+  but archived does not mean expired. Seven variants need confirmation, no
+  replacement link is established, owner aliases are not mapped to family
+  roles, and many records remain unassigned.
 - No live source adapter or scheduler is connected to the network. The queue is
-  offline orchestration only, and the catalog contains synthetic facts only.
+  offline orchestration only. The active benefit catalog still contains only
+  its synthetic fixture; real pilot findings remain unapproved research
+  candidates.
 - The optimizer core is not exposed through the UI and cannot open purchase or
   affiliate routes.
 - Family Finance performs a privacy-preserving reachability check only; signed
   companion identity pinning remains a later gate.
-- Family Finance one-time import, notifications, and Rover verification are not
-  implemented. The new Drive-manifest import is local to MyCard Benefits and is
-  not a continuous synchronization bridge.
+- Family Finance one-time import and notifications are not implemented. The
+  Drive-manifest import is local to MyCard Benefits and is not a continuous
+  synchronization bridge.
 - Initial publication and companion synchronization are complete. Future
   catalog publication, releases, and remote-access changes retain their own
   review gates.
 
 ## Next delivery gate
 
-Complete a synthetic-only UI/API contract for the candidate, queue, and
-optimizer cores. Protected real-card browser/API controls remain a later gate.
+Build the previewed owner/variant/lifecycle/replacement reconciliation workflow
+without enabling secret-field reveal or direct browser write actions.

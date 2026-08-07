@@ -1,0 +1,11 @@
+{
+  "id": "9409594c-590a-5191-bd48-c054900cd239",
+  "slug": "rbl-zomato-credit",
+  "display_name": "Zomato RBL Bank Credit Card",
+  "issuer_id": "rbl-bank",
+  "product_variant_id": "zomato-credit",
+  "network_id": "unknown",
+  "market": "IN",
+  "aliases": [],
+  "co_brand_id": "zomato"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "bf7fb4bd-22e5-5d18-9831-b32011fd0362",
+  "slug": "axis-prestige-debit",
+  "display_name": "Axis Bank Prestige Debit Card",
+  "issuer_id": "axis-bank",
+  "product_variant_id": "prestige-debit",
+  "network_id": "unknown",
+  "market": "IN",
+  "aliases": []
+}

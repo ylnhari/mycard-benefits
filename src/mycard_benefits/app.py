@@ -15,9 +15,14 @@ from .catalog.router import create_catalog_router
 from .config import API_VERSION, APP_ID, PACKAGE_ROOT, Settings
 from .identity import InstallationIdentity
 from .qa import create_qa_router
+from .vault.router import CardReader, create_private_cards_router
 
 
-def create_app(settings: Settings | None = None) -> FastAPI:
+def create_app(
+    settings: Settings | None = None,
+    *,
+    private_card_reader: CardReader | None = None,
+) -> FastAPI:
     settings = settings or Settings.from_environment()
     templates = Jinja2Templates(directory=str(PACKAGE_ROOT / "templates"))
 
@@ -36,6 +41,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     application.include_router(create_catalog_router(settings.catalog_dir))
     application.include_router(create_qa_router(settings.catalog_dir))
+    application.include_router(
+        create_private_cards_router(
+            settings.data_dir,
+            rover_secret=settings.rover_secret,
+            reader=private_card_reader,
+        )
+    )
     application.mount(
         "/static",
         StaticFiles(directory=str(PACKAGE_ROOT / "static")),

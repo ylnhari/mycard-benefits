@@ -25,6 +25,28 @@ def test_synthetic_catalog_loads_deterministically() -> None:
     ]
 
 
+def test_india_starter_catalog_contains_real_product_variants() -> None:
+    catalog = load_catalog(CATALOG_ROOT)
+
+    assert len(catalog.offerings) >= 69
+    tata_neu = catalog.offering_by_slug("hdfc-tata-neu-rupay-select-credit")
+    regalia = catalog.offering_by_slug("hdfc-regalia-gold-credit")
+    assert tata_neu is not None
+    assert tata_neu.display_name == "Tata Neu Infinity HDFC Bank RuPay Select Credit Card"
+    assert tata_neu.network_id == "rupay-select"
+    assert regalia is not None
+    assert regalia.display_name == "HDFC Bank Regalia Gold Credit Card"
+
+
+def test_tracked_import_sample_uses_known_catalog_offerings() -> None:
+    catalog = load_catalog(CATALOG_ROOT)
+    sample_path = Path(__file__).parents[1] / "samples" / "card-import.example.json"
+    sample = json.loads(sample_path.read_text(encoding="utf-8"))
+
+    assert sample["cards"]
+    assert all(catalog.offering_by_slug(card["offering_id"]) is not None for card in sample["cards"])
+
+
 def test_active_rule_requires_approved_evidence(tmp_path: Path) -> None:
     _copy_catalog(tmp_path)
     path = tmp_path / "benefits" / "synthetic-example-reward.json"

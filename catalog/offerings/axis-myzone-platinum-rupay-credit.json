@@ -1,0 +1,10 @@
+{
+  "id": "2a4378eb-632c-5480-b987-e9faa9d08571",
+  "slug": "axis-myzone-platinum-rupay-credit",
+  "display_name": "Axis Bank MY ZONE Platinum RuPay Credit Card",
+  "issuer_id": "axis-bank",
+  "product_variant_id": "my-zone-platinum-credit",
+  "network_id": "rupay",
+  "market": "IN",
+  "aliases": []
+}

@@ -1,0 +1,11 @@
+{
+  "id": "5fef4f94-026c-5e52-ad73-f0bba6ff612b",
+  "slug": "icici-hpcl-coral-platinum-visa-credit",
+  "display_name": "HPCL ICICI Bank Coral Platinum Visa Credit Card",
+  "issuer_id": "icici-bank",
+  "product_variant_id": "hpcl-coral-platinum-credit",
+  "network_id": "visa-platinum",
+  "market": "IN",
+  "aliases": [],
+  "co_brand_id": "hpcl"
+}

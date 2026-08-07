@@ -2,7 +2,7 @@
   "schema_version": 1,
   "cards": [
     {
-      "offering_id": "synthetic-example-in",
+      "offering_id": "synthetic-example-in-visa",
       "lifecycle": "active",
       "secret_fields": {
         "nickname": "SYNTHETIC-ONLY-primary-card",
@@ -10,7 +10,7 @@
       }
     },
     {
-      "offering_id": "synthetic-historical-in",
+      "offering_id": "synthetic-example-in-visa",
       "lifecycle": "archived",
       "secret_fields": {
         "nickname": "SYNTHETIC-ONLY-archived-card",

@@ -1,0 +1,10 @@
+{
+  "id": "fab92c04-afb2-5348-8395-3e39b856aa36",
+  "slug": "idfc-first-visa-platinum-debit",
+  "display_name": "IDFC FIRST Bank Visa Platinum Debit Card",
+  "issuer_id": "idfc-first-bank",
+  "product_variant_id": "visa-platinum-debit",
+  "network_id": "visa-platinum",
+  "market": "IN",
+  "aliases": []
+}

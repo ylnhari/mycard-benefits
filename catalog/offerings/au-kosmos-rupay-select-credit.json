@@ -1,0 +1,10 @@
+{
+  "id": "577aaea2-4086-5082-a5c1-f5fa3cac95bb",
+  "slug": "au-kosmos-rupay-select-credit",
+  "display_name": "AU Kosmos RuPay Select Credit Card",
+  "issuer_id": "au-small-finance-bank",
+  "product_variant_id": "kosmos-credit",
+  "network_id": "rupay-select",
+  "market": "IN",
+  "aliases": []
+}

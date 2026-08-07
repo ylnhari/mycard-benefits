@@ -1,0 +1,10 @@
+{
+  "id": "28d95cf5-1a3b-5982-9862-ef9c12064911",
+  "slug": "unicard-pay-later",
+  "display_name": "Uni Pay Later Card",
+  "issuer_id": "unicard",
+  "product_variant_id": "pay-later",
+  "network_id": "unknown",
+  "market": "IN",
+  "aliases": []
+}

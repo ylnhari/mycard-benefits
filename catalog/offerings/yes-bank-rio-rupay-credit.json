@@ -1,0 +1,11 @@
+{
+  "id": "010a1c4f-7356-5d63-889c-619d6601fa19",
+  "slug": "yes-bank-rio-rupay-credit",
+  "display_name": "Rio YES BANK RuPay Credit Card",
+  "issuer_id": "yes-bank",
+  "product_variant_id": "rio-credit",
+  "network_id": "rupay",
+  "market": "IN",
+  "aliases": [],
+  "co_brand_id": "rio"
+}

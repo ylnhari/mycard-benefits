@@ -1,0 +1,10 @@
+{
+  "id": "aeff285a-74d8-5a65-9108-ec0e4e4e6977",
+  "slug": "idfc-debit-legacy",
+  "display_name": "IDFC Bank Debit Card (Legacy)",
+  "issuer_id": "idfc-bank",
+  "product_variant_id": "legacy-debit",
+  "network_id": "unknown",
+  "market": "IN",
+  "aliases": []
+}

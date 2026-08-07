@@ -1,0 +1,10 @@
+{
+  "id": "bb3a1ec1-01eb-5294-826f-c1978058a0b1",
+  "slug": "indusind-legend-visa-credit",
+  "display_name": "IndusInd Bank Legend Visa Credit Card",
+  "issuer_id": "indusind-bank",
+  "product_variant_id": "legend-credit",
+  "network_id": "visa",
+  "market": "IN",
+  "aliases": []
+}

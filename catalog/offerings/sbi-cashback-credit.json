@@ -1,0 +1,10 @@
+{
+  "id": "a4807236-d7d7-5317-a735-5c699afa72ac",
+  "slug": "sbi-cashback-credit",
+  "display_name": "CASHBACK SBI Card",
+  "issuer_id": "sbi-card",
+  "product_variant_id": "cashback-credit",
+  "network_id": "visa",
+  "market": "IN",
+  "aliases": []
+}

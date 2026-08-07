@@ -1,0 +1,10 @@
+{
+  "id": "efe49c83-db60-5a41-b354-0176ce2e4872",
+  "slug": "icici-sapphiro-amex-credit",
+  "display_name": "ICICI Bank Sapphiro American Express Credit Card",
+  "issuer_id": "icici-bank",
+  "product_variant_id": "sapphiro-credit",
+  "network_id": "american-express",
+  "market": "IN",
+  "aliases": []
+}

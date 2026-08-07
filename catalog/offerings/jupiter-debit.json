@@ -1,0 +1,10 @@
+{
+  "id": "9352de41-0d0c-5c5f-913e-74338080cb9e",
+  "slug": "jupiter-debit",
+  "display_name": "Jupiter Debit Card",
+  "issuer_id": "jupiter",
+  "product_variant_id": "debit-card",
+  "network_id": "unknown",
+  "market": "IN",
+  "aliases": []
+}

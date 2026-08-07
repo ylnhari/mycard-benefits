@@ -1,0 +1,10 @@
+{
+  "id": "3a60dae7-0387-500f-8dfe-9acb36aae98e",
+  "slug": "onecard-credit",
+  "display_name": "OneCard Credit Card",
+  "issuer_id": "onecard",
+  "product_variant_id": "credit-card",
+  "network_id": "unknown",
+  "market": "IN",
+  "aliases": []
+}

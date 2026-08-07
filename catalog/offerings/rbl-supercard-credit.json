@@ -1,0 +1,10 @@
+{
+  "id": "501e5a77-814d-5eb6-8f70-5bc028ddb6ed",
+  "slug": "rbl-supercard-credit",
+  "display_name": "RBL Bank SuperCard Credit Card",
+  "issuer_id": "rbl-bank",
+  "product_variant_id": "supercard-credit",
+  "network_id": "unknown",
+  "market": "IN",
+  "aliases": []
+}

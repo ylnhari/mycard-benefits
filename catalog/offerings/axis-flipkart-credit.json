@@ -1,0 +1,11 @@
+{
+  "id": "1814f188-f844-5eee-8e38-44961f725245",
+  "slug": "axis-flipkart-credit",
+  "display_name": "Flipkart Axis Bank Credit Card",
+  "issuer_id": "axis-bank",
+  "product_variant_id": "flipkart-credit",
+  "network_id": "visa",
+  "market": "IN",
+  "aliases": [],
+  "co_brand_id": "flipkart"
+}

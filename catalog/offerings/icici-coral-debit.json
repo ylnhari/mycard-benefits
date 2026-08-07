@@ -1,0 +1,10 @@
+{
+  "id": "c0ad0101-b317-503e-97a9-f2735bfde109",
+  "slug": "icici-coral-debit",
+  "display_name": "ICICI Bank Coral Debit Card",
+  "issuer_id": "icici-bank",
+  "product_variant_id": "coral-debit",
+  "network_id": "unknown",
+  "market": "IN",
+  "aliases": []
+}

@@ -1,0 +1,10 @@
+{
+  "id": "7b4b66b9-985a-5e0f-b3a7-18090f10f56d",
+  "slug": "icici-sapphiro-rupay-select-credit",
+  "display_name": "ICICI Bank Sapphiro RuPay Select Credit Card",
+  "issuer_id": "icici-bank",
+  "product_variant_id": "sapphiro-credit",
+  "network_id": "rupay-select",
+  "market": "IN",
+  "aliases": []
+}

@@ -1,0 +1,10 @@
+{
+  "id": "0748f8fd-4737-59a9-8c42-e53320ec226a",
+  "slug": "indusind-select-debit",
+  "display_name": "IndusInd Bank Select Debit Card",
+  "issuer_id": "indusind-bank",
+  "product_variant_id": "select-debit",
+  "network_id": "unknown",
+  "market": "IN",
+  "aliases": []
+}

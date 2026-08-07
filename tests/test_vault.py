@@ -51,7 +51,7 @@ def test_round_trip_uses_encrypted_payload_and_stable_nonsensitive_metadata(tmp_
 def test_wrong_passphrase_and_tampered_or_corrupt_files_fail_closed(tmp_path: Path) -> None:
     store = _store(tmp_path)
     session = store.create("correct synthetic passphrase")
-    session.add_card("offer", {"pan": "SYNTHETIC-4111111111111111"})
+    session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-ALPHA"})
     with pytest.raises(VaultAccessError):
         store.open("wrong synthetic passphrase")
 
@@ -77,7 +77,7 @@ def test_all_unencrypted_record_metadata_is_authenticated(
 ) -> None:
     store = _store(tmp_path)
     session = store.create("synthetic passphrase")
-    session.add_card("offer", {"pan": "SYNTHETIC-4111111111111111"})
+    session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-ALPHA"})
     envelope = json.loads(store.path.read_text(encoding="utf-8"))
     envelope["records"][0][field] = replacement
     store.path.write_text(json.dumps(envelope), encoding="utf-8")
@@ -88,7 +88,7 @@ def test_all_unencrypted_record_metadata_is_authenticated(
 def test_hostile_kdf_file_size_and_record_count_fail_before_unlock(tmp_path: Path) -> None:
     store = _store(tmp_path)
     session = store.create("synthetic passphrase")
-    session.add_card("offer", {"pan": "SYNTHETIC-4111111111111111"})
+    session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-ALPHA"})
     envelope = json.loads(store.path.read_text(encoding="utf-8"))
     envelope["kdf"]["memory_cost_kib"] = 999_999_999
     store.path.write_text(json.dumps(envelope), encoding="utf-8")
@@ -97,7 +97,7 @@ def test_hostile_kdf_file_size_and_record_count_fail_before_unlock(tmp_path: Pat
 
     count_store = VaultStore(tmp_path / "private" / "count-vault.json", _permissions=_TestPermissions())
     session = count_store.create("other synthetic passphrase")
-    session.add_card("offer", {"pan": "SYNTHETIC-4000000000000002"})
+    session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-BRAVO"})
     envelope = json.loads(count_store.path.read_text(encoding="utf-8"))
     envelope["records"] *= 1_001
     count_store.path.write_text(json.dumps(envelope), encoding="utf-8")
@@ -115,10 +115,10 @@ def test_hostile_kdf_file_size_and_record_count_fail_before_unlock(tmp_path: Pat
 
 def test_replacement_lifecycle_and_exact_secret_field_allowlist(tmp_path: Path) -> None:
     session = _store(tmp_path).create("synthetic passphrase")
-    old_id = session.add_card("offer", {"pan": "SYNTHETIC-4000000000000002"})
+    old_id = session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-BRAVO"})
     replacement_id = session.replace_card(
         old_id,
-        {"pan": "SYNTHETIC-4000000000000010"},
+        {"pan": "SYNTHETIC-ONLY-PAN-CHARLIE"},
         lifecycle=CardLifecycle.LOST,
     )
     cards = {card["card_id"]: card for card in session.list_cards()}
@@ -126,12 +126,12 @@ def test_replacement_lifecycle_and_exact_secret_field_allowlist(tmp_path: Path) 
     assert cards[old_id]["replacement_card_id"] == replacement_id
     assert cards[replacement_id]["lifecycle"] == "active"
     with pytest.raises(VaultError):
-        session.replace_card(old_id, {"pan": "SYNTHETIC-4000000000000010"})
+        session.replace_card(old_id, {"pan": "SYNTHETIC-ONLY-PAN-CHARLIE"})
     with pytest.raises(VaultError):
-        session.replace_card(replacement_id, {"pan": "SYNTHETIC-4000000000000028"}, lifecycle=CardLifecycle.ACTIVE)
+        session.replace_card(replacement_id, {"pan": "SYNTHETIC-ONLY-PAN-DELTA"}, lifecycle=CardLifecycle.ACTIVE)
     allowed = {
         "cardholder_name": "Synthetic Holder",
-        "pan": "SYNTHETIC-4000000000000036",
+        "pan": "SYNTHETIC-ONLY-PAN-ECHO",
         "expiry_month": "12",
         "expiry_year": "2030",
         "cvv": "999",
@@ -159,13 +159,13 @@ def test_secret_field_bounds_and_persisted_unknown_fields_fail_closed(tmp_path: 
     session = store.create("synthetic passphrase")
     for values in (
         {"notes": "x" * (vault_core._MAX_SECRET_VALUE_CHARS + 1)},
-        {"notes": "x" * vault_core._MAX_SECRET_VALUE_CHARS, "nickname": "y" * vault_core._MAX_SECRET_VALUE_CHARS, "cardholder_name": "z" * vault_core._MAX_SECRET_VALUE_CHARS, "pan": "p" * vault_core._MAX_SECRET_VALUE_CHARS, "cvv": "c"},
+        {"notes": "x" * vault_core._MAX_SECRET_VALUE_CHARS, "nickname": "y" * vault_core._MAX_SECRET_VALUE_CHARS, "cardholder_name": "z" * vault_core._MAX_SECRET_VALUE_CHARS, "pan": ("SYNTHETIC-ONLY-" + "p" * vault_core._MAX_SECRET_VALUE_CHARS)[:vault_core._MAX_SECRET_VALUE_CHARS], "cvv": "c"},
         {"notes": ""},
     ):
         with pytest.raises(VaultError):
             session.add_card("offer", values)
 
-    card_id = session.add_card("offer", {"pan": "SYNTHETIC-4000000000000002"})
+    card_id = session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-BRAVO"})
     record = session._records[card_id]
     values = session._decrypt_record(record)
     values["issuer_customer_id"] = "SYNTHETIC-ONLY"
@@ -217,11 +217,11 @@ def test_uuid7_ids_and_failed_write_leave_memory_and_disk_unchanged(tmp_path: Pa
             lambda path, encoded, permissions, backup: (_ for _ in ()).throw(OSError("synthetic")),
         )
         with pytest.raises(OSError):
-            session.add_card("offer", {"pan": "SYNTHETIC-4000000000000002"})
+            session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-BRAVO"})
     assert session.list_cards() == ()
     assert store.path.read_bytes() == before_disk
 
-    card_id = session.add_card("offer", {"pan": "SYNTHETIC-4000000000000002"})
+    card_id = session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-BRAVO"})
     assert card_id[14] == "7"
     assert card_id[19] in {"8", "9", "a", "b"}
 
@@ -230,21 +230,21 @@ def test_stale_session_conflicts_without_overwriting_newer_disk_state(tmp_path: 
     store = _store(tmp_path)
     first = store.create("synthetic passphrase")
     stale = store.open("synthetic passphrase")
-    first.add_card("offer", {"pan": "SYNTHETIC-4000000000000002"})
+    first.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-BRAVO"})
     current = store.path.read_bytes()
     with pytest.raises(vault_core.VaultConflictError):
-        stale.add_card("offer", {"pan": "SYNTHETIC-4000000000000010"})
+        stale.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-CHARLIE"})
     assert store.path.read_bytes() == current
 
 
 def test_encrypted_backup_rotation_preserves_prior_envelopes(tmp_path: Path) -> None:
     store = _store(tmp_path)
     session = store.create("synthetic passphrase")
-    session.add_card("offer", {"pan": "SYNTHETIC-4000000000000002"})
+    session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-BRAVO"})
     first = store.path.read_bytes()
-    session.add_card("offer", {"pan": "SYNTHETIC-4000000000000010"})
+    session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-CHARLIE"})
     second = store.path.read_bytes()
-    session.add_card("offer", {"pan": "SYNTHETIC-4000000000000028"})
+    session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-DELTA"})
     assert store.path.with_name("vault.json.bak.1").read_bytes() == second
     assert store.path.with_name("vault.json.bak.2").read_bytes() == first
 
@@ -315,7 +315,7 @@ def test_oversized_external_vault_conflicts_without_loading_it(tmp_path: Path) -
     store.path.write_bytes(b"x" * (vault_core._MAX_VAULT_BYTES + 1))
 
     with pytest.raises(vault_core.VaultConflictError):
-        session.add_card("offer", {"pan": "SYNTHETIC-ONLY"})
+        session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN"})
 
 
 def test_oversized_backup_source_preserves_existing_backups(tmp_path: Path) -> None:
@@ -440,7 +440,7 @@ def test_idle_and_absolute_session_expiry_lock_using_monotonic_time(
 
 def test_reveal_rejects_missing_or_noncanonical_fields_without_minting(tmp_path: Path) -> None:
     session = _store(tmp_path).create("synthetic passphrase")
-    card_id = session.add_card("offer", {"pan": "SYNTHETIC-4000000000000002"})
+    card_id = session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-BRAVO"})
 
     for field in ("cvv", "issuer_customer_id"):
         with pytest.raises(VaultAccessError):
@@ -463,9 +463,9 @@ def test_reveal_ttl_and_locked_operations_fail_closed(
 
     session.lock()
     with pytest.raises(VaultAccessError):
-        session.add_card("offer", {"pan": "SYNTHETIC-ONLY"})
+        session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN"})
     with pytest.raises(VaultAccessError):
-        session.replace_card(card_id, {"pan": "SYNTHETIC-ONLY"})
+        session.replace_card(card_id, {"pan": "SYNTHETIC-ONLY-PAN"})
     with pytest.raises(VaultAccessError):
         session.authorize_reveal(card_id, "pin", passphrase="synthetic passphrase")
 
@@ -520,7 +520,7 @@ def test_unwrapped_dek_must_be_256_bits() -> None:
 def test_record_aad_rejects_metadata_tampering_after_mac_recomputation(tmp_path: Path) -> None:
     store = _store(tmp_path)
     session = store.create("synthetic passphrase")
-    session.add_card("offer", {"pan": "SYNTHETIC-4000000000000002"})
+    session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-BRAVO"})
     envelope = json.loads(store.path.read_text(encoding="utf-8"))
     envelope["records"][0]["offering_id"] = "different-offer"
     dek = session._dek
@@ -535,7 +535,7 @@ def test_record_aad_rejects_metadata_tampering_after_mac_recomputation(tmp_path:
 def test_envelope_key_reordering_remains_valid_under_canonical_mac(tmp_path: Path) -> None:
     store = _store(tmp_path)
     session = store.create("synthetic passphrase")
-    card_id = session.add_card("offer", {"pan": "SYNTHETIC-4000000000000002"})
+    card_id = session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-BRAVO"})
     envelope = json.loads(store.path.read_text(encoding="utf-8"))
     reordered = {key: envelope[key] for key in reversed(tuple(envelope))}
     store.path.write_text(json.dumps(reordered, separators=(",", ":")), encoding="utf-8")
@@ -546,10 +546,10 @@ def test_envelope_key_reordering_remains_valid_under_canonical_mac(tmp_path: Pat
 def test_replacement_chain_tampering_fails_after_mac_recomputation(tmp_path: Path) -> None:
     store = _store(tmp_path)
     session = store.create("synthetic passphrase")
-    old_id = session.add_card("offer", {"pan": "SYNTHETIC-4000000000000002"})
+    old_id = session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-BRAVO"})
     new_id = session.replace_card(
         old_id,
-        {"pan": "SYNTHETIC-4000000000000010"},
+        {"pan": "SYNTHETIC-ONLY-PAN-CHARLIE"},
         lifecycle=CardLifecycle.LOST,
     )
     old = session._records[old_id]
@@ -637,15 +637,15 @@ def test_backup_permission_failure_cleans_partial_file(tmp_path: Path) -> None:
     store = VaultStore(tmp_path / "vault.json", _permissions=BackupFailure())
     session = store.create("synthetic passphrase")
     with pytest.raises(vault_core.VaultPermissionError):
-        session.add_card("offer", {"pan": "SYNTHETIC-4000000000000002"})
+        session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-BRAVO"})
     assert not store.path.with_name("vault.json.bak.1").exists()
 
 
 def _two_record_envelope(tmp_path: Path) -> tuple[VaultStore, dict[str, object]]:
     store = _store(tmp_path)
     session = store.create("synthetic passphrase")
-    session.add_card("offer", {"pan": "SYNTHETIC-4000000000000002"})
-    session.add_card("offer", {"pan": "SYNTHETIC-4000000000000010"})
+    session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-BRAVO"})
+    session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-CHARLIE"})
     return store, json.loads(store.path.read_text(encoding="utf-8"))
 
 
@@ -684,7 +684,7 @@ def test_v2_envelope_mac_rejects_cross_vault_record_splice(tmp_path: Path) -> No
 def test_v1_vault_is_rejected_fail_closed(tmp_path: Path) -> None:
     store = _store(tmp_path)
     session = store.create("synthetic passphrase")
-    session.add_card("offer", {"pan": "SYNTHETIC-4000000000000002"})
+    session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-BRAVO"})
     envelope = json.loads(store.path.read_text(encoding="utf-8"))
     envelope["version"] = 1
     envelope.pop("mac")

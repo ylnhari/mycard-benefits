@@ -5,24 +5,20 @@ from __future__ import annotations
 import argparse
 import contextlib
 import getpass
-import hashlib
-import os
 import secrets
 import sys
 from pathlib import Path
-from typing import Protocol, cast
 
 from .config import Settings
 from .vault import VaultError, VaultStore
 from .vault.importer import load_manifest
-
-_KEYRING_SERVICE = "mycard-benefits"
-
-
-class _Keyring(Protocol):
-    def get_password(self, service_name: str, username: str) -> str | None: ...
-
-    def set_password(self, service_name: str, username: str, password: str) -> None: ...
+from .vault.keyring_store import (
+    Keyring,
+    get_keyring_password,
+    keyring_account,
+    load_keyring,
+    set_keyring_password,
+)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -66,7 +62,7 @@ def run(args: argparse.Namespace) -> int:
         raise VaultError(f"vault must {expected} for this operation")
     manifest = load_manifest(args.manifest.resolve()) if args.command == "import" else None
 
-    keyring: _Keyring | None = _load_keyring() if args.keyring else None
+    keyring: Keyring | None = _load_keyring() if args.keyring else None
     account = _keyring_account(vault_path)
     if keyring is not None:
         passphrase = _get_keyring_password(keyring, account)
@@ -109,31 +105,20 @@ def _prompt_passphrase(*, confirm: bool) -> str:
     return passphrase
 
 
-def _load_keyring() -> _Keyring:
-    try:
-        import keyring
-    except ImportError as exc:
-        raise VaultError("keyring support is not installed") from exc
-    return cast(_Keyring, keyring)
+def _load_keyring() -> Keyring:
+    return load_keyring()
 
 
 def _keyring_account(vault_path: Path) -> str:
-    digest = hashlib.sha256(os.path.normcase(str(vault_path)).encode("utf-8")).hexdigest()
-    return f"vault-{digest}"
+    return keyring_account(vault_path)
 
 
-def _get_keyring_password(keyring: _Keyring, account: str) -> str | None:
-    try:
-        return keyring.get_password(_KEYRING_SERVICE, account)
-    except Exception:
-        raise VaultError("operating-system keyring is unavailable") from None
+def _get_keyring_password(keyring: Keyring, account: str) -> str | None:
+    return get_keyring_password(keyring, account)
 
 
-def _set_keyring_password(keyring: _Keyring, account: str, passphrase: str) -> None:
-    try:
-        keyring.set_password(_KEYRING_SERVICE, account, passphrase)
-    except Exception:
-        raise VaultError("operating-system keyring is unavailable") from None
+def _set_keyring_password(keyring: Keyring, account: str, passphrase: str) -> None:
+    set_keyring_password(keyring, account, passphrase)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,10 @@
+{
+  "id": "415cc9fb-b332-5923-8698-b8ebce3879a7",
+  "slug": "axis-select-credit",
+  "display_name": "Axis Bank SELECT Credit Card",
+  "issuer_id": "axis-bank",
+  "product_variant_id": "select-credit",
+  "network_id": "unknown",
+  "market": "IN",
+  "aliases": []
+}

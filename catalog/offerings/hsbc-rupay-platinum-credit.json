@@ -1,0 +1,10 @@
+{
+  "id": "0cc2e5de-353f-545d-a755-7bdc328e66bd",
+  "slug": "hsbc-rupay-platinum-credit",
+  "display_name": "HSBC RuPay Platinum Credit Card",
+  "issuer_id": "hsbc-india",
+  "product_variant_id": "rupay-platinum-credit",
+  "network_id": "rupay-platinum",
+  "market": "IN",
+  "aliases": []
+}

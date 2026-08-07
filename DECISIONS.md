@@ -51,6 +51,24 @@
 - Claude Opus is eligible for large end-to-end public-code tasks; its lower
   subscription quota is a scheduling constraint, not a capability assumption.
 
+## Useful catalog and protected read-only UI — 2026-08-07
+
+- Public product identity and private ownership remain separate. The India
+  starter catalog may contain the public variants represented by the local
+  import, but it never records who owns them or how many instances exist.
+- My Cards may display authenticated, non-secret envelope metadata only after a
+  valid Rover browser session. The app independently verifies Rover's signed
+  cookie, opens the vault through the OS keyring, returns a bounded allowlist of
+  fields, and forbids caching.
+- Add/edit/delete/reveal/copy remain disabled. Owner aliases, exact expiry,
+  uncertain variants, and replacement chains require explicit human
+  confirmation rather than inference.
+- MyCardExpert and SaveSage are discovery-only sources. Current official issuer,
+  administering-party, network, or merchant terms must support every confirmed
+  benefit before the existing human review gate can activate it.
+- Free or subscription-included runners are preferred when verified capable;
+  primary integration and independent review remain required.
+
 ## Technical defaults
 
 - Python/FastAPI, SQLite/SQLAlchemy/Alembic, Jinja and browser JavaScript.

@@ -23,8 +23,9 @@ def test_dashboard_has_all_public_navigation_and_honest_vault_gate(tmp_path: Pat
     for item in ("Overview", "My Cards", "Benefits", "Ask", "Compare", "Expiring Soon", "Updates", "Sources", "Research Queue", "Settings"):
         assert item in page.text
     assert 'href="#ask"' in page.text
-    assert "vault review pending" in page.text
-    assert "Do not enter card numbers, CVVs, PINs" in page.text
+    assert "Rover sign-in required" not in page.text
+    assert "Secret card fields are never returned" in page.text
+    assert "PAN, CVV, PIN" in page.text
     assert "disabled" in page.text
 
 
@@ -34,6 +35,10 @@ def test_catalog_dashboard_assets_use_read_only_endpoints_and_safe_dom_updates()
 
     assert 'getCatalog("offerings")' in script
     assert 'getCatalog("benefits")' in script
+    assert 'fetch("/api/v1/private/cards"' in script
+    assert 'credentials: "same-origin"' in script
+    assert 'cache: "no-store"' in script
+    assert "function renderPrivateCards" in script
     assert "textContent" in script
     assert "innerHTML" not in script
     assert "insertAdjacentHTML" not in script

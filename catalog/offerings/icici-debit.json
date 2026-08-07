@@ -1,0 +1,10 @@
+{
+  "id": "4fff597f-3810-588f-bd2e-09dbaeee0e55",
+  "slug": "icici-debit",
+  "display_name": "ICICI Bank Debit Card",
+  "issuer_id": "icici-bank",
+  "product_variant_id": "debit-card",
+  "network_id": "unknown",
+  "market": "IN",
+  "aliases": []
+}

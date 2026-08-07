@@ -1,0 +1,10 @@
+{
+  "id": "704d56b5-0765-5251-a08d-49fd16f7372e",
+  "slug": "dbs-debit",
+  "display_name": "DBS Bank Debit Card",
+  "issuer_id": "dbs-bank",
+  "product_variant_id": "debit-card",
+  "network_id": "unknown",
+  "market": "IN",
+  "aliases": []
+}

@@ -55,6 +55,9 @@ still needs primary-source evidence and human review.
 
 ## 2026-08-07 — pilot-source discovery update
 
+- Use MyCardExpert and SaveSage as discovery indexes for variant coverage and
+  changed-benefit leads. They never verify a claim; each lead must resolve to
+  current official issuer, administering-party, network, or merchant terms.
 - Treat combined co-brand advertising as a route made of independently
   evidenced layers, not one earn percentage. Tata Neu Infinity is the first
   pilot for card earn plus NeuPass/merchant earn and category fair-use caps.

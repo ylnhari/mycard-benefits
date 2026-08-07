@@ -1,0 +1,10 @@
+{
+  "id": "2d54560c-43ba-5559-9fb7-175921f3ccf9",
+  "slug": "icici-titanium-mastercard-debit",
+  "display_name": "ICICI Bank Titanium Mastercard Debit Card",
+  "issuer_id": "icici-bank",
+  "product_variant_id": "titanium-debit",
+  "network_id": "mastercard",
+  "market": "IN",
+  "aliases": []
+}

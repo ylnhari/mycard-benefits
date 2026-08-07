@@ -231,7 +231,8 @@ def test_persistence_listing_stats_and_event_order_are_deterministic(tmp_path: P
     second = _proposal(store, author="SYNTHETIC-ONLY-B")
     reopened = CandidateStore(tmp_path / "candidates.sqlite3", RELEASE)
 
-    assert [candidate.id for candidate in reopened.list_candidates()] == [first.id, second.id]
+    expected = sorted((first, second), key=lambda candidate: (candidate.created_at, candidate.id))
+    assert [candidate.id for candidate in reopened.list_candidates()] == [candidate.id for candidate in expected]
     assert reopened.stats()[CandidateState.NEEDS_REVIEW] == 2
     assert [event.id for event in reopened.events(first.id)] == [1]
 

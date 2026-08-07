@@ -1,0 +1,10 @@
+{
+  "id": "499d4ea3-8eb2-5f39-a90b-22f6c5f2ef99",
+  "slug": "rbl-duet-credit",
+  "display_name": "RBL Bank Duet Credit Card",
+  "issuer_id": "rbl-bank",
+  "product_variant_id": "duet-credit",
+  "network_id": "unknown",
+  "market": "IN",
+  "aliases": []
+}

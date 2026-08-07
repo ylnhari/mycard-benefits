@@ -1,0 +1,10 @@
+{
+  "id": "6c53238b-c87e-5640-9ec1-1403cbf9d140",
+  "slug": "hsbc-visa-debit",
+  "display_name": "HSBC Visa Debit Card",
+  "issuer_id": "hsbc-india",
+  "product_variant_id": "visa-debit",
+  "network_id": "visa",
+  "market": "IN",
+  "aliases": []
+}

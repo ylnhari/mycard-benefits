@@ -1,0 +1,10 @@
+{
+  "id": "eca5f433-8a85-5601-b603-c3ad4a8eb3b3",
+  "slug": "hdfc-rupay-credit",
+  "display_name": "HDFC Bank RuPay Credit Card",
+  "issuer_id": "hdfc-bank",
+  "product_variant_id": "rupay-credit",
+  "network_id": "rupay",
+  "market": "IN",
+  "aliases": []
+}

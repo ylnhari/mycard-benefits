@@ -1,6 +1,6 @@
 const root = document.documentElement;
 const themeKey = "mycard-benefits-theme";
-const state = { offerings: [], benefits: [] };
+const state = { offerings: [], benefits: [], privateCards: [] };
 const views = new Set([...document.querySelectorAll("[data-panel]")].map(panel => panel.id));
 
 function setTheme(theme) {
@@ -83,8 +83,11 @@ function offeringCard(offering) {
 function renderOfferings() {
   document.querySelector("#offeringCount").textContent = String(state.offerings.length);
   const preview = document.querySelector("#offeringPreview"); clear(preview);
-  if (!state.offerings.length) preview.append(node("p", "No public offerings are available.", "empty-state"));
-  for (const offering of state.offerings) preview.append(offeringCard(offering));
+  const query = document.querySelector("#offeringSearch").value.trim().toLocaleLowerCase();
+  const filtered = state.offerings.filter(offering => [offering.display_name, offering.issuer_id, offering.network_id, offering.slug].some(value => value.toLocaleLowerCase().includes(query)));
+  document.querySelector("#offeringSearchStatus").textContent = query ? `${filtered.length} matching card variant${filtered.length === 1 ? "" : "s"}` : `${state.offerings.length} card variants available`;
+  if (!filtered.length) preview.append(node("p", "No card variant matches that search.", "empty-state"));
+  for (const offering of filtered) preview.append(offeringCard(offering));
   for (const select of document.querySelectorAll("#benefitOffering, #compareA, #compareB")) {
     const keep = select.value; clear(select);
     if (select.id === "benefitOffering") select.append(new Option("All offerings", ""));
@@ -92,6 +95,7 @@ function renderOfferings() {
     if ([...select.options].some(option => option.value === keep)) select.value = keep;
   }
 }
+document.querySelector("#offeringSearch").addEventListener("input", renderOfferings);
 function evidenceLine(evidence) {
   const line = node("li");
   line.append(node("span", `${evidence.source_policy_class.replaceAll("_", " ")} · ${evidence.review_state} · ${evidence.confidence} confidence`));
@@ -133,6 +137,72 @@ function renderComparison() {
 }
 document.querySelector("#benefitOffering").addEventListener("change", renderBenefits);
 for (const select of document.querySelectorAll("#compareA, #compareB")) select.addEventListener("change", renderComparison);
+
+function privateCardName(card) {
+  return state.offerings.find(offering => offering.slug === card.offering_id)?.display_name || card.offering_id.replaceAll("-", " ");
+}
+function privateCardBadge(lifecycle) {
+  if (lifecycle === "active") return "badge active";
+  if (["lost", "stolen"].includes(lifecycle)) return "badge error";
+  return "badge pending";
+}
+function renderPrivateCards() {
+  const lifecycle = document.querySelector("#cardLifecycle").value;
+  const query = document.querySelector("#myCardSearch").value.trim().toLocaleLowerCase();
+  const cards = state.privateCards.filter(card => (!lifecycle || card.lifecycle === lifecycle) && (!query || privateCardName(card).toLocaleLowerCase().includes(query) || card.offering_id.includes(query)));
+  const target = document.querySelector("#myCardList"); clear(target);
+  if (!cards.length) {
+    target.append(node("p", state.privateCards.length ? "No cards match these filters." : "No card records are in this vault.", "empty-state"));
+    return;
+  }
+  cards.forEach((card, index) => {
+    const item = node("article", undefined, "catalog-card private-card");
+    const head = node("div", undefined, "card-title");
+    const title = node("div");
+    title.append(node("p", `Local card ${index + 1}`, "eyebrow"), node("h3", privateCardName(card)));
+    head.append(title, node("span", card.lifecycle, privateCardBadge(card.lifecycle)));
+    item.append(head, node("p", `Added ${fmtDate(card.created_at.slice(0, 10))} · updated ${fmtDate(card.updated_at.slice(0, 10))}`));
+    if (card.replacement_card_id) item.append(node("p", "Replacement history is linked.", "allowance"));
+    const offering = state.offerings.find(candidate => candidate.slug === card.offering_id);
+    if (offering) item.append(node("p", `${offering.issuer_id} · ${offering.network_id.replaceAll("-", " ")}`, "quiet-copy"));
+    target.append(item);
+  });
+}
+function setPrivateAccess(title, text, badge, status) {
+  document.querySelector("#vaultSummaryTitle").textContent = title;
+  document.querySelector("#vaultSummaryText").textContent = text;
+  document.querySelector("#myCardsBadge").textContent = badge;
+  document.querySelector("#myCardStatus").textContent = status;
+}
+async function loadPrivateCards() {
+  try {
+    const response = await fetch("/api/v1/private/cards", { headers: { Accept: "application/json" }, credentials: "same-origin", cache: "no-store" });
+    if (response.status === 401) {
+      setPrivateAccess("Open through Rover to view My Cards", "The public catalog works here. Your private list appears only after this browser signs in to Rover.", "Rover sign-in required", "Sign in to Rover, then open MyCard from its project card.");
+      document.querySelector("#myCardCount").textContent = "—";
+      document.querySelector("#myCardCountNote").textContent = "Open through Rover";
+      renderPrivateCards();
+      return;
+    }
+    if (!response.ok) throw new Error("unavailable");
+    const payload = await response.json();
+    state.privateCards = Array.isArray(payload.cards) ? payload.cards : [];
+    const active = payload.lifecycle_counts?.active || 0;
+    document.querySelector("#myCardCount").textContent = String(state.privateCards.length);
+    document.querySelector("#myCardCountNote").textContent = `${active} active · encrypted locally`;
+    setPrivateAccess("Private card list ready", `${state.privateCards.length} card records are mapped to the public catalog. Secret fields remain encrypted and are not returned.`, "Authenticated through Rover", `${state.privateCards.length} cards loaded; ${active} active.`);
+    const lifecycleSelect = document.querySelector("#cardLifecycle");
+    for (const lifecycle of Object.keys(payload.lifecycle_counts || {})) lifecycleSelect.append(new Option(`${lifecycle} (${payload.lifecycle_counts[lifecycle]})`, lifecycle));
+    renderPrivateCards();
+  } catch {
+    setPrivateAccess("Private vault unavailable", "The public catalog still works. Check the local keyring and vault service before retrying.", "Unavailable", "Private card list could not be opened; no fallback data was used.");
+    document.querySelector("#myCardCount").textContent = "—";
+    document.querySelector("#myCardCountNote").textContent = "Vault unavailable";
+    renderPrivateCards();
+  }
+}
+document.querySelector("#cardLifecycle").addEventListener("change", renderPrivateCards);
+document.querySelector("#myCardSearch").addEventListener("input", renderPrivateCards);
 
 function setQaStatus(message, kind) {
   const target = document.querySelector("#qaStatus");
@@ -266,6 +336,7 @@ async function boot() {
     for (const target of [document.querySelector("#offeringPreview"), document.querySelector("#benefitList"), document.querySelector("#sourceList"), document.querySelector("#comparison")]) { clear(target); target.append(node("p", "Public catalog data is unavailable. Try again after a reviewed catalog is installed.", "empty-state")); }
     document.querySelector("#benefitEmpty").hidden = true;
   }
+  await loadPrivateCards();
 }
 const initialView = viewFromHash();
 if (location.hash.slice(1) !== initialView) history.replaceState(null, "", `#${initialView}`);

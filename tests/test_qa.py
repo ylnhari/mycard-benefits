@@ -95,7 +95,7 @@ def test_no_result_and_ambiguous_shapes_include_safe_guidance() -> None:
     empty = Catalog(release=catalog.release, offerings=catalog.offerings, benefits=())
     result = answer(empty, "offerings for lounge")
     assert result["intent"] == "no_result" and result["message"] and result["suggestions"]
-    original = catalog.offerings[0]
+    original = next(offering for offering in catalog.offerings if offering.slug == "synthetic-example-in-visa")
     collision = replace(original, id="99999999-9999-4999-8999-999999999999", slug="collision", display_name="Collision", aliases=("Synthetic India Visa",))
     ambiguous = answer(Catalog(release=catalog.release, offerings=(original, collision), benefits=catalog.benefits), "benefits for synthetic india visa")
     assert ambiguous["intent"] == "ambiguous" and ambiguous["message"] and len(ambiguous["choices"]) == 2 and ambiguous["suggestions"]

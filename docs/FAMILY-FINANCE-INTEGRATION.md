@@ -36,6 +36,9 @@ it as a Rover web project, keep Rover authentication enabled, and use the
 Rover-issued proxy URL. Do not put the Rover secret in either application's
 source, URL, browser storage, or documentation. A Rover proxy port can be
 reallocated; if that happens, update the browser-local companion setting.
+The app reads the matching `ROVER_SECRET` only from its process configuration
+or ignored local `.env`; Rover supplies it when launching the registered project
+on this workstation.
 
 ## Data boundary
 

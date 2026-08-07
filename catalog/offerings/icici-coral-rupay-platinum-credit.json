@@ -1,0 +1,10 @@
+{
+  "id": "9edd8abc-5ca2-594b-9cbc-5c4da6167889",
+  "slug": "icici-coral-rupay-platinum-credit",
+  "display_name": "ICICI Bank Coral RuPay Platinum Credit Card",
+  "issuer_id": "icici-bank",
+  "product_variant_id": "coral-platinum-credit",
+  "network_id": "rupay-platinum",
+  "market": "IN",
+  "aliases": []
+}

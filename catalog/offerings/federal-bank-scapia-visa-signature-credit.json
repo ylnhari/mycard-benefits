@@ -1,0 +1,11 @@
+{
+  "id": "197da3ee-e8cb-5beb-889a-9ec36b31f2a3",
+  "slug": "federal-bank-scapia-visa-signature-credit",
+  "display_name": "Scapia Federal Bank Visa Signature Credit Card",
+  "issuer_id": "federal-bank",
+  "product_variant_id": "scapia-credit",
+  "network_id": "visa-signature",
+  "market": "IN",
+  "aliases": [],
+  "co_brand_id": "scapia"
+}

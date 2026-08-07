@@ -1,0 +1,11 @@
+{
+  "id": "f022c001-b6d9-5312-a1a1-d0583043e4f9",
+  "slug": "hdfc-swiggy-mastercard-credit",
+  "display_name": "Swiggy HDFC Bank Mastercard Credit Card",
+  "issuer_id": "hdfc-bank",
+  "product_variant_id": "swiggy-credit",
+  "network_id": "mastercard",
+  "market": "IN",
+  "aliases": [],
+  "co_brand_id": "swiggy"
+}

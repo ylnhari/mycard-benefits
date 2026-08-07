@@ -1,0 +1,10 @@
+{
+  "id": "e37951fe-a599-5327-bcd2-5762624590f7",
+  "slug": "slice-rupay-credit",
+  "display_name": "Slice RuPay Credit Card",
+  "issuer_id": "slice",
+  "product_variant_id": "rupay-credit",
+  "network_id": "rupay",
+  "market": "IN",
+  "aliases": []
+}

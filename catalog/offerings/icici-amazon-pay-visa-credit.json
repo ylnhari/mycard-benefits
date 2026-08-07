@@ -1,0 +1,11 @@
+{
+  "id": "5b5c5443-ed62-54ac-8f08-45851c094119",
+  "slug": "icici-amazon-pay-visa-credit",
+  "display_name": "Amazon Pay ICICI Bank Visa Credit Card",
+  "issuer_id": "icici-bank",
+  "product_variant_id": "amazon-pay-credit",
+  "network_id": "visa",
+  "market": "IN",
+  "aliases": [],
+  "co_brand_id": "amazon-pay"
+}
