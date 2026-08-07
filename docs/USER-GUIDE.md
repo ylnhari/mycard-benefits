@@ -321,6 +321,16 @@ to it. A card whose identifier has no catalog match appears in a clearly labeled
 status filter and a search box that matches product, bank, network, status, and
 the record's safe identifiers.
 
+**Viewing a card's details.** Every row has a **View details** button. Pressing
+it (with the mouse or the keyboard) expands a read-only detail panel showing the
+same safe facts: product name, issuer/bank, network, lifecycle, when the record
+was added and updated, and the replacement relationship — whether this card was
+replaced by another one, or replaced an earlier card, named when both records
+are present. The panel never adds a new field and never shows a secret; Escape
+or the button closes it and returns focus to the row. An unmatched card's panel
+says so honestly, without printing the raw identifier, and points at the two
+ways to fix it (fix the import identifier, or request the catalog variant).
+
 **What it never shows, and never sends to your browser:** the card number, CVV,
 PIN, cardholder name, your nickname for the card, notes, and expiry date. Those
 stay encrypted. The list is built from the record's outer envelope only — a local
