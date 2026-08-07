@@ -3,14 +3,15 @@
 1. **Complete:** foundation, governance, clean-clone server, and durable agent
    substrate.
 2. **Partial, usable:** public catalog schema, immutable identifiers, temporal
-   rules, evaluator, API, and 68 real India product variants plus one synthetic
-   fixture. Officially verified benefit coverage remains sparse.
+   rules, evaluator, API, and 68 real India product variants. Synthetic records
+   are isolated to tests. Officially verified benefit coverage remains sparse.
 3. **Read-only UI complete; writes gated:** encrypted
    vault, one-use reveal authorization, bounded backup/restore, locking,
    integrity checks, strict manifest parsing, atomic batch import, and optional
    OS-keyring unlock are implemented. An authenticated My Cards view exposes
-   only non-secret envelope metadata; browser writes and secret reveal remain
-   gated.
+   only non-secret envelope metadata, rendered as readable rows joined to public
+   catalog product, bank, network, lifecycle, and record dates; browser writes
+   and secret reveal remain gated.
 4. **Partial:** responsive dashboard, comparisons, evidence views, deterministic
    traceable Q&A, and purchase-route optimizer core. Reminders and optimizer UI
    are not implemented.

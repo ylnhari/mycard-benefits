@@ -43,11 +43,12 @@ cards will not appear there.
 This is an early release, and the list is deliberately honest.
 
 **Working:** the local dashboard (desktop and phone, dark and light, keyboard
-navigable); a public catalog of **69 card variants** — real Indian credit cards,
+navigable); a public catalog of **68 card variants** — real Indian credit cards,
 debit cards, lounge memberships, and pay-later products identified by bank,
-product, and network, plus one labelled synthetic fixture — searchable by bank,
-card, or network; **My Cards**, a read-only list of your imported cards matched to
-their catalog product; browsing benefits with their dates and evidence; **Ask**, a
+product, and network — searchable by bank, card, or network; **My Cards**, a
+read-only list of your imported cards shown as
+readable rows with their public catalog product, bank, network, lifecycle status,
+and record dates; browsing benefits with their dates and evidence; **Ask**, a
 deterministic question box answered from catalog facts with no AI model involved;
 **Compare** for two cards side by side; **Sources** for the evidence trail; and a
 command-line tool that creates your encrypted vault and imports your cards.
@@ -96,8 +97,11 @@ views. The app remains bound to loopback; it opens the OS-keyring-encrypted vaul
 server-side and returns envelope metadata only — card UUID, catalog offering,
 lifecycle, created and updated timestamps, and a linked replacement card
 identifier — sent `no-store`, and refused outright if the vault yields any
-unexpected field. PAN, CVV, PIN, nickname, notes, cardholder name, and expiry are
-never returned.
+unexpected field. The browser joins that envelope to the public catalog so each
+card renders as a row with the product name, issuer/bank, network, lifecycle, and
+record dates; an identifier with no catalog match appears under a clearly labeled
+"Unmatched card variant" row rather than a raw slug. PAN, CVV, PIN, nickname,
+notes, cardholder name, and expiry are never returned.
 
 ## Public versus private
 

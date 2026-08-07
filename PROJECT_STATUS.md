@@ -10,7 +10,7 @@ view of the encrypted portfolio.
 ## Completed
 
 - Clone-safe loopback FastAPI application, signed installation identity, port
-  resolution, public dashboard, synthetic demo catalog, and offline test suite.
+  resolution, public dashboard, isolated test catalog, and offline test suite.
 - Versioned public catalog loader/API, source policy, evidence governance,
   immutable candidate/diff store, and resumable SQLite research queue.
 - Deterministic public catalog Q&A API/UI and a pure purchase-route optimizer;
@@ -23,11 +23,16 @@ view of the encrypted portfolio.
   integrity verification. The owner-authorized local migration completed; its
   data and receipt remain ignored.
 - Optional, data-isolated Family Finance launcher and bundled setup guide.
-- Public India starter catalog with 68 real product-variant identities plus the
-  synthetic fixture. Product presence is not presented as benefit verification.
+- Public India starter catalog with 68 real product-variant identities. Product
+  presence is not presented as benefit verification; synthetic fixtures are
+  isolated from runtime catalog views and APIs.
 - Loopback-local, read-only My Cards API/UI. It opens the existing vault through
   the operating-system keyring, returns only card UUID, offering, lifecycle,
-  timestamps, and replacement metadata, and applies `no-store`.
+  timestamps, and replacement metadata, and applies `no-store`. The view renders
+  each card as a readable row joined to public catalog product, issuer/bank,
+  network, lifecycle, and record dates; unmatched identifiers appear as a
+  clearly labeled "Unmatched card variant" row, and search and lifecycle
+  filtering return exact subsets.
 - MyCard remains loopback-bound. A personal external launcher may start it and
   provide phone access, but MyCard does not integrate with that tool.
 - Discovery-only pilot source work for Tata Neu HDFC Infinity and HDFC Regalia
@@ -74,9 +79,9 @@ view of the encrypted portfolio.
   replacement link is established, owner aliases are not mapped to family
   roles, and many records remain unassigned.
 - No live source adapter or scheduler is connected to the network. The queue is
-  offline orchestration only. The active benefit catalog still contains only
-  its synthetic fixture; real pilot findings remain unapproved research
-  candidates.
+  offline orchestration only. The active benefit catalog is empty until
+  official-source findings are reviewed and approved; real pilot findings remain
+  unapproved research candidates.
 - The optimizer core is not exposed through the UI and cannot open purchase or
   affiliate routes.
 - Family Finance performs a privacy-preserving reachability check only; signed

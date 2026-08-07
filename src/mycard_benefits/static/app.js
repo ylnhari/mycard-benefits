@@ -138,41 +138,66 @@ function renderComparison() {
 document.querySelector("#benefitOffering").addEventListener("change", renderBenefits);
 for (const select of document.querySelectorAll("#compareA, #compareB")) select.addEventListener("change", renderComparison);
 
-function privateCardName(card) {
-  return state.offerings.find(offering => offering.slug === card.offering_id)?.display_name || card.offering_id.replaceAll("-", " ");
+const UNMATCHED_CARD_LABEL = "Unmatched card variant";
+function offeringForCard(card) {
+  return state.offerings.find(candidate => candidate.slug === card.offering_id);
+}
+function cardSearchText(card, offering) {
+  return [offering?.display_name, offering?.issuer_id, offering?.network_id, offering?.slug, card.lifecycle, card.offering_id, card.card_id].filter(Boolean).join(" ").toLocaleLowerCase();
 }
 function privateCardBadge(lifecycle) {
   if (lifecycle === "active") return "badge active";
   if (["lost", "stolen"].includes(lifecycle)) return "badge error";
   return "badge pending";
 }
+function privateCardDates(card) {
+  const created = fmtDate((card.created_at || "").slice(0, 10));
+  const updated = fmtDate((card.updated_at || "").slice(0, 10));
+  return `Added ${created} · updated ${updated}`;
+}
+function privateCardRow(card) {
+  const offering = offeringForCard(card);
+  const item = node("article", undefined, "catalog-card private-card");
+  const head = node("div", undefined, "card-title");
+  const title = node("div");
+  const matched = Boolean(offering);
+  title.append(node("p", matched ? `${offering.issuer_id} · ${offering.network_id.replaceAll("-", " ").toUpperCase()}` : "Not matched in the public catalog", "eyebrow"), node("h3", matched ? offering.display_name : UNMATCHED_CARD_LABEL));
+  head.append(title, node("span", card.lifecycle, privateCardBadge(card.lifecycle)));
+  item.append(head);
+  item.append(node("p", privateCardDates(card), "quiet-copy"));
+  if (!matched) item.append(node("p", "This card's product identifier has no match in the public catalog. Its product name will appear once the identifier matches or the card variant is added.", "unmatched-note"));
+  if (card.replacement_card_id) item.append(node("p", "Replacement history is linked.", "allowance"));
+  return item;
+}
 function renderPrivateCards() {
   const lifecycle = document.querySelector("#cardLifecycle").value;
   const query = document.querySelector("#myCardSearch").value.trim().toLocaleLowerCase();
-  const cards = state.privateCards.filter(card => (!lifecycle || card.lifecycle === lifecycle) && (!query || privateCardName(card).toLocaleLowerCase().includes(query) || card.offering_id.includes(query)));
+  const cards = state.privateCards.filter(card => {
+    if (lifecycle && card.lifecycle !== lifecycle) return false;
+    if (query && !cardSearchText(card, offeringForCard(card)).includes(query)) return false;
+    return true;
+  });
   const target = document.querySelector("#myCardList"); clear(target);
-  if (!cards.length) {
-    target.append(node("p", state.privateCards.length ? "No cards match these filters." : "No card records are in this vault.", "empty-state"));
+  if (!state.privateCards.length) {
+    target.append(node("p", "No card records are in this vault yet. Import cards with the mycard-vault command line, then return here to see them listed.", "empty-state"));
     return;
   }
-  cards.forEach((card, index) => {
-    const item = node("article", undefined, "catalog-card private-card");
-    const head = node("div", undefined, "card-title");
-    const title = node("div");
-    title.append(node("p", `Local card ${index + 1}`, "eyebrow"), node("h3", privateCardName(card)));
-    head.append(title, node("span", card.lifecycle, privateCardBadge(card.lifecycle)));
-    item.append(head, node("p", `Added ${fmtDate(card.created_at.slice(0, 10))} · updated ${fmtDate(card.updated_at.slice(0, 10))}`));
-    if (card.replacement_card_id) item.append(node("p", "Replacement history is linked.", "allowance"));
-    const offering = state.offerings.find(candidate => candidate.slug === card.offering_id);
-    if (offering) item.append(node("p", `${offering.issuer_id} · ${offering.network_id.replaceAll("-", " ")}`, "quiet-copy"));
-    target.append(item);
-  });
+  if (!cards.length) {
+    target.append(node("p", "No cards match the current search and lifecycle filter. Clear the search or choose a different status.", "empty-state"));
+    return;
+  }
+  for (const card of cards) target.append(privateCardRow(card));
 }
 function setPrivateAccess(title, text, badge, status) {
   document.querySelector("#vaultSummaryTitle").textContent = title;
   document.querySelector("#vaultSummaryText").textContent = text;
   document.querySelector("#myCardsBadge").textContent = badge;
   document.querySelector("#myCardStatus").textContent = status;
+}
+function setPrivateUnavailable(title, text, badge, status) {
+  setPrivateAccess(title, text, badge, status);
+  const target = document.querySelector("#myCardList"); clear(target);
+  target.append(node("p", "The private vault could not be opened, so no card list can be shown. Make sure the app is not in demo mode, the vault exists, and it can be unlocked through the operating-system keyring.", "empty-state"));
 }
 async function loadPrivateCards() {
   try {
@@ -188,10 +213,9 @@ async function loadPrivateCards() {
     for (const lifecycle of Object.keys(payload.lifecycle_counts || {})) lifecycleSelect.append(new Option(`${lifecycle} (${payload.lifecycle_counts[lifecycle]})`, lifecycle));
     renderPrivateCards();
   } catch {
-    setPrivateAccess("Private vault unavailable", "The public catalog still works. Check the local keyring and vault service before retrying.", "Unavailable", "Private card list could not be opened; no fallback data was used.");
+    setPrivateUnavailable("Private vault unavailable", "The public catalog still works. Check that the app is not in demo mode, that the vault exists, and that it can be unlocked through the OS keyring before retrying.", "Unavailable", "Private card list could not be opened; no fallback data was used.");
     document.querySelector("#myCardCount").textContent = "—";
     document.querySelector("#myCardCountNote").textContent = "Vault unavailable";
-    renderPrivateCards();
   }
 }
 document.querySelector("#cardLifecycle").addEventListener("change", renderPrivateCards);
