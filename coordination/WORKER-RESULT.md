@@ -4,6 +4,7 @@ Status: PENDING
 Task: MC-003
 Runner: not started
 Provider/model: not started
+Branch: `agent/mc003-antigravity`
 
 ## Result
 
@@ -24,6 +25,10 @@ None.
 ## Remaining risks or blockers
 
 None recorded.
+
+## Commit
+
+Not created.
 
 ## Verdict
 
