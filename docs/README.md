@@ -78,8 +78,9 @@ documentation change — see each document's own notes on unresolved questions.
   delegated runner may and may not do, including the unattended-work
   boundary restated for agent operators specifically.
 - [PURCHASE-OPTIMIZER.md](PURCHASE-OPTIMIZER.md) — deterministic whole-route
-  ranking, value classes, stacking, and affiliate neutrality. The engine is not
-  exposed through the UI in this release.
+  ranking, value classes, stacking, affiliate neutrality, and the ephemeral
+  loopback API. The engine is exposed only through that loopback API in this
+  release, not through the UI.
 - [IDEA-LOG.md](IDEA-LOG.md) — durable owner ideas and discovery leads that are
   not approved catalog facts.
 - [DECISION-TRACE.md](DECISION-TRACE.md) — concise trace from the initial

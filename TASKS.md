@@ -513,7 +513,7 @@ Manager protocol: tasks are assigned one at a time; a worker owns only its named
 
 ### Reward and purchase optimization
 
-- [ ] **MC-098: Expose the optimizer core through a protected local API** - Wire the reviewed pure engine (`src/mycard_benefits/optimizer/`) to a narrowly scoped loopback API.
+- [x] **MC-098: Expose the optimizer core through a protected local API** - Wire the reviewed pure engine (`src/mycard_benefits/optimizer/`) to a narrowly scoped loopback API.
   - Acceptance: API accepts a planned-purchase scenario and returns ranked routes; rejects stale/unreviewed inputs; no persistence unless explicitly saved per `PROJECT_STATUS.md` "Not yet safe".
   - Depends on: none
   - Suggested runner: OpenCode
