@@ -57,9 +57,10 @@ verified after the publication scan:
 - `agent/mc085-antigravity`: `3059e68` (unapproved WIP);
 - `agent/mc098-opencode`: `2f6d34e` (integrated reference branch).
 
-This receipt metadata is included by the recorded publication gate. Subsequent
-local completion work awaits its own exact publication gate. Future work starts
-from `main`; no worker branch is a prerequisite.
+The reviewed Claude/MC-085 completion was subsequently synchronized by normal
+fast-forward and verified on both remote `main` and
+`manager/concurrent-integration` at `776699c` before the final receipt metadata
+commit. Future work starts from `main`; no worker branch is a prerequisite.
 
 ## Worker branches and review disposition
 
