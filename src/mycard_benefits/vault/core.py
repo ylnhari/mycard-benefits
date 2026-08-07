@@ -39,7 +39,6 @@ _ENVELOPE_MAC_INFO: Final = b"mycard-benefits/vault-envelope-mac/v2"
 _MAX_VAULT_BYTES: Final = 5 * 1024 * 1024
 _MAX_RECORDS: Final = 1_000
 _MAX_CHILD_RECORDS: Final = 5_000
-_MAX_LABEL_CHARS: Final = 160
 _BACKUP_COUNT: Final = 3
 _COPY_CHUNK_BYTES: Final = 64 * 1024
 _MAX_SECRET_VALUE_CHARS: Final = 4_096
@@ -186,10 +185,11 @@ class _Record:
 
 @dataclass(frozen=True)
 class _ChildRecord:
+    """Non-secret; the display label is always derived from `kind`, never free text."""
+
     child_id: str
     parent_card_id: str
     kind: ChildRecordKind
-    label: str
     lifecycle: ChildRecordLifecycle
     created_at: str
     updated_at: str
@@ -330,7 +330,6 @@ class VaultSession:
                     "child_id": record.child_id,
                     "parent_card_id": record.parent_card_id,
                     "kind": record.kind.value,
-                    "label": record.label,
                     "lifecycle": record.lifecycle.value,
                     "created_at": record.created_at,
                     "updated_at": record.updated_at,
@@ -372,11 +371,12 @@ class VaultSession:
         self,
         parent_card_id: str,
         kind: ChildRecordKind,
-        label: str,
         *,
         lifecycle: ChildRecordLifecycle = ChildRecordLifecycle.ACTIVE,
         expiry_date: str | None = None,
     ) -> str:
+        """Add a non-secret child record. There is no free-text label: the display
+        name is always derived from `kind`, so no secret value can be stored here."""
         with self._lock:
             self._require_unlocked()
             self._get_record(parent_card_id)
@@ -384,7 +384,6 @@ class VaultSession:
                 raise VaultError("invalid child record kind")
             if not isinstance(lifecycle, ChildRecordLifecycle):
                 raise VaultError("invalid lifecycle")
-            label = _validate_label(label)
             if expiry_date is not None:
                 _validate_date(expiry_date)
             if len(self._child_records) >= _MAX_CHILD_RECORDS:
@@ -395,7 +394,6 @@ class VaultSession:
                 child_id=child_id,
                 parent_card_id=parent_card_id,
                 kind=kind,
-                label=label,
                 lifecycle=lifecycle,
                 created_at=now,
                 updated_at=now,
@@ -669,7 +667,6 @@ def _serialize_envelope(
                 "child_id": record.child_id,
                 "parent_card_id": record.parent_card_id,
                 "kind": record.kind.value,
-                "label": record.label,
                 "lifecycle": record.lifecycle.value,
                 "created_at": record.created_at,
                 "updated_at": record.updated_at,
@@ -828,7 +825,6 @@ def _parse_child_records(
             "child_id",
             "parent_card_id",
             "kind",
-            "label",
             "lifecycle",
             "created_at",
             "updated_at",
@@ -847,7 +843,6 @@ def _parse_child_records(
         try:
             kind = ChildRecordKind(raw["kind"])
             lifecycle = ChildRecordLifecycle(raw["lifecycle"])
-            label = _validate_label(raw["label"])
             if expiry_date is not None:
                 _validate_date(expiry_date)
         except (ValueError, VaultError):
@@ -856,7 +851,6 @@ def _parse_child_records(
             child_id=child_id,
             parent_card_id=parent_card_id,
             kind=kind,
-            label=label,
             lifecycle=lifecycle,
             created_at=raw["created_at"],
             updated_at=raw["updated_at"],
@@ -917,16 +911,6 @@ def validate_offering_id(value: str) -> None:
     """Protect the cleartext envelope field from receiving arbitrary private text."""
     if not isinstance(value, str) or _OFFERING_ID.fullmatch(value) is None:
         raise VaultError("offering_id is invalid")
-
-
-def _validate_label(value: str) -> str:
-    """Bound a non-secret child-record display label; never a place for secrets."""
-    if not isinstance(value, str):
-        raise VaultError("label is invalid")
-    stripped = value.strip()
-    if not stripped or len(stripped) > _MAX_LABEL_CHARS or not stripped.isprintable():
-        raise VaultError("label is invalid")
-    return stripped
 
 
 def _validate_date(value: str) -> None:

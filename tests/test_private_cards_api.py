@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -322,37 +323,43 @@ def test_real_reader_reports_locked_when_vault_exists_with_stored_passphrase_but
     assert response.json()["detail"]["code"] == "locked"
 
 
+def _child_record(**overrides: object) -> dict[str, object]:
+    base: dict[str, object] = {
+        "child_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0010",
+        "parent_card_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0001",
+        "kind": "priority_pass",
+        "lifecycle": "active",
+        "created_at": "2026-08-07T00:00:00Z",
+        "updated_at": "2026-08-07T00:00:00Z",
+    }
+    base.update(overrides)
+    return base
+
+
+def _card_with_children(*children: dict[str, object]) -> dict[str, object]:
+    return {
+        "card_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0001",
+        "offering_id": "hdfc-regalia-gold-credit",
+        "lifecycle": "active",
+        "created_at": "2026-08-07T00:00:00Z",
+        "updated_at": "2026-08-07T00:00:00Z",
+        "child_records": list(children),
+    }
+
+
 def test_private_cards_nest_child_records_with_only_envelope_fields(tmp_path: Path) -> None:
     def reader() -> tuple[dict[str, object], ...]:
         return (
-            {
-                "card_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0001",
-                "offering_id": "hdfc-regalia-gold-credit",
-                "lifecycle": "active",
-                "created_at": "2026-08-07T00:00:00Z",
-                "updated_at": "2026-08-07T00:00:00Z",
-                "child_records": [
-                    {
-                        "child_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0010",
-                        "parent_card_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0001",
-                        "kind": "priority_pass",
-                        "label": "Priority Pass membership",
-                        "lifecycle": "active",
-                        "created_at": "2026-08-07T00:00:00Z",
-                        "updated_at": "2026-08-07T00:00:00Z",
-                        "expiry_date": "2027-01-01",
-                    },
-                    {
-                        "child_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0011",
-                        "parent_card_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0001",
-                        "kind": "voucher",
-                        "label": "Movie voucher",
-                        "lifecycle": "expired",
-                        "created_at": "2026-08-06T00:00:00Z",
-                        "updated_at": "2026-08-06T00:00:00Z",
-                    },
-                ],
-            },
+            _card_with_children(
+                _child_record(expiry_date="2027-01-01"),
+                _child_record(
+                    child_id="018f47f2-0f86-7b0a-bc7d-f00ba47c0011",
+                    kind="voucher",
+                    lifecycle="expired",
+                    created_at="2026-08-06T00:00:00Z",
+                    updated_at="2026-08-06T00:00:00Z",
+                ),
+            ),
         )
 
     with _client(tmp_path, reader) as client:
@@ -363,44 +370,56 @@ def test_private_cards_nest_child_records_with_only_envelope_fields(tmp_path: Pa
     children = response.json()["cards"][0]["child_records"]
     assert len(children) == 2
     assert children[0]["kind"] == "priority_pass"
-    assert children[0]["expiry_date"] == "2027-01-01"
+    assert children[0]["expiry_signal"] == "active"
     assert set(children[0]) == {
         "child_id",
         "parent_card_id",
         "kind",
-        "label",
         "lifecycle",
         "created_at",
         "updated_at",
-        "expiry_date",
+        "expiry_signal",
     }
     assert children[1]["kind"] == "voucher"
     assert children[1]["lifecycle"] == "expired"
-    assert children[1]["expiry_date"] is None
+    assert children[1]["expiry_signal"] is None
+    assert "2027-01-01" not in response.text
+    assert "label" not in response.text
+
+
+def test_private_cards_never_send_the_exact_child_expiry_date(tmp_path: Path) -> None:
+    """Only a bounded signal crosses the boundary; the raw date never does."""
+    today = datetime.now(UTC).date()
+    expired_date = (today - timedelta(days=5)).isoformat()
+    soon_date = (today + timedelta(days=5)).isoformat()
+    later_date = (today + timedelta(days=400)).isoformat()
+
+    def reader() -> tuple[dict[str, object], ...]:
+        return (
+            _card_with_children(
+                _child_record(expiry_date=expired_date),
+                _child_record(child_id="018f47f2-0f86-7b0a-bc7d-f00ba47c0011", expiry_date=soon_date),
+                _child_record(child_id="018f47f2-0f86-7b0a-bc7d-f00ba47c0012", expiry_date=later_date),
+            ),
+        )
+
+    with _client(tmp_path, reader) as client:
+        response = client.get("/api/v1/private/cards")
+
+    assert response.status_code == 200
+    children = response.json()["cards"][0]["child_records"]
+    assert [child["expiry_signal"] for child in children] == ["expired", "expiring_soon", "active"]
+    for exact_date in (expired_date, soon_date, later_date):
+        assert exact_date not in response.text
+    assert "expiry_date" not in response.text
 
 
 def test_private_cards_fail_closed_on_unexpected_child_record_fields(tmp_path: Path) -> None:
     def reader() -> tuple[dict[str, object], ...]:
         return (
-            {
-                "card_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0001",
-                "offering_id": "hdfc-regalia-gold-credit",
-                "lifecycle": "active",
-                "created_at": "2026-08-07T00:00:00Z",
-                "updated_at": "2026-08-07T00:00:00Z",
-                "child_records": [
-                    {
-                        "child_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0010",
-                        "parent_card_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0001",
-                        "kind": "priority_pass",
-                        "label": "Priority Pass membership",
-                        "lifecycle": "active",
-                        "created_at": "2026-08-07T00:00:00Z",
-                        "updated_at": "2026-08-07T00:00:00Z",
-                        "membership_number": "SYNTHETIC-ONLY-SHOULD-NOT-LEAK",
-                    },
-                ],
-            },
+            _card_with_children(
+                _child_record(membership_number="SYNTHETIC-ONLY-SHOULD-NOT-LEAK"),
+            ),
         )
 
     with _client(tmp_path, reader) as client:
@@ -410,6 +429,71 @@ def test_private_cards_fail_closed_on_unexpected_child_record_fields(tmp_path: P
     assert "SYNTHETIC-ONLY-SHOULD-NOT-LEAK" not in response.text
     for secret in ("membership_number", "barcode", "credential_secret", "pan", "cvv", "pin"):
         assert secret not in response.text.lower()
+
+
+def test_private_cards_fail_closed_on_free_text_child_label(tmp_path: Path) -> None:
+    """There is no display-label field at all; any attempt to supply one is rejected."""
+
+    def reader() -> tuple[dict[str, object], ...]:
+        return (
+            _card_with_children(
+                _child_record(label="SYNTHETIC-ONLY-secret-membership-number-ALPHA-NOT-A-REAL-PAN"),
+            ),
+        )
+
+    with _client(tmp_path, reader) as client:
+        response = client.get("/api/v1/private/cards")
+
+    assert response.status_code == 503
+    assert "SYNTHETIC-ONLY-secret-membership-number" not in response.text
+    assert "NOT-A-REAL-PAN" not in response.text
+
+
+def test_private_cards_fail_closed_on_unknown_child_kind_or_lifecycle(tmp_path: Path) -> None:
+    def reader_with_kind() -> tuple[dict[str, object], ...]:
+        return (_card_with_children(_child_record(kind="not-a-real-kind")),)
+
+    def reader_with_lifecycle() -> tuple[dict[str, object], ...]:
+        return (_card_with_children(_child_record(lifecycle="not-a-real-lifecycle")),)
+
+    for reader in (reader_with_kind, reader_with_lifecycle):
+        with _client(tmp_path, reader) as client:
+            response = client.get("/api/v1/private/cards")
+        assert response.status_code == 503
+
+
+def test_private_cards_fail_closed_on_child_parent_mismatch(tmp_path: Path) -> None:
+    def reader() -> tuple[dict[str, object], ...]:
+        return (
+            _card_with_children(
+                _child_record(parent_card_id="018f47f2-0f86-7b0a-bc7d-f00ba47c0099"),
+            ),
+        )
+
+    with _client(tmp_path, reader) as client:
+        response = client.get("/api/v1/private/cards")
+
+    assert response.status_code == 503
+
+
+def test_private_cards_fail_closed_on_duplicate_child_record_ids(tmp_path: Path) -> None:
+    def reader() -> tuple[dict[str, object], ...]:
+        return (_card_with_children(_child_record(), _child_record()),)
+
+    with _client(tmp_path, reader) as client:
+        response = client.get("/api/v1/private/cards")
+
+    assert response.status_code == 503
+
+
+def test_private_cards_fail_closed_on_invalid_child_identifiers(tmp_path: Path) -> None:
+    def reader() -> tuple[dict[str, object], ...]:
+        return (_card_with_children(_child_record(child_id="not-a-uuid")),)
+
+    with _client(tmp_path, reader) as client:
+        response = client.get("/api/v1/private/cards")
+
+    assert response.status_code == 503
 
 
 def test_real_reader_groups_child_records_under_their_parent_card(
@@ -423,10 +507,8 @@ def test_real_reader_groups_child_records_under_their_parent_card(
     session = VaultStore(vault_path).create("synthetic passphrase for child records")
     card_id = session.add_card("hdfc-regalia-gold-credit", {"pan": "SYNTHETIC-ONLY-PAN"})
     other_card_id = session.add_card("hdfc-tata-neu-rupay-select-credit", {"pan": "SYNTHETIC-ONLY-PAN-2"})
-    session.add_child_record(
-        card_id, ChildRecordKind.LOUNGE_CREDENTIAL, "SYNTHETIC-ONLY-Lounge access"
-    )
-    session.add_child_record(other_card_id, ChildRecordKind.MEMBERSHIP, "SYNTHETIC-ONLY-Membership")
+    session.add_child_record(card_id, ChildRecordKind.LOUNGE_CREDENTIAL)
+    session.add_child_record(other_card_id, ChildRecordKind.MEMBERSHIP)
     session.lock()
 
     class StubKeyring:

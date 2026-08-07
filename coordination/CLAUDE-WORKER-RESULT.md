@@ -1,11 +1,15 @@
 # Claude batch result — MC-024 and MC-177
 
-Status: COMPLETE
+Status: COMPLETE (corrected after manager review — see "Correction" below)
 Task: MC-024, MC-177
 Runner: Claude Code Sonnet 5
 Branch: `agent/mc024-177-claude`
 Base: `33a866c2c402b976cb59b03af2ae6c803df51d18`
 Push authorized: no (not pushed)
+
+**Read the "Correction — manager review" section near the end first.** It
+supersedes the child-record `label` and `expiry_date` claims made in the
+initial write-up below (kept for context, not accurate as final state).
 
 ## MC-024 — linked child records
 
@@ -24,14 +28,15 @@ that same pattern rather than introducing a new persistence layer.
   `voucher`, `companion_credential`) and `ChildRecordLifecycle`
   (`active`/`expired`/`archived`) enums.
 - `_ChildRecord` frozen dataclass: `child_id`, `parent_card_id`, `kind`,
-  `label`, `lifecycle`, `created_at`, `updated_at`, `expiry_date` (optional).
-  All fields are non-secret; none of the `_ALLOWED_SECRET_FIELDS` machinery
-  was touched or extended.
+  `lifecycle`, `created_at`, `updated_at`, `expiry_date` (optional). **No
+  free-text `label` field** (removed after manager review — see
+  "Correction" below); all fields are non-secret and none of the
+  `_ALLOWED_SECRET_FIELDS` machinery was touched or extended.
 - `VaultSession.add_child_record(...)` validates the parent card exists
-  (`_get_record`), validates kind/lifecycle enum membership, a bounded
-  printable `label` (`_validate_label`, ≤160 chars), and an optional
-  `YYYY-MM-DD` `expiry_date` (`_validate_date`). `list_child_records(parent_card_id=None)`
-  mirrors `list_cards()`'s envelope-projection pattern.
+  (`_get_record`), validates kind/lifecycle enum membership, and an optional
+  `YYYY-MM-DD` `expiry_date` (`_validate_date`).
+  `list_child_records(parent_card_id=None)` mirrors `list_cards()`'s
+  envelope-projection pattern.
 - Persistence: `child_records` is a new top-level envelope key, cleartext
   (no per-field secret to encrypt) but covered by the same whole-envelope
   HMAC (`_envelope_mac`) that already authenticates every other cleartext
@@ -47,8 +52,8 @@ that same pattern rather than introducing a new persistence layer.
   The on-disk format version constant (`_FORMAT_VERSION = 2`) was
   deliberately **not** bumped.
 - Fail-closed parsing: unknown parent card id, unknown kind/lifecycle string,
-  malformed label/date, or any tampered cleartext field (parent id, kind,
-  label, lifecycle, timestamps) makes the whole vault refuse to open
+  malformed date, or any tampered cleartext field (parent id, kind,
+  lifecycle, timestamps) makes the whole vault refuse to open
   (`VaultAccessError`), matching the existing card-record invariants.
 - `ChildRecordKind`/`ChildRecordLifecycle` exported from `vault/__init__.py`.
 
@@ -103,14 +108,18 @@ this pass is tracked or left running.
 
 ### Tests added
 
-- `tests/test_vault.py`: round-trip + reopen, parent-must-exist, invalid
-  kind/lifecycle/label/date (parametrized, 6 cases), full tamper-each-field
-  authentication (parametrized, 6 fields), dangling-parent and unknown-kind
+- `tests/test_vault.py`: round-trip + reopen, no-label-parameter-exists
+  (signature introspection), parent-must-exist, invalid kind/lifecycle/date
+  (parametrized, 4 cases), full tamper-each-field authentication
+  (parametrized, 5 fields), dangling-parent and unknown-kind
   externally-tampered rejection, the backward-compatibility open test above,
   and a count-bound test.
 - `tests/test_private_cards_api.py`: nested rendering with the full expected
-  field set, fail-closed on an unexpected nested field (`membership_number`)
-  with a leak check, and an end-to-end test through the real
+  field set (post-correction shape), the exact-expiry-date-never-sent test
+  (3 signal buckets), fail-closed on an unexpected nested field
+  (`membership_number`) and on a `label` field specifically, fail-closed on
+  unknown kind/unknown lifecycle/parent-mismatch/duplicate-id/invalid-uuid
+  (5 dedicated tests), and an end-to-end test through the real
   `_read_keyring_cards` reader (via `VaultStore`/`StubKeyring`, no real
   keyring) proving per-card grouping.
 - `tests/test_ui.py`: static-source assertions for the new render functions,
@@ -123,8 +132,10 @@ this pass is tracked or left running.
   MC-024 intentionally adds, not a regression.
 
 No secret child value (membership number, credential value, barcode) is
-modeled, stored, or ever crosses the HTTP boundary — only kind, a
-user-supplied display label, lifecycle, and an optional expiry date.
+modeled, stored, or ever crosses the HTTP boundary. See "Correction" below:
+after manager review, the field set that can reach the browser is exactly
+`child_id`, `parent_card_id`, `kind`, `lifecycle`, `created_at`, `updated_at`,
+and `expiry_signal` — no free-text label, no exact expiry date.
 
 ## MC-177 — self-contained, launcher-independent guidance
 
@@ -174,10 +185,12 @@ none was already present.
   (new "Linked child records and remote-access UI copy — 2026-08-07"
   section recording the no-SQLAlchemy architecture decision and the
   in-app-copy decision).
-- Quality gates, all green on the final tree:
+- Quality gates, all green on the final (corrected) tree:
   - `uv run ruff check .` — all checks passed.
   - `uv run mypy src` — success, no issues found in 31 source files.
-  - `uv run pytest -q` — 281 passed (started at 254 before this batch).
+  - `uv run pytest -q` — 282 passed (started at 254 before this batch; net
+    +28 across the initial submission and the correction — several tests
+    were added, removed, or renamed as the child-record contract changed).
   - `node --check src/mycard_benefits/static/app.js` — passed.
   - `uv build` — both sdist and wheel built successfully.
   - `git diff --check` — clean (no whitespace errors).
@@ -189,6 +202,79 @@ none was already present.
   exact-field-set assertion, and where internal helper signatures
   (`_serialize_envelope`, `_persist`) changed and their direct unit-test
   call sites needed the new parameter.
+
+## Correction — manager review
+
+The manager rejected the initial commit (`d988f0c` at review time) with three
+blocking findings. All three are fixed in a follow-up local commit; nothing
+was pushed in between.
+
+1. **Free-text child-record label could carry a secret.** `add_child_record`
+   took an arbitrary `label: str`, stored it as cleartext envelope metadata,
+   and the API/UI rendered it verbatim — a real membership number typed into
+   that field would have leaked. Fix: the `label` field is removed entirely
+   from `_ChildRecord`, `add_child_record`, envelope
+   serialization/parsing, `PrivateChildRecordSummary`, and the UI. There is
+   no code path left that accepts free text for a child record; the
+   displayed name is always looked up from the allowlisted `ChildRecordKind`
+   (`CHILD_RECORD_KIND_LABELS` in `app.js`, already a static, non-user-
+   controlled map). Any reader that still supplies a `label` key is rejected
+   by `extra="forbid"` (`test_private_cards_fail_closed_on_free_text_child_label`,
+   `test_private_cards_fail_closed_on_unexpected_child_record_fields`), and
+   `test_child_record_has_no_free_text_label_field` asserts the vault-session
+   method signature itself has no such parameter.
+2. **API boundary didn't independently fail closed.** `PrivateChildRecordSummary`
+   typed `kind`/`lifecycle` as plain `str` and never checked that a nested
+   child's `parent_card_id` matched its containing card, so only the vault's
+   disk-parsing layer — not the HTTP boundary itself — enforced those
+   invariants; a bug in a future reader implementation would have slipped
+   through unvalidated. Fix: `kind: ChildRecordKind` and
+   `lifecycle: ChildRecordLifecycle` (real enums, so an unknown string is a
+   422/503 `ValidationError`, not a passthrough string); `child_id`/
+   `parent_card_id`/`card_id` are uuid-format-validated
+   (`field_validator`); and a `model_validator(mode="after")` on
+   `PrivateCardSummary` rejects any child record whose `parent_card_id`
+   differs from the card's own `card_id`, and rejects duplicate `child_id`
+   values within one card's list. Covered by
+   `test_private_cards_fail_closed_on_unknown_child_kind_or_lifecycle`,
+   `test_private_cards_fail_closed_on_child_parent_mismatch`,
+   `test_private_cards_fail_closed_on_duplicate_child_record_ids`,
+   `test_private_cards_fail_closed_on_invalid_child_identifiers`.
+3. **Exact expiry dates reached the browser.** `expiry_date` was sent
+   verbatim in the API response and rendered as a formatted date in the UI.
+   Fix: `PrivateChildRecordSummary` has no `expiry_date` field at all. A
+   `model_validator(mode="before")` strips any incoming `expiry_date` and
+   replaces it with a bounded `expiry_signal` —
+   `"expired" | "expiring_soon" | "active" | null` — computed server-side by
+   `_expiry_signal_from_date()` against the real current date (`expiring_soon`
+   = within 30 days). The exact date string never appears in the model, the
+   JSON response, or the rendered page; the UI shows only
+   `CHILD_RECORD_EXPIRY_SIGNAL_TEXT[record.expiry_signal]` ("Expired" /
+   "Expiring soon" / "Not expiring soon"). The vault itself still stores the
+   precise `expiry_date` locally (that's local disk state, not the HTTP/UI
+   boundary the finding was about, and it's what the signal is computed
+   from) — nothing in the finding asked for the value to disappear from the
+   user's own encrypted vault, only for it to stop crossing into the
+   browser. Covered by `test_private_cards_never_send_the_exact_child_expiry_date`
+   (three buckets, asserts every exact date string and the literal token
+   `expiry_date` are absent from the response body) and a direct pydantic
+   unit check in the fix-verification pass.
+
+Also removed as dead code once `label` was gone: `_validate_label` and
+`_MAX_LABEL_CHARS` in `core.py`.
+
+Re-verification: re-ran the full gate set on the corrected tree (all green,
+see updated counts below) and re-checked the live JSON response of a scratch
+dev server seeded with expired/expiring-soon/far-future/no-expiry child
+records — confirmed the response contains only `expiry_signal` buckets, no
+`label` key anywhere, and no exact date string. A live Chrome DOM screenshot
+pass (done for the original submission) was not repeated for this
+correction: the browser-automation tool required an interactive
+browser-selection choice this session had no user available to answer, so
+verification for the correction relies on the curl-verified live API
+payload plus the existing static JS-source assertions in `test_ui.py`
+(`childRecordRow`'s rendering logic itself did not change — only which
+fields it reads did, and those field names are asserted directly).
 
 ## Risks / follow-ups for later tasks
 

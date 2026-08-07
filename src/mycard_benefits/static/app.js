@@ -182,19 +182,27 @@ const CHILD_RECORD_KIND_LABELS = {
   companion_credential: "Companion credential",
 };
 const CHILD_RECORDS_EMPTY_NOTE = "No Priority Pass, lounge, membership, voucher, or companion credentials are linked to this card.";
+const CHILD_RECORD_EXPIRY_SIGNAL_TEXT = {
+  expired: "Expired",
+  expiring_soon: "Expiring soon",
+  active: "Not expiring soon",
+};
 function childRecordBadge(lifecycle) {
   if (lifecycle === "active") return "badge active";
   if (lifecycle === "expired") return "badge error";
   return "badge pending";
 }
 function childRecordRow(record) {
+  // The display name is always the allowlisted kind label, never free text:
+  // there is no user-editable label field, so no secret value can be shown here.
   const row = node("div", undefined, "child-record-row");
   const title = node("div");
-  title.append(node("p", CHILD_RECORD_KIND_LABELS[record.kind] || "Linked credential", "eyebrow"), node("p", record.label));
+  title.append(node("p", CHILD_RECORD_KIND_LABELS[record.kind] || "Linked credential", "eyebrow"));
   row.append(title);
   const meta = node("div", undefined, "child-record-meta");
   meta.append(node("span", record.lifecycle, childRecordBadge(record.lifecycle)));
-  if (record.expiry_date) meta.append(node("span", `Expires ${fmtDate(record.expiry_date)}`, "quiet-copy"));
+  const expirySignalText = CHILD_RECORD_EXPIRY_SIGNAL_TEXT[record.expiry_signal];
+  if (expirySignalText) meta.append(node("span", expirySignalText, "quiet-copy"));
   row.append(meta);
   return row;
 }
