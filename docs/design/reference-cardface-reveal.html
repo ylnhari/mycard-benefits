@@ -1,0 +1,359 @@
+<title>Reference: card faces + reveal — drop-in for MyCard Benefits</title>
+<style>
+/* ============================================================
+   REFERENCE IMPLEMENTATION - card faces and the reveal flow.
+   Tokens are the artifact's; assume they already exist at :root.
+   Only the two missing components are defined here.
+   ============================================================ */
+:root{
+  --ink:#14161A; --paper:#F5F6F8; --surface:#FFFFFF; --surface-2:#EDEFF3;
+  --slate:#5A6170; --slate-2:#7C8494; --rule:#DDE1E8;
+  --accent:#2B44C7; --accent-soft:#E6E9FB;
+  --ok:#1F7A4D; --ok-bg:#E4F2EA; --warn:#8A5A00; --warn-bg:#FBF0DC;
+  --bad:#A81E17; --bad-bg:#FAE6E4;
+  --shadow:0 1px 2px rgba(20,22,26,.06),0 8px 24px -12px rgba(20,22,26,.18);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"Cascadia Mono","SF Mono",Menlo,Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root{
+  --ink:#E9EBEF; --paper:#0E1013; --surface:#171A20; --surface-2:#1F232B;
+  --slate:#A0A8B8; --slate-2:#7C8494; --rule:#2A2F39;
+  --accent:#93A2FF; --accent-soft:#1C2340;
+  --ok:#5BD79C; --ok-bg:#123024; --warn:#F0B429; --warn-bg:#33260A;
+  --bad:#FF7A6E; --bad-bg:#381714;
+  --shadow:0 1px 2px rgba(0,0,0,.5),0 10px 30px -14px rgba(0,0,0,.8);
+}}
+:root[data-theme="dark"]{
+  --ink:#E9EBEF; --paper:#0E1013; --surface:#171A20; --surface-2:#1F232B;
+  --slate:#A0A8B8; --slate-2:#7C8494; --rule:#2A2F39;
+  --accent:#93A2FF; --accent-soft:#1C2340;
+  --ok:#5BD79C; --ok-bg:#123024; --warn:#F0B429; --warn-bg:#33260A;
+  --bad:#FF7A6E; --bad-bg:#381714;
+}
+:root[data-theme="light"]{
+  --ink:#14161A; --paper:#F5F6F8; --surface:#FFFFFF; --surface-2:#EDEFF3;
+  --slate:#5A6170; --slate-2:#7C8494; --rule:#DDE1E8;
+  --accent:#2B44C7; --accent-soft:#E6E9FB;
+  --ok:#1F7A4D; --ok-bg:#E4F2EA; --warn:#8A5A00; --warn-bg:#FBF0DC;
+  --bad:#A81E17; --bad-bg:#FAE6E4;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;padding:32px}
+h1,h2,h3{font-family:var(--serif);margin:0 0 8px;font-weight:600;letter-spacing:-.01em}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--slate-2);margin:0 0 6px}
+
+/* ---------- 1. CARD FACES ---------- */
+.wallet-meta{font-family:var(--mono);font-size:12px;color:var(--slate);letter-spacing:.03em;margin:0 0 18px}
+.chiprow{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 22px}
+.chip{font-size:12.5px;padding:0 13px;min-height:36px;display:inline-flex;align-items:center;
+  border:1px solid var(--rule);border-radius:99px;color:var(--slate);background:var(--surface);cursor:pointer}
+.chip.on{border-color:var(--ink);background:var(--ink);color:var(--paper);font-weight:600}
+.chip:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+.cardgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
+.cardface{
+  position:relative;aspect-ratio:1.586;border-radius:12px;padding:16px 18px;
+  display:flex;flex-direction:column;justify-content:space-between;
+  color:#F7F9FC;box-shadow:var(--shadow);border:0;text-align:left;cursor:pointer;
+  font:inherit;overflow:hidden;
+}
+.cardface:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.cardface.archived{filter:saturate(.18) brightness(.82)}
+.cf-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.cf-issuer{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;opacity:.88}
+.cf-status{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 9px;border-radius:99px;background:rgba(255,255,255,.18);backdrop-filter:blur(2px)}
+.cf-name{font-family:var(--serif);font-size:21px;line-height:1.15;margin:0}
+.cf-count{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;opacity:.82;margin:5px 0 0}
+.cf-bottom{display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+.cf-last4{font-family:var(--mono);font-size:15px;letter-spacing:.16em;font-variant-numeric:tabular-nums}
+.cf-add4{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  opacity:.9;text-decoration:underline;text-underline-offset:3px}
+.cf-network{font-family:var(--mono);font-size:11px;letter-spacing:.1em;font-weight:700;opacity:.95}
+
+/* ---------- 2. REVEAL: create-once ---------- */
+.modal{border:1px solid var(--rule);border-radius:var(--r);background:var(--surface);
+  box-shadow:var(--shadow);padding:20px;max-width:400px;margin-top:26px}
+.modal h3{font-size:19px;margin-bottom:6px}
+.modal p{margin:0;color:var(--slate);font-size:13.5px}
+.field{margin-top:13px}
+.field label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--slate-2);display:block}
+.field input{width:100%;margin-top:5px;border:1px solid var(--rule);border-radius:7px;padding:10px 12px;
+  background:var(--surface-2);font-family:var(--mono);font-size:14px;color:var(--ink);letter-spacing:.2em;min-height:44px}
+.field input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.seg{display:flex;margin-top:6px;border:1px solid var(--rule);border-radius:7px;overflow:hidden;width:fit-content}
+.seg button{font:inherit;font-size:12.5px;padding:0 14px;min-height:38px;border:0;background:transparent;color:var(--slate);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface-2);color:var(--ink);font-weight:650}
+.seg button:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+.primary{margin-top:15px;width:100%;min-height:44px;border:0;border-radius:8px;
+  background:var(--accent);color:#fff;font:inherit;font-weight:650;cursor:pointer}
+.primary:disabled{opacity:.5;cursor:not-allowed}
+.foot{margin-top:11px;color:var(--slate);font-size:12.5px}
+.err{margin-top:9px;color:var(--bad);font-size:12.5px}
+
+/* ---------- 3. REVEAL: revealed ---------- */
+.reveal{border:1px solid var(--rule);border-radius:var(--r);background:var(--surface);
+  box-shadow:var(--shadow);padding:20px;max-width:430px;margin-top:26px}
+.reveal .sub{font-family:var(--mono);font-size:11.5px;color:var(--slate-2);letter-spacing:.04em}
+.rrow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;
+  padding:12px 0;border-bottom:1px solid var(--rule)}
+.rrow:last-of-type{border-bottom:0}
+.rlab{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--slate-2)}
+.rval{font-family:var(--mono);font-size:15.5px;letter-spacing:.1em;font-variant-numeric:tabular-nums;margin-top:2px}
+.rbtn{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+  min-height:44px;padding:0 12px;border:1px solid var(--rule);border-radius:7px;
+  background:transparent;color:var(--accent);cursor:pointer}
+.rbtn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.hidenow{margin-top:14px;min-height:44px;width:100%;border:1px solid var(--rule);border-radius:8px;
+  background:transparent;color:var(--ink);font:inherit;cursor:pointer}
+@media (max-width:760px){ .cardgrid{grid-template-columns:1fr} }
+</style>
+
+<p class="eyebrow">Reference · component 1</p>
+<h2>Card faces</h2>
+<p class="wallet-meta" id="walletMeta"></p>
+<div class="chiprow" id="chips"></div>
+<div class="cardgrid" id="grid"></div>
+
+<p class="eyebrow" style="margin-top:40px">Reference · component 2</p>
+<h2>First reveal, ever</h2>
+<div class="modal">
+  <h3>Create a code for card details</h3>
+  <p>You'll be asked for this whenever you show a full card number, CVV or PIN. Nothing else needs it.</p>
+  <div class="field">
+    <label id="useaLbl">Use a</label>
+    <div class="seg" role="group" aria-labelledby="useaLbl">
+      <button type="button" id="segPin" aria-pressed="true">6-digit PIN</button>
+      <button type="button" id="segPass" aria-pressed="false">Passphrase</button>
+    </div>
+  </div>
+  <div class="field">
+    <label for="code1" id="codeLbl">Your PIN</label>
+    <input id="code1" type="password" inputmode="numeric" autocomplete="new-password" minlength="6">
+  </div>
+  <div class="field">
+    <label for="code2">Confirm</label>
+    <input id="code2" type="password" inputmode="numeric" autocomplete="new-password" minlength="6">
+  </div>
+  <p class="err" id="codeErr" role="alert" hidden></p>
+  <button class="primary" id="createBtn">Create &amp; show details</button>
+  <p class="foot">Stored only on this computer. If you lose it, card details can't be recovered — the rest of the app keeps working.</p>
+</div>
+
+<p class="eyebrow" style="margin-top:40px">Reference · component 3</p>
+<h2>Revealed · every time after</h2>
+<div class="reveal" id="revealCard">
+  <h3 style="margin-bottom:2px">Regalia Gold</h3>
+  <p class="sub" id="hideIn">Hidden again in 30 seconds.</p>
+  <div class="rrow">
+    <div><p class="rlab">Card number</p><p class="rval" id="vNum">4317 •••• •••• 4417</p></div>
+    <button class="rbtn" data-copy="vNum">Copy</button>
+  </div>
+  <div class="rrow">
+    <div><p class="rlab">Expiry</p><p class="rval" id="vExp">08 / 29</p></div>
+    <button class="rbtn" data-copy="vExp">Copy</button>
+  </div>
+  <div class="rrow">
+    <div><p class="rlab">CVV</p><p class="rval" id="vCvv">•••</p></div>
+    <button class="rbtn" id="cvvBtn">Show</button>
+  </div>
+  <button class="hidenow" id="hideNow">Hide now</button>
+</div>
+
+<script>
+/* ---------- issuer-derived colourway: generated, never hand-assigned ---------- */
+function issuerHue(id){
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return h % 360;
+}
+function issuerGradient(id){
+  const h = issuerHue(id);
+  const h2 = (h + 24) % 360;
+  return `linear-gradient(135deg, hsl(${h} 46% 32%), hsl(${h2} 52% 20%))`;
+}
+
+/* ---------- benefit count line: honest, including the gap ---------- */
+function countLine(c){
+  if (!c.benefits) return "No benefits recorded";
+  const bits = [`${c.benefits} benefit${c.benefits === 1 ? "" : "s"}`];
+  if (c.verified) bits.push(`${c.verified} verified`);
+  if (c.conflicts) bits.push(`${c.conflicts} conflict${c.conflicts === 1 ? "" : "s"}`);
+  return bits.join(" · ");
+}
+
+function cardFace(c){
+  const el = document.createElement("button");
+  el.type = "button";
+  el.className = "cardface" + (c.lifecycle === "archived" ? " archived" : "");
+  el.style.background = issuerGradient(c.issuer_id);
+  el.setAttribute("aria-label",
+    `${c.issuer}, ${c.name}, ${c.lifecycle === "archived" ? "archived" : "in use"}, ${countLine(c)}`);
+
+  const top = document.createElement("div");
+  top.className = "cf-top";
+  const iss = document.createElement("span");
+  iss.className = "cf-issuer"; iss.textContent = c.issuer;
+  const st = document.createElement("span");
+  st.className = "cf-status";
+  st.textContent = c.lifecycle === "archived" ? "Archived" : "In use";
+  top.append(iss, st);
+
+  const mid = document.createElement("div");
+  const nm = document.createElement("p"); nm.className = "cf-name"; nm.textContent = c.name;
+  const ct = document.createElement("p"); ct.className = "cf-count"; ct.textContent = countLine(c);
+  mid.append(nm, ct);
+
+  const bot = document.createElement("div");
+  bot.className = "cf-bottom";
+  const l4 = document.createElement("span");
+  if (c.last4) { l4.className = "cf-last4"; l4.textContent = "•••• " + c.last4; }
+  else { l4.className = "cf-add4"; l4.textContent = "Add last 4"; }
+  const nw = document.createElement("span");
+  nw.className = "cf-network"; nw.textContent = c.network;
+  bot.append(l4, nw);
+
+  el.append(top, mid, bot);
+  return el;
+}
+
+/* demo data only - the real screen reads the vault + catalog */
+const CARDS = [
+  {issuer:"HDFC Bank", issuer_id:"hdfc-bank", name:"Regalia Gold", network:"VISA", last4:"4417", lifecycle:"in_use", benefits:17, conflicts:2, verified:0},
+  {issuer:"HDFC Bank", issuer_id:"hdfc-bank", name:"Tata Neu Infinity", network:"RUPAY", last4:null, lifecycle:"in_use", benefits:9, verified:1, conflicts:0},
+  {issuer:"HDFC Bank", issuer_id:"hdfc-bank", name:"Millennia", network:"MC", last4:"0912", lifecycle:"in_use", benefits:8, verified:0, conflicts:0},
+  {issuer:"ICICI Bank", issuer_id:"icici-bank", name:"Amazon Pay", network:"VISA", last4:"3388", lifecycle:"in_use", benefits:0},
+  {issuer:"IndusInd", issuer_id:"indusind-bank", name:"Legend", network:"VISA", last4:"7741", lifecycle:"in_use", benefits:4, verified:0, conflicts:0},
+  {issuer:"Axis Bank", issuer_id:"axis-bank", name:"NEO", network:"VISA", last4:"1120", lifecycle:"archived", benefits:1, verified:0, conflicts:0},
+];
+
+const grid = document.getElementById("grid");
+const inUse = CARDS.filter(c => c.lifecycle !== "archived").length;
+const arch = CARDS.length - inUse;
+const withB = CARDS.filter(c => c.benefits > 0).length;
+document.getElementById("walletMeta").textContent =
+  `${inUse} in use · ${arch} archived · ${withB} with benefits recorded`;
+
+/* archived desaturate AND sort last */
+const ordered = [...CARDS].sort((a, b) =>
+  (a.lifecycle === "archived") - (b.lifecycle === "archived"));
+ordered.forEach(c => grid.append(cardFace(c)));
+
+const FILTERS = ["In use","Archived","Credit","Debit","Has lounge","Has movie","HDFC","ICICI"];
+const chips = document.getElementById("chips");
+FILTERS.forEach((f, i) => {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "chip" + (i === 0 ? " on" : ""); b.textContent = f;
+  b.setAttribute("aria-pressed", i === 0 ? "true" : "false");
+  b.addEventListener("click", () => {
+    const on = b.classList.toggle("on");
+    b.setAttribute("aria-pressed", on ? "true" : "false");
+  });
+  chips.append(b);
+});
+
+/* ---------- create-once credential ---------- */
+let mode = "pin";
+const segPin = document.getElementById("segPin"), segPass = document.getElementById("segPass");
+const c1 = document.getElementById("code1"), c2 = document.getElementById("code2");
+const codeLbl = document.getElementById("codeLbl"), codeErr = document.getElementById("codeErr");
+
+function setMode(m){
+  mode = m;
+  const pin = m === "pin";
+  segPin.setAttribute("aria-pressed", pin ? "true" : "false");
+  segPass.setAttribute("aria-pressed", pin ? "false" : "true");
+  codeLbl.textContent = pin ? "Your PIN" : "Your passphrase";
+  [c1, c2].forEach(f => {
+    f.value = "";
+    f.minLength = pin ? 6 : 12;
+    f.inputMode = pin ? "numeric" : "text";
+  });
+  codeErr.hidden = true;
+}
+segPin.addEventListener("click", () => setMode("pin"));
+segPass.addEventListener("click", () => setMode("pass"));
+
+document.getElementById("createBtn").addEventListener("click", () => {
+  const min = mode === "pin" ? 6 : 12;
+  codeErr.hidden = true;
+  if (c1.value.length < min) {
+    codeErr.textContent = mode === "pin"
+      ? "A PIN needs at least 6 digits."
+      : "A passphrase needs at least 12 characters.";
+    codeErr.hidden = false; return;
+  }
+  if (mode === "pin" && !/^\d+$/.test(c1.value)) {
+    codeErr.textContent = "A PIN is digits only. Choose Passphrase for letters.";
+    codeErr.hidden = false; return;
+  }
+  if (c1.value !== c2.value) {
+    codeErr.textContent = "Those two do not match.";
+    codeErr.hidden = false; return;
+  }
+  /* real integration: POST to the vault create-credential endpoint.
+     Argon2id at high cost, escalating delay and lockout stay server-side.
+     The plaintext never leaves this handler and is never logged. */
+  codeErr.textContent = "Reference only — wire this to the vault endpoint.";
+  codeErr.hidden = false;
+  c1.value = ""; c2.value = "";
+});
+
+/* ---------- revealed state: countdown, clipboard auto-clear, blur re-hide ---------- */
+const HIDE_AFTER = 30, CLIP_AFTER = 28;
+let hideLeft = HIDE_AFTER, hideTimer = null;
+const hideIn = document.getElementById("hideIn");
+const revealCard = document.getElementById("revealCard");
+
+function tick(){
+  hideLeft -= 1;
+  hideIn.textContent = hideLeft > 0
+    ? `Hidden again in ${hideLeft} seconds.`
+    : "Hidden.";
+  if (hideLeft <= 0) doHide();
+}
+function startCountdown(){
+  clearInterval(hideTimer); hideLeft = HIDE_AFTER;
+  hideIn.textContent = `Hidden again in ${hideLeft} seconds.`;
+  hideTimer = setInterval(tick, 1000);
+}
+function doHide(){
+  clearInterval(hideTimer);
+  document.getElementById("vNum").textContent = "•••• •••• •••• 4417";
+  document.getElementById("vExp").textContent = "•• / ••";
+  document.getElementById("vCvv").textContent = "•••";
+  hideIn.textContent = "Hidden.";
+}
+document.getElementById("hideNow").addEventListener("click", doHide);
+/* re-hide on tab blur, not only on the timer */
+document.addEventListener("visibilitychange", () => { if (document.hidden) doHide(); });
+
+document.querySelectorAll("[data-copy]").forEach(btn => {
+  btn.addEventListener("click", async () => {
+    const txt = document.getElementById(btn.dataset.copy).textContent;
+    let left = CLIP_AFTER;
+    try { await navigator.clipboard.writeText(txt); } catch (e) { /* no clipboard in this context */ }
+    btn.textContent = `Copy · 0:${String(left).padStart(2,"0")}`;
+    const t = setInterval(async () => {
+      left -= 1;
+      btn.textContent = `Copy · 0:${String(left).padStart(2,"0")}`;
+      if (left <= 0) {
+        clearInterval(t);
+        /* the countdown is not decoration: the clipboard actually clears */
+        try { await navigator.clipboard.writeText(""); } catch (e) {}
+        btn.textContent = "Copy";
+      }
+    }, 1000);
+  });
+});
+document.getElementById("cvvBtn").addEventListener("click", () => {
+  const el = document.getElementById("vCvv");
+  const shown = el.textContent !== "•••";
+  el.textContent = shown ? "•••" : "417";
+  document.getElementById("cvvBtn").textContent = shown ? "Show" : "Hide";
+  if (!shown) startCountdown();
+});
+startCountdown();
+</script>

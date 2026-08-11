@@ -68,3 +68,27 @@ def test_cli_has_no_way_to_configure_a_non_loopback_bind() -> None:
     assert 'uvicorn.run(create_app(settings), host="127.0.0.1"' in cli_source
     assert "MYCARD_BENEFITS_HOST" not in cli_source
     assert "os.environ" not in cli_source
+
+
+def test_cli_ignores_a_host_environment_poisoning_attempt(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A copied launcher environment must not be able to widen the bind."""
+    captured: dict[str, object] = {}
+
+    monkeypatch.setenv("MYCARD_BENEFITS_HOST", "0.0.0.0")
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["mycard-benefits", "--data-dir", str(tmp_path / "data"), "--no-browser"],
+    )
+    monkeypatch.setattr(cli, "create_app", lambda settings: settings)
+    monkeypatch.setattr(
+        cli.uvicorn,
+        "run",
+        lambda app, *, host, port: captured.update(app=app, host=host, port=port),
+    )
+
+    cli.main()
+
+    assert captured["host"] == "127.0.0.1"

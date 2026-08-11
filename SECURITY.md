@@ -16,9 +16,9 @@ controls; do not route real data through the browser or HTTP API.
 
 The design aims to protect against accidental commits/logging, casual household
 access, offline inspection of copied runtime files, malicious catalog content,
-and unintended network transmission. The signed health identity enables future
-connection pinning, but the current Family Finance launcher does not yet verify
-that signature; a wrong service at a configured address remains a known risk.
+and unintended network transmission. MyCard signs its own health identity.
+External access tooling is outside this repository and is not a MyCard
+dependency.
 The design cannot guarantee protection from malware running as the user, a
 compromised operating system, screen capture, swap/hibernation inspection, or
 clipboard-monitoring software.

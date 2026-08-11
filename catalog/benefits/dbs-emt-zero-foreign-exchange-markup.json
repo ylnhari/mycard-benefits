@@ -1,0 +1,35 @@
+{
+  "id": "06236b2b-30cc-50f1-b0bd-d2c0956bd13b",
+  "offering_id": "784d30a2-d144-53dd-bfa1-88549e975d39",
+  "title": "DBS EMT zero foreign-exchange markup",
+  "benefit_type": "other",
+  "category": "foreign_exchange",
+  "allowance": {
+    "foreign_exchange_markup_percent": 0
+  },
+  "eligibility": [],
+  "conditions": [],
+  "exclusions": [],
+  "redemption_steps": [],
+  "provider": null,
+  "effective_from": null,
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.dbs.bank.in/digibank/in/cards/debit-cards/ease-my-trip",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "fab94dcdb74ba219ca28aa1f7dca793866e83643886175b4aa07cab75a0565d6",
+  "retrieved_at": "2026-08-10T00:00:00Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.dbs.bank.in/digibank/in/cards/debit-cards/ease-my-trip",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "fab94dcdb74ba219ca28aa1f7dca793866e83643886175b4aa07cab75a0565d6",
+      "retrieved_at": "2026-08-10T00:00:00Z",
+      "id": "415d8d30-24dd-57bb-8bbc-edd7f29a18b2",
+      "source_observation_id": "4337cf16-f2c5-5bf1-9465-27bda36a6840",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "low"
+    }
+  ]
+}

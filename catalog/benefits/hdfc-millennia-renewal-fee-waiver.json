@@ -1,0 +1,41 @@
+{
+  "id": "d5a55304-65ed-5b65-a558-5e44f6192508",
+  "offering_id": "16f59859-681b-5934-8709-037f5fb1fdb0",
+  "title": "HDFC Millennia renewal-fee waiver",
+  "benefit_type": "other",
+  "category": "annual_fee",
+  "allowance": {
+    "waived_fee_inr": 1000
+  },
+  "eligibility": [
+    {
+      "field": "preceding_card_membership_year_spend_inr",
+      "operator": "gte",
+      "value": 100000
+    }
+  ],
+  "conditions": [],
+  "exclusions": [],
+  "redemption_steps": [],
+  "provider": null,
+  "effective_from": null,
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.hdfc.bank.in/credit-cards/millennia-credit-card/fees-and-charges",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "650a5c8f4e7001a6887fa02664696f4c44fb5f20b702503422116d5284482a1a",
+  "retrieved_at": "2026-08-10T00:00:00Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.hdfc.bank.in/credit-cards/millennia-credit-card/fees-and-charges",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "650a5c8f4e7001a6887fa02664696f4c44fb5f20b702503422116d5284482a1a",
+      "retrieved_at": "2026-08-10T00:00:00Z",
+      "id": "ee48c3fb-2eb5-538f-b530-22ec2697b36c",
+      "source_observation_id": "452896e8-cb62-5ab5-b31c-2f9a35a17e13",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "low"
+    }
+  ]
+}

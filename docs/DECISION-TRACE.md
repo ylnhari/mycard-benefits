@@ -15,7 +15,12 @@ contract remains `PRODUCT_REQUIREMENTS.md`, `DECISIONS.md`, and `SECURITY.md`.
   but never bypasses login, CAPTCHA, access controls, robots restrictions, or
   rate limits. A blocked source is paused, logged, and surfaced for follow-up.
 
-## Family Finance boundary
+## Superseded Family Finance boundary (historical)
+
+> Historical record only: these bullets preserve an earlier owner decision and
+> were superseded by the 2026-08-10 cancellation of the integration. They are
+> retained for traceability and do not describe a current capability or roadmap
+> item.
 
 - Family Finance keeps its existing Cards page and remains useful without this
   repository.
@@ -37,3 +42,17 @@ contract remains `PRODUCT_REQUIREMENTS.md`, `DECISIONS.md`, and `SECURITY.md`.
   benefit.
 - Public benefit knowledge is reusable; personal card instances and usage state
   stay local and encrypted. Agents do not receive decrypted vault data.
+- The Planner dashboard is an honest, ephemeral adapter: user-entered routing
+  assumptions are submitted with fail-closed review markers (`reviewed: false`,
+  `freshness: "unknown"`), the engine always rejects them as unverified, and
+  the UI labels every layer "User-entered assumption". Nothing user-typed is
+  ever presented as verified, no synthetic provenance can resolve (reserved
+  `.invalid` domain), and the flow never navigates, persists, or fetches live
+  sources. See `docs/PURCHASE-OPTIMIZER.md` "Planner UI adapter".
+
+## Catalog review rule revision — 2026-08-10
+
+The owner made one dated human approval sufficient for local catalog activation
+at every review tier. Enhanced, ambiguous, and high-impact claims retain their
+risk tier and may recommend a second independent human review, while non-human
+review and author self-approval remain rejected.

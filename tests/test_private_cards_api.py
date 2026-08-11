@@ -8,7 +8,10 @@ from fastapi.testclient import TestClient
 
 from mycard_benefits.app import create_app
 from mycard_benefits.config import Settings
+from mycard_benefits.vault.core import VaultError, VaultStore
 from mycard_benefits.vault.router import VaultUnavailable
+
+SYNTHETIC_CATALOG = Path(__file__).parent / "fixtures" / "synthetic_catalog"
 
 
 def _client(tmp_path: Path, reader: object) -> TestClient:
@@ -18,6 +21,88 @@ def _client(tmp_path: Path, reader: object) -> TestClient:
         port=8777,
     )
     return TestClient(create_app(settings, private_card_reader=reader))  # type: ignore[arg-type]
+
+
+def _copy_discovery_catalog(tmp_path: Path) -> None:
+    for relative in (
+        "schema/release.json",
+        "offerings/synthetic-example-in.json",
+        "benefits/synthetic-example-reward.json",
+        "benefits/synthetic-example-movie.json",
+    ):
+        target = tmp_path / "catalog" / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text((SYNTHETIC_CATALOG / relative).read_text(encoding="utf-8"), encoding="utf-8")
+
+
+def test_owned_discovery_joins_canonical_public_offering_and_redacts_unmatched_id(tmp_path: Path) -> None:
+    _copy_discovery_catalog(tmp_path)
+
+    def reader() -> tuple[dict[str, object], ...]:
+        return (
+            {"card_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0001", "offering_id": "synthetic-example-in-visa", "lifecycle": "active", "created_at": "2026-08-07T00:00:00Z", "updated_at": "2026-08-07T00:00:00Z"},
+            {"card_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0002", "offering_id": "SYNTHETIC-ONLY-UNMATCHED-RAW", "lifecycle": "archived", "created_at": "2026-08-07T00:00:00Z", "updated_at": "2026-08-07T00:00:00Z"},
+        )
+
+    with _client(tmp_path, reader) as client:
+        response = client.get("/api/v1/private/discovery/cards")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["cards"][0]["catalog_match"] == "matched"
+    assert payload["cards"][0]["public_display"] == "Synthetic Example India Visa"
+    assert payload["cards"][0]["rule_ids"] == [
+        "33333333-3333-4333-8333-333333333334",
+        "33333333-3333-4333-8333-333333333333",
+    ]
+    assert payload["cards"][1]["catalog_match"] == "unmatched"
+    assert "SYNTHETIC-ONLY-UNMATCHED-RAW" not in response.text
+    assert "owner" not in response.text.lower()
+    assert response.headers["cache-control"] == "no-store"
+
+
+def test_discovery_owned_order_is_server_side_and_cursor_is_state_bound(tmp_path: Path) -> None:
+    _copy_discovery_catalog(tmp_path)
+
+    def reader() -> tuple[dict[str, object], ...]:
+        return (
+            {"card_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0001", "offering_id": "synthetic-example-in-visa", "lifecycle": "active", "created_at": "2026-08-07T00:00:00Z", "updated_at": "2026-08-07T00:00:00Z"},
+        )
+
+    with _client(tmp_path, reader) as client:
+        first = client.get("/api/v1/catalog/discovery", params={"page_size": 1})
+        assert first.status_code == 200
+        assert first.json()[0]["owned_match"] is True
+        next_cursor = first.headers["x-discovery-next-cursor"]
+        assert next_cursor and next_cursor != "1"
+
+        second = client.get(
+            "/api/v1/catalog/discovery", params={"page_size": 1, "cursor": next_cursor}
+        )
+        assert second.status_code == 200
+        assert second.json()[0]["owned_match"] is True
+        assert second.headers.get("x-discovery-next-cursor", "") == ""
+
+        owned = client.get(
+            "/api/v1/catalog/discovery",
+            params={"page_size": 1, "owned_only": "true"},
+        )
+        assert owned.status_code == 200
+        assert all(item["owned_match"] for item in owned.json())
+        owned_cursor = owned.headers["x-discovery-next-cursor"]
+        owned_page_two = client.get(
+            "/api/v1/catalog/discovery",
+            params={"page_size": 1, "owned_only": "true", "cursor": owned_cursor},
+        )
+        assert owned_page_two.status_code == 200
+        assert all(item["owned_match"] for item in owned_page_two.json())
+        assert owned_page_two.headers.get("x-discovery-next-cursor", "") == ""
+
+        mismatched = client.get(
+            "/api/v1/catalog/discovery",
+            params={"page_size": 1, "cursor": next_cursor, "q": "movie"},
+        )
+        assert mismatched.status_code == 409
 
 
 def test_private_cards_are_a_local_read_only_api_without_gateway_coupling(tmp_path: Path) -> None:
@@ -120,6 +205,7 @@ def test_private_cards_rows_carry_only_the_five_envelope_fields(tmp_path: Path) 
         "lifecycle",
         "created_at",
         "updated_at",
+        "masked_last4",
         "replacement_card_id",
         "child_records",
     }
@@ -192,6 +278,7 @@ def test_unmatched_offering_response_is_envelope_only_and_never_repeats_slug(
         "lifecycle",
         "created_at",
         "updated_at",
+        "masked_last4",
         "replacement_card_id",
         "child_records",
     }
@@ -211,11 +298,53 @@ def test_private_cards_503_when_reader_raises(tmp_path: Path) -> None:
     detail = response.json()["detail"]
     assert detail["code"] == "generic"
     assert detail["message"]
-    assert (
-        response.headers.get("cache-control") is None
-        or response.headers["cache-control"] != "no-store"
-    )
+    assert response.headers["cache-control"] == "no-store"
+    assert response.headers["pragma"] == "no-cache"
     assert "fallback" not in response.text.lower()
+
+
+def test_private_cards_reject_cross_site_unsafe_methods_without_reading_the_vault(
+    tmp_path: Path,
+) -> None:
+    """The protected browser surface is read-only, so it has no CSRF write path."""
+    called = False
+
+    def reader() -> tuple[dict[str, str], ...]:
+        nonlocal called
+        called = True
+        raise AssertionError("an unsafe method must not call the vault reader")
+
+    with _client(tmp_path, reader) as client:
+        for method in ("post", "put", "patch", "delete"):
+            response = client.request(
+                method,
+                "/api/v1/private/cards",
+                headers={"Origin": "https://attacker.invalid"},
+                json={"marker": "SYNTHETIC-ONLY-CSRF-MARKER"},
+            )
+            assert response.status_code == 405
+            assert response.headers["cache-control"] == "no-store"
+            assert response.headers["pragma"] == "no-cache"
+            assert "SYNTHETIC-ONLY-CSRF-MARKER" not in response.text
+            assert "access-control-allow-origin" not in response.headers
+    assert not called
+
+
+def test_private_cards_unknown_unavailable_code_is_redacted_from_api_and_logs(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    marker = "SYNTHETIC-ONLY-PRIVATE-ERROR-MARKER"
+
+    def reader() -> tuple[dict[str, str], ...]:
+        raise VaultUnavailable(marker)
+
+    with _client(tmp_path, reader) as client:
+        response = client.get("/api/v1/private/cards")
+
+    assert response.status_code == 503
+    assert response.json()["detail"]["code"] == "generic"
+    assert marker not in response.text
+    assert marker not in caplog.text
 
 
 def test_unavailable_codes_map_to_distinct_structured_details(tmp_path: Path) -> None:
@@ -239,15 +368,20 @@ def test_unavailable_codes_map_to_distinct_structured_details(tmp_path: Path) ->
         detail = response.json()["detail"]
         assert detail["code"] == code, code
         assert detail["message"], code
+        assert response.headers["cache-control"] == "no-store", code
+        assert response.headers["pragma"] == "no-cache", code
         assert str(tmp_path) not in response.text, code
 
 
-def test_real_reader_reports_vault_missing_when_no_vault_and_no_keyring_entry(
+def test_real_reader_bootstraps_vault_when_no_vault_and_no_keyring_entry(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     class StubKeyring:
         def get_password(self, service_name: str, username: str) -> str | None:
             return None
+
+        def set_password(self, service_name: str, username: str, password: str) -> None:
+            raise RuntimeError("SYNTHETIC-ONLY-keyring-write-unavailable")
 
     import mycard_benefits.vault.router as router_module
 
@@ -256,8 +390,63 @@ def test_real_reader_reports_vault_missing_when_no_vault_and_no_keyring_entry(
     with _client(tmp_path, None) as client:  # type: ignore[arg-type]
         response = client.get("/api/v1/private/cards")
 
+    assert response.status_code == 200
+    assert response.json()["cards"] == []
+    assert (tmp_path / "data" / "private" / "vault.json").is_file()
+    assert (tmp_path / "data" / "private" / "device-key").is_file()
+
+
+def test_real_reader_bootstraps_vault_when_keyring_is_unavailable_and_vault_is_absent(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def unavailable_keyring() -> object:
+        raise VaultError("SYNTHETIC-ONLY-keyring-unavailable")
+
+    import mycard_benefits.vault.router as router_module
+
+    monkeypatch.setattr(router_module, "load_keyring", unavailable_keyring)
+
+    with _client(tmp_path, None) as client:  # type: ignore[arg-type]
+        response = client.get("/api/v1/private/cards")
+
+    assert response.status_code == 200
+    assert response.json()["cards"] == []
+    assert (tmp_path / "data" / "private" / "vault.json").is_file()
+    assert (tmp_path / "data" / "private" / "device-key").is_file()
+    assert response.headers["cache-control"] == "no-store"
+    assert response.headers["pragma"] == "no-cache"
+    assert "SYNTHETIC-ONLY-keyring-unavailable" not in response.text
+
+
+def test_real_reader_keeps_keyring_unavailable_for_present_vault_manual_unlock_fallback(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    passphrase = "SYNTHETIC-ONLY-manual-unlock-passphrase"
+    vault = tmp_path / "data" / "private" / "vault.json"
+    session = VaultStore(vault).create(passphrase)
+    session.add_card(
+        "synthetic-example-in-visa",
+        {"pan": "SYNTHETIC-ONLY-PAN"},
+        passphrase=passphrase,
+    )
+    session.lock()
+
+    def unavailable_keyring() -> object:
+        raise VaultError("SYNTHETIC-ONLY-keyring-unavailable")
+
+    import mycard_benefits.vault.router as router_module
+
+    monkeypatch.setattr(router_module, "load_keyring", unavailable_keyring)
+
+    with _client(tmp_path, None) as client:  # type: ignore[arg-type]
+        response = client.get("/api/v1/private/cards")
+
     assert response.status_code == 503
-    assert response.json()["detail"]["code"] == "vault_missing"
+    assert response.json()["detail"]["code"] == "keyring_unavailable"
+    assert response.headers["cache-control"] == "no-store"
+    assert response.headers["pragma"] == "no-cache"
+    assert passphrase not in response.text
+    assert "SYNTHETIC-ONLY-PAN" not in response.text
 
 
 def test_real_reader_reports_wrong_data_dir_when_keyring_knows_this_vault_path(
@@ -531,8 +720,8 @@ def test_real_reader_groups_child_records_under_their_parent_card(
 
     vault_path = tmp_path / "data" / "private" / "vault.json"
     session = VaultStore(vault_path).create("synthetic passphrase for child records")
-    card_id = session.add_card("hdfc-regalia-gold-credit", {"pan": "SYNTHETIC-ONLY-PAN"})
-    other_card_id = session.add_card("hdfc-tata-neu-rupay-select-credit", {"pan": "SYNTHETIC-ONLY-PAN-2"})
+    card_id = session.add_card("hdfc-regalia-gold-credit", {"pan": "SYNTHETIC-ONLY-PAN"}, passphrase="synthetic passphrase for child records")
+    other_card_id = session.add_card("hdfc-tata-neu-rupay-select-credit", {"pan": "SYNTHETIC-ONLY-PAN-2"}, passphrase="synthetic passphrase for child records")
     session.add_child_record(card_id, ChildRecordKind.LOUNGE_CREDENTIAL)
     session.add_child_record(other_card_id, ChildRecordKind.MEMBERSHIP)
     session.lock()
@@ -559,3 +748,32 @@ def test_real_reader_groups_child_records_under_their_parent_card(
     assert "SYNTHETIC-ONLY-PAN" not in response.text
     for secret in ("pan", "cvv", "pin"):
         assert secret not in response.text.lower()
+
+
+def test_production_reminder_reader_returns_only_derived_inputs(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from mycard_benefits.vault import ChildRecordKind
+    from mycard_benefits.vault.core import VaultStore
+    from mycard_benefits.vault.router import _read_keyring_reminder_inputs
+
+    vault_path = tmp_path / "data" / "private" / "vault.json"
+    session = VaultStore(vault_path).create("synthetic reminder passphrase")
+    card_id = session.add_card(
+        "hdfc-regalia-gold-credit",
+        {"pan": "SYNTHETIC-ONLY-PAN", "expiry_month": "08", "expiry_year": "2026"},
+        passphrase="synthetic reminder passphrase",
+    )
+    session.add_child_record(card_id, ChildRecordKind.VOUCHER, expiry_date="2026-08-10")
+    session.lock()
+
+    class StubKeyring:
+        def get_password(self, service_name: str, username: str) -> str | None:
+            return "synthetic reminder passphrase"
+
+    import mycard_benefits.vault.router as router_module
+    monkeypatch.setattr(router_module, "load_keyring", lambda: StubKeyring())
+    inputs = _read_keyring_reminder_inputs(vault_path)
+    assert inputs[0]["expiry_date"] == "2026-08-31"
+    assert "pan" not in inputs[0]
+    assert inputs[0]["child_records"][0]["expiry_date"] == "2026-08-10"

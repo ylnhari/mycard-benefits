@@ -1,0 +1,45 @@
+{
+  "id": "f0e86ca3-ebf6-5361-9a4e-9ab75bf87327",
+  "offering_id": "16f59859-681b-5934-8709-037f5fb1fdb0",
+  "title": "HDFC Millennia base CashPoints earn",
+  "benefit_type": "reward_points",
+  "category": "reward_points",
+  "allowance": {
+    "cashpoints_percent": 1,
+    "calendar_month_cap": 1000,
+    "exclusions": [
+      "fuel",
+      "rent",
+      "government",
+      "cash_advance",
+      "card_payment",
+      "card_charge",
+      "emi"
+    ]
+  },
+  "eligibility": [],
+  "conditions": [],
+  "exclusions": [],
+  "redemption_steps": [],
+  "provider": null,
+  "effective_from": null,
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/millennia-credit-card/pdf/millennia-tnc-20th-jul26.pdf",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "e5dc77addbfba8169d8ed6f99aa7b188a24022247567f5d1c1b6a9f7b54ed5a5",
+  "retrieved_at": "2026-08-10T00:00:00Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/millennia-credit-card/pdf/millennia-tnc-20th-jul26.pdf",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "e5dc77addbfba8169d8ed6f99aa7b188a24022247567f5d1c1b6a9f7b54ed5a5",
+      "retrieved_at": "2026-08-10T00:00:00Z",
+      "id": "26558005-8f2e-51b5-8792-70608942c8ee",
+      "source_observation_id": "ad77aaa7-2dc5-503d-9d0c-150b58692eac",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "low"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "manifest_version": "1",
+  "description": "Public research checklist. Empty sources mean missing, not verified absence.",
+  "source_slots": [
+    "issuer_product_page_terms",
+    "issuer_program_terms",
+    "network_wide_terms",
+    "merchant_partner_terms",
+    "program_administrator_terms"
+  ],
+  "benefit_categories": [
+    "rewards", "transfer_rates", "movie_bookmyshow", "travel_flight_hotel",
+    "dining_food_coupons", "cashback", "vouchers", "lounge_priority_pass",
+    "meet_and_assist", "insurance_protection", "milestone_spend_conditioned",
+    "onboarding_renewal", "indirect_document_upload", "network_wide",
+    "uncommon_single_card", "merchant_partner", "other_unknown"
+  ],
+  "offering_overrides": {}
+}

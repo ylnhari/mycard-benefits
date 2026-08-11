@@ -1,0 +1,35 @@
+{
+  "id": "79c26cac-9268-59a1-a865-ed6ba47c3286",
+  "offering_id": "77204ea2-801f-55c2-b8a7-2eb87f743ced",
+  "title": "DBS Aspire zero foreign-exchange markup",
+  "benefit_type": "other",
+  "category": "foreign_exchange",
+  "allowance": {
+    "foreign_exchange_markup_percent": 0
+  },
+  "eligibility": [],
+  "conditions": [],
+  "exclusions": [],
+  "redemption_steps": [],
+  "provider": null,
+  "effective_from": null,
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.dbs.bank.in/digibank/in/banking/account/dbs-aspire",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "1d26591ac5596627bcf655953b474108af6057bd966719ba5b2b46e85413248b",
+  "retrieved_at": "2026-08-10T00:00:00Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.dbs.bank.in/digibank/in/banking/account/dbs-aspire",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "1d26591ac5596627bcf655953b474108af6057bd966719ba5b2b46e85413248b",
+      "retrieved_at": "2026-08-10T00:00:00Z",
+      "id": "7211d212-1806-5d94-8732-fef76d6d07db",
+      "source_observation_id": "3bc676e5-226a-55f7-95e9-400cb9b1d908",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "low"
+    }
+  ]
+}

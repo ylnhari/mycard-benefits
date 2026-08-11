@@ -1,0 +1,10 @@
+{
+  "id": "c2a6190e-7462-5b76-97ce-3b994c26d351",
+  "slug": "dbs-treasures-visa-infinite-debit",
+  "display_name": "DBS Treasures Visa Infinite Debit Card",
+  "issuer_id": "dbs-bank",
+  "product_variant_id": "treasures-visa-infinite-debit",
+  "network_id": "visa-infinite",
+  "market": "IN",
+  "aliases": []
+}

@@ -1,0 +1,37 @@
+{
+  "id": "33333333-3333-4333-8333-333333333334",
+  "offering_id": "22222222-2222-4222-8222-222222222222",
+  "benefit_type": "movie",
+  "title": "SYNTHETIC-ONLY movie ticket illustration",
+  "status": "needs_review",
+  "review_tier": "standard",
+  "effective_from": "2026-01-01",
+  "effective_to": "2026-12-31",
+  "eligibility": [
+    {"field": "purchase.channel", "operator": "equals", "value": "synthetic-checkout"}
+  ],
+  "allowance": {"unit": "tickets", "period": "month", "cap": 2},
+  "provider": "SYNTHETIC-ONLY-TICKETING-PROVIDER",
+  "official_reference": "https://example.invalid/synthetic-movie-terms",
+  "redemption_steps": [
+    "SYNTHETIC-ONLY: open the provider's official redemption page",
+    "SYNTHETIC-ONLY: verify the current card and offer terms",
+    "SYNTHETIC-ONLY: apply the eligible code at checkout"
+  ],
+  "exclusions": [
+    "SYNTHETIC-ONLY: excluded showtimes or inventory may apply"
+  ],
+  "evidence": [{
+    "id": "44444444-4444-4444-8444-444444444445",
+    "source_policy_class": "issuer_document",
+    "url": "https://example.invalid/synthetic-movie-terms",
+    "content_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "retrieved_at": "2026-08-06T00:00:00Z",
+    "effective_from": "2026-01-01",
+    "effective_to": "2026-12-31",
+    "confidence": "low",
+    "review_state": "needs_review",
+    "reviews": []
+  }],
+  "conflicts_with": []
+}

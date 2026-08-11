@@ -17,7 +17,7 @@ def test_blank_dashboard_and_unsigned_health(tmp_path: Path) -> None:
     with _client(tmp_path) as client:
         page = client.get("/")
         assert page.status_code == 200
-        assert "Secret card fields are never returned" in page.text
+        assert "Card numbers, CVV, PIN, names, notes" in page.text
         health = client.get("/api/v1/health").json()
         assert health["status"] == "ok"
         assert health["app_id"] == "mycard-benefits"

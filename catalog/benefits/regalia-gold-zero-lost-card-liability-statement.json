@@ -1,0 +1,37 @@
+{
+  "id": "d9084b73-d32f-535a-bc0e-37641d4391a9",
+  "offering_id": "83a6036e-bd88-5cb8-aa8f-676521050f68",
+  "title": "Regalia Gold zero lost-card-liability statement",
+  "benefit_type": "other",
+  "category": "other",
+  "allowance": {},
+  "eligibility": [
+    {
+      "field": "loss_reported_immediately",
+      "operator": "equals",
+      "value": true
+    }
+  ],
+  "conditions": [],
+  "exclusions": [],
+  "redemption_steps": [],
+  "provider": null,
+  "effective_from": null,
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.hdfc.bank.in/credit-cards/regalia-gold-credit-card",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "06a79a11c0db2f8b372be5eea6e4f0147297ccb1773acd5895cf5a181eb99160",
+  "retrieved_at": "2026-08-09T18:35:41Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.hdfc.bank.in/credit-cards/regalia-gold-credit-card",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "06a79a11c0db2f8b372be5eea6e4f0147297ccb1773acd5895cf5a181eb99160",
+      "retrieved_at": "2026-08-09T18:35:41Z",
+      "id": "f21ca056-6d72-5b33-8d74-0e6e0fa8bfc8",
+      "confidence": "high"
+    }
+  ]
+}

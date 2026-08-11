@@ -15,13 +15,14 @@ UUIDv7 and are never mixed into catalog identifiers.
 
 ## Roles
 
-- **Source agent / contributor** — proposes. Produces candidate assertions
-  and evidence records (see `SOURCE-ADAPTER-RUNBOOK.md` for automated
-  sources; a human contributor follows the same shape manually).
+- **Source contributor** — proposes. Produces candidate assertions and
+  evidence records; automated source execution is not part of this local
+  consumer release.
 - **Independent reviewer** — a human who approves or rejects and whose recorded
   identity differs from the candidate author's identity.
-- **Second reviewer** — a different human, required in addition to the first
-  for ambiguous or high-impact claims (see below).
+- **Second reviewer** — a different human who may be recommended in addition
+  to the first for enhanced, ambiguous, or high-impact claims. This is risk
+  context, not a mandatory activation gate.
 
 A worker or contributor can never approve its own catalog change. Agents may
 draft review notes but cannot hold either reviewer role. Reviewer identity and
@@ -35,16 +36,16 @@ the approval timestamp are part of the approval record.
    the evidence: correct source tier, correct effective dates, neutral
    wording, no reproduced source prose, hash matches what was actually
    retrieved.
-3. If it holds up, the reviewer moves the evidence to `reviewed` (or
-   `approved` if only one reviewer is required — see below) and either
-   approves or requests changes on the assertion.
-4. Ambiguous claims (terms that could be read more than one way, or that
-   depend on eligibility conditions not clearly stated in the source) and
-   high-impact claims (benefits likely to be relied on for a real financial
-   decision, or affecting many offerings at once) require a **second**,
-   independent reviewer before the assertion can become `active`.
-5. Once all required reviewers have approved, the evidence state becomes
-   `approved` and the assertion is eligible for the next release snapshot.
+3. If it holds up, the reviewer moves the evidence to `approved` and either
+   approves or requests changes on the assertion. One dated human approval is
+   sufficient at every review tier.
+4. Enhanced, ambiguous, and high-impact claims should surface a recommendation
+   for a second independent human review when one is available. The recommendation
+   does not block activation; the reviewer must still resolve conflicts and
+   preserve uncertainty in the structured claim.
+5. Once the human approval is recorded, the evidence state becomes `approved`
+   and the assertion is eligible for the next release snapshot. Agents still
+   cannot approve candidates, and authors cannot approve their own work.
 
 ## Conflicts between sources
 
@@ -65,6 +66,17 @@ structured facts — they are not deleted. This preserves the accepted
 decision in `DECISIONS.md`; do not remove expired assertions during routine
 maintenance.
 
+## Movie and ticket benefits
+
+Movie rules use the common `eligibility` predicates for conditions and the
+common `allowance` object for caps or usage windows. A `benefit_type: movie`
+record additionally carries a bounded `provider`, an anonymous HTTPS
+`official_reference`, ordered `redemption_steps`, and explicit `exclusions`.
+These fields describe how a user can verify and use a ticket or voucher offer;
+they do not authorize checkout, redemption, affiliate routing, or a claim that
+an issuer or merchant currently offers it. Missing or changed evidence keeps
+the rule in `needs_review`, which is never treated as an active benefit.
+
 ## Release process
 
 Approved, active assertions compile to a deterministic JSON snapshot as the
@@ -76,6 +88,5 @@ reviewable; the JSON snapshot is generated, not hand-edited.
 - `SOURCE-POLICY.md` — where an assertion's backing evidence is allowed to
   come from.
 - `EVIDENCE.md` — the record structure and review states referenced above.
-- `SOURCE-ADAPTER-RUNBOOK.md` — how automated candidates are produced.
 - `AGENT-OPERATIONS.md` — the boundaries an agent operates under while
   proposing candidates.

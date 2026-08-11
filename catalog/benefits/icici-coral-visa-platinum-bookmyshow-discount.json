@@ -1,0 +1,56 @@
+{
+  "id": "19d0a8fe-a988-50a1-ac7a-c7a5e76d76d5",
+  "offering_id": "78985841-c398-5e6e-8321-47f84442d1d5",
+  "title": "ICICI Coral Visa Platinum BookMyShow discount",
+  "benefit_type": "movie",
+  "category": "movie",
+  "allowance": {
+    "discount_percent": 25,
+    "cap_inr": 100,
+    "cap_basis": "lower_of_percent_or_cap",
+    "uses_per_month": 2
+  },
+  "eligibility": [
+    {
+      "field": "movie_ticket_count",
+      "operator": "gte",
+      "value": 2
+    },
+    {
+      "field": "preceding_spend_quarter_inr",
+      "operator": "gte",
+      "value": 25000
+    }
+  ],
+  "conditions": [],
+  "exclusions": [
+    "No automated redemption authorization is implied.",
+    "Unknown stacking remains unapproved unless the terms explicitly support it."
+  ],
+  "redemption_steps": [
+    "Select the named offer at BookMyShow checkout.",
+    "Use the eligible card variant and complete payment.",
+    "Pay applicable processing or internet fees where required."
+  ],
+  "provider": "BookMyShow",
+  "effective_from": null,
+  "effective_to": "2027-03-31",
+  "end_date_known": true,
+  "source_url": "https://in.bookmyshow.com/offers/icici-bank-25-discount-offer/ICICICC520",
+  "source_policy_class": "administering_terms",
+  "content_sha256": "087980143a827928b775f5babc5239259e5b94e49532245c26c842f6d9cc02bc",
+  "retrieved_at": "2026-08-10T00:00:00Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://in.bookmyshow.com/offers/icici-bank-25-discount-offer/ICICICC520",
+      "source_policy_class": "administering_terms",
+      "content_sha256": "087980143a827928b775f5babc5239259e5b94e49532245c26c842f6d9cc02bc",
+      "retrieved_at": "2026-08-10T00:00:00Z",
+      "id": "35427f55-1b6d-507e-867e-b8884ff01274",
+      "source_observation_id": "1b944660-d94e-5a0c-9090-b6fb726d2552",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "low"
+    }
+  ]
+}

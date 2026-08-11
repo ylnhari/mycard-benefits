@@ -1,0 +1,28 @@
+name: Fixture-only quality
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  fixture-quality:
+    runs-on: ubuntu-latest
+    env:
+      MYCARD_BENEFITS_NO_DOTENV: "1"
+      MYCARD_BENEFITS_LIVE_CHECKS: "0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: uv sync --frozen --all-groups
+      - run: uv run --no-sync ruff check .
+      - run: uv run --no-sync mypy src
+      - run: uv run --no-sync pytest -q -m "not rendered_ui"
+      - run: node --check src/mycard_benefits/static/app.js
+      - run: uv build

@@ -1,0 +1,46 @@
+{
+  "id": "6680ff3f-db49-5f39-bfd9-b6f8f628b56b",
+  "offering_id": "77204ea2-801f-55c2-b8a7-2eb87f743ced",
+  "title": "DBS Aspire wellness programme condition",
+  "benefit_type": "other",
+  "category": "wellness",
+  "allowance": {
+    "uses_per_financial_year": 1
+  },
+  "eligibility": [
+    {
+      "field": "aspire_relationship",
+      "operator": "equals",
+      "value": true
+    },
+    {
+      "field": "same_quarter_debit_retail_spend_inr",
+      "operator": "gte",
+      "value": 20000
+    }
+  ],
+  "conditions": [],
+  "exclusions": [],
+  "redemption_steps": [],
+  "provider": null,
+  "effective_from": null,
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.dbs.bank.in/in/iwov-resources/pdf/aspire-variant-most-important-terms-conditions.pdf",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "aa944871eb9d14a807a3ac5e2e5cdd609cefed89a853589b166d24d5eeb80039",
+  "retrieved_at": "2026-08-10T00:00:00Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.dbs.bank.in/in/iwov-resources/pdf/aspire-variant-most-important-terms-conditions.pdf",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "aa944871eb9d14a807a3ac5e2e5cdd609cefed89a853589b166d24d5eeb80039",
+      "retrieved_at": "2026-08-10T00:00:00Z",
+      "id": "3205dc5c-30c4-553d-b6c0-1a848bad57a5",
+      "source_observation_id": "3a7c6ff4-75dc-5ce5-bd60-c6fabada96f9",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "low"
+    }
+  ]
+}

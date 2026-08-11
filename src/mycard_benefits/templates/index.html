@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="color-scheme" content="dark light">
+  <meta name="color-scheme" content="light dark">
   <title>MyCard Benefits</title>
   <link rel="stylesheet" href="/static/app.css">
 </head>
@@ -15,96 +15,196 @@
     <span>My Cards is switched off, so no private vault is opened. By default, demo activity uses the separate <code>demo-data</code> folder; an explicit <code>--data-dir</code> changes only that demo activity folder. Start without <code>--demo</code> to see My Cards.</span>
   </div>
   {% endif %}
+
   <div class="shell">
     <aside class="sidebar" aria-label="Primary navigation">
       <div class="brand"><span aria-hidden="true">◇</span> MyCard <b>Benefits</b></div>
       <p class="rail-note">Public catalog · private vault</p>
       <nav id="primaryNav" aria-label="Dashboard sections">
-        <a class="active" href="#overview" data-view="overview" aria-current="page">Overview</a>
-        <a href="#my-cards" data-view="my-cards">My Cards</a>
+        <a class="active" href="#my-cards" data-view="my-cards" aria-current="page">My Cards</a>
         <a href="#benefits" data-view="benefits">Benefits</a>
-        <a href="#ask" data-view="ask">Ask</a>
-        <a href="#compare" data-view="compare">Compare</a>
-        <a href="#expiring" data-view="expiring">Expiring Soon</a>
-        <a href="#updates" data-view="updates">Updates</a>
-        <a href="#sources" data-view="sources">Sources</a>
-        <a href="#research" data-view="research">Research Queue</a>
+        <a href="#search" data-view="search">Search</a>
         <a href="#settings" data-view="settings">Settings</a>
       </nav>
-      <button id="themeToggle" class="quiet" type="button" aria-pressed="true">Use light theme</button>
+      <button id="themeToggle" class="quiet" type="button" aria-pressed="false">Use dark theme</button>
       <p class="version">Local-first · v{{ app_version }}{% if demo %} · Synthetic demo{% endif %}</p>
     </aside>
 
-    <main id="main" tabindex="-1">
-      <header class="topline">
-        <div>
-          <p class="eyebrow">Evidence-led benefits intelligence</p>
-          <h1>Know what a card offers—before you rely on it.</h1>
-          <p class="lede">Find your exact card variant, see which benefits are verified, and keep your own card history encrypted on this computer.</p>
-        </div>
-        <div class="catalog-state" id="catalogState" role="status" aria-live="polite">Loading public catalog…</div>
-      </header>
+    <main id="main" tabindex="-1" aria-label="MyCard Benefits">
+      <p id="viewAnnouncement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
 
-      <section id="overview" data-panel class="view" aria-labelledby="overview-title">
-        <div class="hero panel">
-          <div>
-            <p class="eyebrow">Public catalog dashboard</p>
-            <h2 id="overview-title">Verified context, visible uncertainty</h2>
-            <p>Start with My Cards to see the imported card list, or search the public catalog for a product. A card can exist before its benefits have completed official-source review.</p>
-            <div class="actions"><a class="button secondary" href="#my-cards" data-go="my-cards">Open my cards</a><a class="button secondary" href="#benefits" data-go="benefits">Browse verified benefits</a></div>
-          </div>
-          <div class="vault-card" id="vaultSummary" aria-label="Private vault status">
-            <span class="vault-icon" aria-hidden="true">⌾</span><strong id="vaultSummaryTitle">Checking private card access…</strong>
-            <small id="vaultSummaryText">Private cards stay in the local encrypted vault. Secret card fields are never returned by this dashboard.</small>
-          </div>
+      <section id="my-cards" data-panel class="view" aria-labelledby="cards-title">
+        <div class="view-heading">
+          <div><p class="eyebrow">Local wallet · private by default</p><h1 id="cards-title">My Cards</h1><p class="lede">Add your cards once, then see the benefits that match them.</p></div>
         </div>
-        <div class="metrics" aria-label="Catalog summary">
-          <article><span>Card variants</span><strong id="offeringCount">—</strong><small>Public product identities</small></article>
-          <article><span>Active benefits</span><strong id="benefitCount">—</strong><small>At the catalog as-of date</small></article>
-          <article><span>My cards</span><strong id="myCardCount">—</strong><small id="myCardCountNote">Authentication required</small></article>
-        </div>
-        <section class="panel" aria-labelledby="catalog-preview-title"><div class="section-head"><div><p class="eyebrow">Public card catalog</p><h2 id="catalog-preview-title">Find a card variant</h2></div><a href="#compare" data-go="compare">Compare public offerings</a></div><label class="catalog-search" for="offeringSearch">Search by bank, card, or network <input id="offeringSearch" type="search" autocomplete="off" placeholder="Try Tata Neu, HDFC, Visa…"></label><p id="offeringSearchStatus" class="quiet-copy" role="status" aria-live="polite"></p><div id="offeringPreview" class="card-grid" aria-live="polite"></div></section>
-      </section>
 
-      <section id="my-cards" data-panel class="view" hidden aria-labelledby="cards-title">
-        <div class="section-head"><div><p class="eyebrow">Encrypted local portfolio</p><h2 id="cards-title">My Cards</h2></div><span id="myCardsBadge" class="badge pending">Checking access</span></div>
-        <div class="panel private-explainer"><div><h3>Useful card history, without exposing card numbers</h3><p>This view shows product, lifecycle, and record dates only. PAN, CVV, PIN, cardholder name, nickname, notes, and expiry remain encrypted and are not sent to the browser.</p></div><div class="actions"><button type="button" disabled>Add or edit — next protected milestone</button></div></div>
-        <div class="card-filters"><label>Lifecycle <select id="cardLifecycle"><option value="">All</option></select></label><label>Find a card <input id="myCardSearch" type="search" autocomplete="off" placeholder="Product, bank, network, or status"></label></div>
-        <p id="myCardStatus" class="qa-status" role="status" aria-live="polite"></p>
-        <div id="myCardList" class="card-grid" aria-live="polite"></div>
+        <section class="panel private-explainer" aria-labelledby="private-explainer-title">
+          <div><h2 id="private-explainer-title">Your cards, kept private</h2><p>Your cards are stored securely on this computer. This screen only shows the details you need to recognise and manage them.</p><details class="privacy-note"><summary>Privacy details</summary><p>Card numbers, CVV, PIN, names, notes, and exact expiry details are kept private. They are not included in the public benefits catalog.</p></details></div>
+        </section>
+
+        <section class="panel protected-card-actions" data-private-only hidden aria-labelledby="protected-card-actions-title">
+          <div class="section-head"><div><p class="eyebrow">Your wallet</p><h2 id="protected-card-actions-title">Add your cards</h2><p class="quiet-copy">Choose the exact card variant. You can add private details later if you want to.</p></div><span id="protectedActionBadge" class="badge pending">Cards unavailable</span></div>
+          <p id="protectedActionStatus" class="qa-status" role="status" aria-live="polite">My Cards is loading.</p>
+          <div class="protected-action-grid primary-card-action">
+            <form id="cardAddForm" class="protected-action-form" autocomplete="off">
+              <h3>Choose your cards</h3>
+              <p class="quiet-copy">Tick everything in your wallet. You can add details later — nothing is required now.</p>
+              <div class="onboarding-step"><span class="field-label">Step 1 · Pick your banks</span><div id="cardAddIssuerChips" class="onboarding-issuer-chips" role="group" aria-label="Filter cards by issuer"></div></div>
+              <div class="onboarding-step"><span class="field-label">Step 2 · Tick your cards</span><div id="cardAddOfferingChoices" class="choice-chips onboarding-products" role="group" aria-label="Choose cards to add"></div><p id="cardAddSelectionStatus" class="quiet-copy" role="status" aria-live="polite">No cards selected yet.</p></div>
+              <details id="cardAddAdvanced" class="advanced-card-fields"><summary>Optional private details for one selected card</summary><p class="quiet-copy">A full card number, expiry, CVV, PIN, and nickname are optional. These fields are available only when one product is selected; last 4 is a follow-up after adding.</p><label>Card number <input id="cardAddPan" type="text" inputmode="numeric" autocomplete="off"></label><label>Expiry month / year <span class="inline-fields"><input id="cardAddExpiryMonth" maxlength="2" inputmode="numeric" placeholder="MM"><input id="cardAddExpiryYear" maxlength="4" inputmode="numeric" placeholder="YYYY"></span></label><label>CVV <input id="cardAddCvv" type="password" inputmode="numeric" autocomplete="off"></label><label>PIN <input id="cardAddPin" type="password" inputmode="numeric" autocomplete="off"></label><label>Private nickname <input id="cardAddNickname" type="text" autocomplete="off"></label></details>
+              <button id="cardAddSubmit" type="submit" disabled>Add cards</button>
+            </form>
+          </div>
+          <section id="cardAddLastFourPrompt" class="card-add-followup" hidden aria-labelledby="cardAddLastFourTitle">
+            <div class="section-head"><div><p class="eyebrow">Step 3 · Optional follow-up</p><h3 id="cardAddLastFourTitle">Tell your cards apart</h3><p class="quiet-copy">Add a last 4 only if it helps you recognise duplicate products. You can skip this and do it later.</p></div></div>
+            <div id="cardAddLastFourFields" class="card-add-followup-grid"></div>
+            <p id="cardAddLastFourStatus" class="qa-status" role="status" aria-live="polite"></p>
+            <div class="protected-prompt-actions"><button id="cardAddLastFourSave" type="button">Save last 4s</button><button id="cardAddLastFourSkip" type="button" class="secondary">Skip for now</button></div>
+          </section>
+          <details id="manageCardsDetails" class="manage-cards-details"><summary>Manage cards and private details</summary><p class="quiet-copy">Edit a nickname, add a last 4, change a card's status, replace an old card, or remove a record.</p><div class="protected-action-grid">
+            <form id="cardEditForm" class="protected-action-form" autocomplete="off">
+              <h3>Edit private details</h3>
+              <div class="choice-field"><span class="field-label">Card record</span><input id="cardEditId" type="hidden"><button id="cardEditIdButton" class="choice-summary" type="button" aria-label="Choose a card to edit">Choose a card</button><div id="cardEditIdChoices" class="choice-chips" role="group" aria-label="Cards to edit"></div></div>
+              <label>Last 4, optional <input id="cardEditLastFour" type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off"></label>
+              <label>Nickname <input id="cardEditNickname" type="text" autocomplete="off"></label>
+              <label>Notes <textarea id="cardEditNotes" rows="2" autocomplete="off"></textarea></label>
+              <button type="submit">Save private details</button>
+            </form>
+            <form id="cardLifecycleForm" class="protected-action-form" autocomplete="off">
+              <h3>Change card status</h3>
+              <div class="choice-field"><span class="field-label">Card record</span><input id="cardLifecycleId" type="hidden"><button id="cardLifecycleIdButton" class="choice-summary" type="button" aria-label="Choose a card to update">Choose a card</button><div id="cardLifecycleIdChoices" class="choice-chips" role="group" aria-label="Cards to update"></div></div>
+              <div class="choice-field"><span class="field-label">New status</span><input id="cardLifecycleValue" type="hidden" value="active"><button id="cardLifecycleValueButton" class="choice-summary" type="button" aria-label="Choose a new card status">In use</button><div id="cardLifecycleValueChoices" class="choice-chips" role="group" aria-label="Card statuses"></div></div>
+              <button type="submit">Update card status</button>
+            </form>
+            <form id="cardReplaceForm" class="protected-action-form" autocomplete="off">
+              <h3>Replace a card</h3>
+              <div class="choice-field"><span class="field-label">Card record</span><input id="cardReplaceId" type="hidden"><button id="cardReplaceIdButton" class="choice-summary" type="button" aria-label="Choose a card to replace">Choose a card</button><div id="cardReplaceIdChoices" class="choice-chips" role="group" aria-label="Cards to replace"></div></div>
+              <label>Replacement card number <input id="cardReplacePan" type="text" inputmode="numeric" autocomplete="off" required></label>
+              <label>Replacement expiry <span class="inline-fields"><input id="cardReplaceExpiryMonth" maxlength="2" inputmode="numeric" placeholder="MM"><input id="cardReplaceExpiryYear" maxlength="4" inputmode="numeric" placeholder="YYYY"></span></label>
+              <label>Replacement CVV <input id="cardReplaceCvv" type="password" inputmode="numeric" autocomplete="off"></label>
+              <button type="submit">Replace card</button>
+            </form>
+            <form id="cardDeleteForm" class="protected-action-form" autocomplete="off">
+              <h3>Remove a card</h3>
+              <div class="choice-field"><span class="field-label">Card record</span><input id="cardDeleteId" type="hidden"><button id="cardDeleteIdButton" class="choice-summary" type="button" aria-label="Choose a card to remove">Choose a card</button><div id="cardDeleteIdChoices" class="choice-chips" role="group" aria-label="Cards to remove"></div></div>
+              <div class="choice-field"><span class="field-label">Action</span><input id="cardDeleteAction" type="hidden" value="delete"><button id="cardDeleteActionButton" class="choice-summary" type="button" aria-label="Choose a removal action">Remove record</button><div id="cardDeleteActionChoices" class="choice-chips" role="group" aria-label="Removal actions"></div></div>
+              <label>Type <code>DELETE CARD</code> to confirm <input id="cardDeleteConfirmation" autocomplete="off" required></label>
+              <button type="submit" class="danger-button">Remove card</button>
+            </form>
+          </div></details>
+        </section>
+
+        <section class="card-browser" aria-labelledby="cardBrowserTitle">
+          <div class="section-head"><div><p class="eyebrow">Your wallet</p><h2 id="cardBrowserTitle">Browse your cards</h2><p id="myCardSummary" class="wallet-meta" role="status" aria-live="polite">Your saved cards will appear here.</p></div></div>
+          <div id="myCardChips" class="chiprow" aria-label="Card filters"></div>
+          <label class="card-search">Find a card <input id="myCardSearch" type="search" autocomplete="off" placeholder="Product, bank, network, or status"></label>
+          <p id="myCardStatus" class="qa-status" role="status" aria-live="polite"></p>
+          <div id="myCardList" class="cardgrid" aria-live="polite"></div>
+        </section>
+
+        <section id="cardRevealPrompt" class="panel reveal-panel" hidden role="dialog" aria-modal="true" aria-labelledby="cardRevealTitle" aria-describedby="cardRevealHelp">
+          <div id="revealCreateState" class="reveal-state">
+            <h3 id="cardRevealTitle">Create a code for card details</h3>
+            <p id="cardRevealHelp">You'll be asked for this whenever you show a full card number, CVV or PIN. Nothing else needs it.</p>
+            <form id="revealCreateForm" class="reveal-form" autocomplete="off">
+              <div class="reveal-field">
+                <label id="revealUseLabel">Use a</label>
+                <div class="reveal-segmented" role="group" aria-labelledby="revealUseLabel">
+                  <button type="button" id="revealPinMode" aria-pressed="true">6-digit PIN</button>
+                  <button type="button" id="revealPassphraseMode" aria-pressed="false">Passphrase</button>
+                </div>
+              </div>
+              <div class="reveal-field">
+                <label for="revealCode">Your PIN</label>
+                <input id="revealCode" type="password" inputmode="numeric" autocomplete="new-password" minlength="6" required>
+              </div>
+              <div class="reveal-field">
+                <label for="revealCodeConfirm">Confirm</label>
+                <input id="revealCodeConfirm" type="password" inputmode="numeric" autocomplete="new-password" minlength="6" required>
+              </div>
+              <p id="revealCreateError" class="reveal-error" role="alert" hidden></p>
+              <button id="revealCreateButton" type="submit">Create &amp; show details</button>
+              <p class="reveal-footnote">Stored only on this computer. If you lose it, card details can't be recovered — the rest of the app keeps working.</p>
+            </form>
+          </div>
+
+          <div id="revealShownState" class="reveal-state" hidden>
+            <h3 id="revealProductName"></h3>
+            <p id="revealHideIn" class="reveal-subtitle">Hidden again in 30 seconds.</p>
+            <div class="reveal-row">
+              <div><p class="reveal-label">Card number</p><p id="revealCardNumber" class="reveal-value">•••• •••• ••••</p></div>
+              <button id="revealCopyNumber" class="reveal-control" type="button">Copy</button>
+            </div>
+            <div class="reveal-row">
+              <div><p class="reveal-label">Expiry</p><p id="revealExpiry" class="reveal-value">•• / ••</p></div>
+              <button id="revealCopyExpiry" class="reveal-control" type="button">Copy</button>
+            </div>
+            <div class="reveal-row">
+              <div><p class="reveal-label">CVV</p><p id="revealCvv" class="reveal-value">•••</p></div>
+              <button id="revealCvvButton" class="reveal-control" type="button">Show</button>
+            </div>
+            <button id="revealHideNow" class="secondary reveal-hide-now" type="button">Hide now</button>
+          </div>
+        </section>
+
+        <section id="secretErasePrompt" class="panel secret-erase-prompt" hidden role="alertdialog" aria-labelledby="secretErasePromptTitle" aria-describedby="secretErasePromptHelp">
+          <h2 id="secretErasePromptTitle">Decide about stored CVV/PIN</h2>
+          <p id="secretErasePromptHelp">This card now has a status where stored CVV/PIN may no longer be needed. Keep them by default, or confirm a separate local action to erase only those fields. The card envelope, history, and replacement lineage remain.</p>
+          <form id="secretEraseForm" class="protected-action-form" autocomplete="off"><input id="secretEraseReauth" type="password" autocomplete="current-password" hidden aria-hidden="true" tabindex="-1"><div class="protected-prompt-actions"><button id="secretEraseKeepButton" type="button" class="secondary">Keep stored CVV/PIN</button><button type="submit" class="danger-button">Erase stored CVV/PIN</button></div></form>
+        </section>
       </section>
 
       <section id="benefits" data-panel class="view" hidden aria-labelledby="benefits-title">
-        <div class="section-head"><div><p class="eyebrow">Active catalog rules</p><h2 id="benefits-title">Benefits</h2></div><label class="filter">Offering <select id="benefitOffering"><option value="">All offerings</option></select></label></div>
-        <p id="benefitEmpty" class="empty-state" hidden>No active catalog benefits match this selection.</p><div id="benefitList" class="stack" aria-live="polite"></div>
+        <div class="view-heading benefit-masthead"><div><p class="eyebrow">Public catalog · source-backed</p><h1 id="benefits-title">Benefits</h1><p class="lede">What your cards actually get you — and how much of the answer to trust.</p></div><p id="benefitSummary" class="benefit-summary" role="status" aria-live="polite">Loading public benefits…</p></div>
+        <div id="benefitScope" class="benefit-scope" aria-label="Benefit scope"><button type="button" class="scope-button" data-benefit-scope="owned" aria-pressed="false">My cards only</button><button type="button" class="scope-button selected" data-benefit-scope="all" aria-pressed="true">All cards</button></div>
+        <div id="benefitCategoryChips" class="benefit-category-chips" aria-label="Benefit categories"></div>
+        <p id="benefitCatalogStatus" class="qa-status" role="status" aria-live="polite"></p>
+        <p id="benefitCatalogEmpty" class="empty-state" hidden></p>
+        <div id="benefitList" class="stack" aria-live="polite"></div>
+
+        <section id="publicCardBrowser" class="public-catalog-browser" aria-labelledby="publicCardBrowserTitle">
+          <div class="section-head"><div><p class="eyebrow">Public catalog · no card storage needed</p><h2 id="publicCardBrowserTitle">Browse public cards</h2><p class="quiet-copy">Explore every catalog card by issuer or network. Select a card to see its recorded benefits.</p></div><p class="catalog-count"><strong id="offeringCount">0</strong><span>public cards</span></p></div>
+          <div class="public-catalog-filters" aria-label="Public card filters">
+            <label>Issuer <select id="offeringIssuer"><option value="">All issuers</option></select></label>
+            <label>Network <select id="offeringNetwork"><option value="">All networks</option></select></label>
+            <label>Find a card <input id="offeringSearch" type="search" maxlength="120" autocomplete="off" placeholder="Name, issuer, or network"></label>
+          </div>
+          <p id="offeringSearchStatus" class="qa-status" role="status" aria-live="polite">Loading public cards…</p>
+          <div id="offeringPreview" class="cardgrid public-card-grid" aria-live="polite"></div>
+          <section id="offeringDetail" class="offering-detail" hidden aria-live="polite" aria-label="Selected public card details"></section>
+        </section>
       </section>
 
-      <section id="ask" data-panel class="view" hidden aria-labelledby="ask-title">
-        <div class="section-head"><div><p class="eyebrow">Traceable public answers</p><h2 id="ask-title">Ask the catalog</h2></div></div>
-        <div class="panel qa-panel">
-          <p>Ask about reviewed public benefits. Questions are not saved, and private card data is never used.</p>
-          <form id="qaForm" class="qa-form" novalidate>
-            <label for="qaQuery">Question</label>
-            <div class="qa-controls"><input id="qaQuery" name="query" type="text" maxlength="500" required autocomplete="off" aria-describedby="qaHelp qaStatus" placeholder="Benefits for HDFC Bank Regalia Gold Credit Card"><button id="qaSubmit" type="submit">Ask catalog</button><button id="qaReset" type="button" class="secondary">Clear</button></div>
-            <p id="qaHelp" class="quiet-copy">Up to 500 characters. Press Enter to ask or Escape to clear.</p>
-          </form>
-          <div class="qa-examples" aria-label="Example questions"><span>Try an example:</span><button type="button" class="secondary" data-qa-example="benefits for HDFC Bank Regalia Gold Credit Card">Benefits for Regalia Gold</button><button type="button" class="secondary" data-qa-example="offerings for reward points">Offerings for reward points</button></div>
-          <p id="qaStatus" class="qa-status" role="status" aria-live="polite"></p>
-          <div id="qaResults" class="stack" aria-live="polite" aria-atomic="true"></div>
-        </div>
+      <section id="search" data-panel class="view" hidden aria-labelledby="search-title">
+        <div class="view-heading search-masthead"><div><p class="eyebrow">Public catalog · one index</p><h1 id="search-title">Search</h1><p class="lede">Find a benefit by title, category, card name, condition, or how to use it.</p></div><p id="searchSummary" class="benefit-summary" role="status" aria-live="polite">Search the catalog and your saved cards.</p></div>
+        <form id="benefitSearchForm" class="discovery-form" novalidate>
+          <label for="benefitSearch">Search benefits, cards, conditions, or instructions</label>
+          <div class="discovery-search-row"><input id="benefitSearch" type="search" maxlength="300" autocomplete="off" placeholder="movie ticket discount" aria-describedby="benefitSearchHelp searchStatus"><button id="benefitSearchSubmit" type="submit">Search</button><button id="benefitSearchReset" type="button" class="secondary">Clear</button></div>
+          <p id="benefitSearchHelp" class="quiet-copy">Search spans benefit titles, categories, card names, conditions, values, and claim instructions.</p>
+          <div id="searchScope" class="search-scope" aria-label="Search scope"><button type="button" class="scope-button selected" data-search-scope="owned" aria-pressed="true">My cards</button><button type="button" class="scope-button" data-search-scope="all" aria-pressed="false">Everything</button></div>
+          <div class="discovery-filters" aria-label="Search filters">
+            <label>Category <select id="benefitCategory"><option value="">All categories</option></select></label>
+            <label>Merchant or partner <input id="benefitMerchant" type="search" maxlength="100" autocomplete="off" placeholder="BookMyShow…"></label>
+            <label>Value or cap <input id="benefitCap" type="search" maxlength="80" autocomplete="off" placeholder="600, tickets, points"></label>
+            <label>Condition <input id="benefitCondition" type="search" maxlength="120" autocomplete="off" placeholder="online, spend"></label>
+            <label>How to use <input id="benefitClaimChannel" type="search" maxlength="100" autocomplete="off" placeholder="checkout, app"></label>
+            <label>Catalog state <select id="benefitStatus"><option value="">All states</option><option value="verified">Verified</option><option value="check_before_use">Check before use</option><option value="sources_differ">Sources differ</option></select></label>
+          </div>
+        </form>
+        <p id="searchStatus" class="qa-status" role="status" aria-live="polite" tabindex="-1"></p>
+        <div id="searchResults" class="stack" aria-live="polite"></div>
+        <div id="searchEmpty" class="empty-state" hidden></div>
+        <section id="benefitDetail" class="stack benefit-detail-panel" aria-live="polite" aria-label="Selected benefit details"><p class="quiet-copy">Select a benefit to see what it is, how to qualify, how to claim it, and the official terms.</p></section>
       </section>
 
-      <section id="compare" data-panel class="view" hidden aria-labelledby="compare-title">
-        <div class="section-head"><div><p class="eyebrow">Public records only</p><h2 id="compare-title">Compare offerings</h2></div></div>
-        <div class="panel compare-controls"><label>First offering <select id="compareA"></select></label><label>Second offering <select id="compareB"></select></label></div>
-        <div id="comparison" class="comparison" aria-live="polite"></div>
+      <section id="settings" data-panel class="view" hidden aria-labelledby="settings-title">
+        <div class="view-heading"><div><p class="eyebrow">Local preferences</p><h1 id="settings-title">Settings</h1><p class="lede">Keep this browser comfortable and your local card access clear.</p></div></div>
+        <section class="panel settings-card" aria-labelledby="appearance-title"><div class="setting-copy"><p class="eyebrow">Appearance</p><h2 id="appearance-title">Theme</h2><p>Theme preference is stored only in this browser.</p></div><button id="themeToggleInline" type="button" class="secondary" aria-pressed="false">Use dark theme</button></section>
+        <section class="panel settings-card" aria-labelledby="data-location-title"><div class="setting-copy"><p class="eyebrow">Where your data lives</p><h2 id="data-location-title">Data location</h2><p>Card records and encrypted private details stay in the local app data folder on this computer. MyCard does not upload them or put them in the public benefits catalog.</p></div><span class="local-mark">LOCAL ONLY</span></section>
+        <section class="panel local-storage-note" aria-labelledby="stored-locally-title"><p class="eyebrow">What is stored locally</p><h2 id="stored-locally-title">Your private card data stays local</h2><p>MyCard stores your encrypted card records, any optional private details you enter, and the small browser preference used for your theme. Public benefit facts remain separate from your card records.</p><p class="quiet-copy">Full card numbers, CVV, PIN, names, notes, and exact expiry details are never shown in the public catalog or sent to background agents.</p></section>
       </section>
 
-      <section id="expiring" data-panel class="view" hidden aria-labelledby="expiring-title"><div class="section-head"><div><p class="eyebrow">Private reminders</p><h2 id="expiring-title">Expiring Soon</h2></div><span class="badge pending">Vault unavailable</span></div><div class="panel empty-state"><span aria-hidden="true">◷</span><h3>No reminder data is available</h3><p>Expiry dates are private vault data. This dashboard does not infer or store them from the public catalog.</p></div></section>
-      <section id="updates" data-panel class="view" hidden aria-labelledby="updates-title"><div class="section-head"><div><p class="eyebrow">Review pipeline</p><h2 id="updates-title">Updates</h2></div></div><div class="panel empty-state"><span aria-hidden="true">✓</span><h3>No updates are queued in this preview</h3><p>Catalog changes require source evidence and independent review before they become active.</p></div></section>
-      <section id="sources" data-panel class="view" hidden aria-labelledby="sources-title"><div class="section-head"><div><p class="eyebrow">Evidence trail</p><h2 id="sources-title">Sources</h2></div></div><div id="sourceList" class="stack" aria-live="polite"></div></section>
-      <section id="research" data-panel class="view" hidden aria-labelledby="research-title"><div class="section-head"><div><p class="eyebrow">Proposals only</p><h2 id="research-title">Research Queue</h2></div><span class="badge pending">Official verification required</span></div><div class="panel empty-state"><span aria-hidden="true">⌕</span><h3>Research stays separate from confirmed benefits</h3><p>MyCardExpert, SaveSage, and community sources may help discover an offer. The app treats it as unverified until the current issuer, network, administering-party, or merchant terms confirm it and a human approves the change.</p></div></section>
-      <section id="settings" data-panel class="view" hidden aria-labelledby="settings-title"><div class="section-head"><div><p class="eyebrow">Local display</p><h2 id="settings-title">Settings</h2></div></div><div class="panel setting-row"><div><h3>Appearance</h3><p>Theme preference is stored only in this browser.</p></div><button id="themeToggleInline" type="button" class="secondary">Toggle theme</button></div><div class="panel setting-row"><div><h3>Remote access</h3><p>This app answers only on <code>127.0.0.1</code> — this computer. For phone or another-device access, use an authenticated gateway or launcher you control to forward to that address. That tool is separate software: it is never part of this app, does not share its identity or configuration, and this app's bind never changes to reach it.</p></div></div></section>
+      <footer class="app-footer"><p>Check the official terms before relying on a benefit. MyCard keeps card records local and does not make purchases or claims.</p></footer>
     </main>
   </div>
   <script src="/static/app.js" type="module"></script>

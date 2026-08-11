@@ -7,11 +7,11 @@ from decimal import ROUND_HALF_EVEN, Decimal
 
 from .model import (
     CURRENCY_MINOR_UNITS,
+    ActionLinkReviewState,
     ComponentContribution,
     ComponentValueClass,
     EvidenceTier,
     Freshness,
-    LinkClass,
     OptimizationResult,
     PurchaseScenario,
     RankedRoute,
@@ -30,6 +30,10 @@ def optimize(scenario: PurchaseScenario, candidates: tuple[RouteCandidate, ...])
     route_ids = [candidate.id for candidate in candidates]
     if len(route_ids) != len(set(route_ids)):
         raise ValueError("route IDs must be unique")
+    for candidate in candidates:
+        for component in candidate.components:
+            if component.benefit_state != "verified":
+                raise ValueError("optimizer accepts only verified benefit state")
     evaluated: list[RankedRoute] = []
     rejected: list[RejectedRoute] = []
     for candidate in candidates:
@@ -58,15 +62,14 @@ def _rejection_reasons(scenario: PurchaseScenario, candidate: RouteCandidate) ->
     reasons: list[str] = []
     if candidate.link_class not in scenario.allowed_link_classes:
         reasons.append(f"{candidate.link_class.value} routes are hidden by the user")
-    if candidate.link_class is LinkClass.OFFICIAL:
-        official_origin = canonical_https_origin(candidate.official_reference, "official_reference", origin_entry=False)
-        approved_origins = {
-            canonical_https_origin(origin, "approved_official_origin", origin_entry=True)
-            for origin in scenario.approved_official_origins
-        }
-        if official_origin not in approved_origins:
-            reasons.append("official route origin is not in the caller-approved origin set")
-    cap_groups: set[str] = set()
+    action_origin = canonical_https_origin(
+        candidate.official_reference, "official_reference", origin_entry=False
+    )
+    if action_origin not in scenario.admitted_action_origins:
+        reasons.append("action route origin is not in the caller-admitted action origin set")
+    if candidate.action_link_review_state is not ActionLinkReviewState.APPROVED:
+        reasons.append("action link is not human reviewed")
+    cap_group_amounts: dict[str, Decimal | None] = {}
     benefit_rule_ids: set[str] = set()
     for component in candidate.components:
         if component.benefit_rule_id in benefit_rule_ids:
@@ -88,9 +91,12 @@ def _rejection_reasons(scenario: PurchaseScenario, candidate: RouteCandidate) ->
         if component.expires_on is not None and component.expires_on < scenario.as_of:
             reasons.append(f"{component.id}: component expired before the scenario date")
         if component.cap_group is not None:
-            if component.cap_group in cap_groups:
-                reasons.append(f"{component.cap_group}: shared cap allocation is not implemented")
-            cap_groups.add(component.cap_group)
+            if component.per_transaction_cap is None:
+                reasons.append(f"{component.id}: a cap_group member must declare a per_transaction_cap")
+            elif component.cap_group in cap_group_amounts and cap_group_amounts[component.cap_group] != component.per_transaction_cap:
+                reasons.append(f"{component.cap_group}: shared cap_group members must declare the same per_transaction_cap")
+            else:
+                cap_group_amounts[component.cap_group] = component.per_transaction_cap
     reasons.extend(_compatibility_rejections(candidate.components))
     return reasons
 
@@ -167,8 +173,10 @@ def _contributions(
 ) -> tuple[ComponentContribution, ...]:
     budget = _quantize(scenario.amount, scenario)
     remaining_by_class = {value_class: budget for value_class in ComponentValueClass}
+    remaining_by_cap_group: dict[str, Decimal] = {}
     return tuple(
-        _contribution(scenario, component, remaining_by_class) for component in components
+        _contribution(scenario, component, remaining_by_class, remaining_by_cap_group)
+        for component in components
     )
 
 
@@ -176,6 +184,7 @@ def _contribution(
     scenario: PurchaseScenario,
     component: RouteComponent,
     remaining_by_class: dict[ComponentValueClass, Decimal],
+    remaining_by_cap_group: dict[str, Decimal],
 ) -> ComponentContribution:
     limit = min(
         value
@@ -183,6 +192,11 @@ def _contribution(
         if value is not None
     )
     limit = min(limit, remaining_by_class[component.value_class])
+    if component.cap_group is not None and component.per_transaction_cap is not None:
+        # _rejection_reasons already guarantees every member of this group declared
+        # the same per_transaction_cap, so seeding lazily from that value is safe.
+        group_remaining = remaining_by_cap_group.setdefault(component.cap_group, component.per_transaction_cap)
+        limit = min(limit, group_remaining)
     contribution = ComponentContribution(
         id=component.id,
         label=component.label,
@@ -197,8 +211,13 @@ def _contribution(
         expires_on=component.expires_on,
         conditions=component.conditions,
         assumptions=component.assumptions,
+        per_transaction_cap=component.per_transaction_cap,
+        remaining_allowance=component.remaining_allowance,
+        layer=component.layer,
     )
     remaining_by_class[component.value_class] -= contribution.value_max
+    if component.cap_group is not None and component.cap_group in remaining_by_cap_group:
+        remaining_by_cap_group[component.cap_group] -= contribution.value_max
     return contribution
 
 
@@ -213,10 +232,9 @@ def _total(
     )
 
 
-def _ranking_key(route: RankedRoute) -> tuple[Decimal, int, int, int, int, int, str]:
+def _ranking_key(route: RankedRoute) -> tuple[Decimal, int, int, int, int, str]:
     fragility = sum(len(component.conditions) for component in route.components)
     stalest_verification = min(component.verified_on.toordinal() for component in route.components)
-    affiliate_penalty = int(route.link_class is LinkClass.AFFILIATE)
     worst_evidence_tier = min(_evidence_tier_rank(component.evidence_tier) for component in route.components)
     return (
         -route.net_guaranteed,
@@ -224,7 +242,6 @@ def _ranking_key(route: RankedRoute) -> tuple[Decimal, int, int, int, int, int, 
         -stalest_verification,
         -worst_evidence_tier,
         len(route.components),
-        affiliate_penalty,
         route.route_id,
     )
 

@@ -1,0 +1,19 @@
+{
+  "id": "971261f5-cbda-448c-b3fc-10d0ac25c3c8",
+  "name": "Visa consumer offers and perks platform (visa.co.in)",
+  "tier": 3,
+  "ingestion_class": "B",
+  "status": "candidate",
+  "url_prefixes": [
+    "https://www.visa.co.in/offers/"
+  ],
+  "cadence_seconds": 86400,
+  "max_age_days": 30,
+  "time_limited": true,
+  "robots_url": "https://www.visa.co.in/robots.txt",
+  "robots_sha256": "84482799e28c29bcf7e6e6e5c9e6a544722a16d998b94a75ee83dc8c33990b4a",
+  "terms_url": "https://www.visa.co.in/legal.html",
+  "terms_sha256": "5dc1f41be46d8e835c484bbf1aeda9c4b9a4b2651ac4b9783b734bb7a269f9c4",
+  "reviewed_at": "2026-08-09",
+  "human_reviewer_id": null
+}

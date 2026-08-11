@@ -39,7 +39,9 @@ catalog change (see `CATALOG-GOVERNANCE.md`) and states, at minimum:
 - The retrieval cadence the adapter will use.
 - A maximum re-check interval no longer than 90 days. Time-limited promotions
   use 30 days or their remaining lifetime, whichever is shorter.
-- Who approved the admission and when.
+- The human reviewer who approved the admission and when. One dated human
+  approval is sufficient; additional review may be recommended for high-impact
+  or ambiguous sources but is not mandatory.
 
 Until a source has an admission record, work against it is manual and
 non-automated, or the source is left as a discovery-only lead per tier 6.
@@ -94,12 +96,11 @@ when it stays inside these boundaries:
 - Violating a source's published terms of service.
 
 If automation hits any of the forbidden conditions above, it must stop and
-report the block — see `SOURCE-ADAPTER-RUNBOOK.md` and `AGENT-OPERATIONS.md`
+report the block — see `AGENT-OPERATIONS.md`
 — never route around it.
 
 ## Related documents
 
 - `EVIDENCE.md` — the structure and storage of retrieved evidence.
-- `SOURCE-ADAPTER-RUNBOOK.md` — building and operating a source adapter.
 - `CATALOG-GOVERNANCE.md` — how a candidate assertion becomes a published fact.
 - `AGENT-OPERATIONS.md` — what background agents may and may not do.

@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
 from enum import StrEnum
+from typing import TypeVar
 from urllib.parse import urlparse
 
 # Bound public calculations to values that remain exact and inexpensive in Decimal.
@@ -16,12 +17,28 @@ MAX_INPUT_DECIMAL_SCALE = 6
 MAX_CURRENCY_SCALE = 4
 _HOST = re.compile(r"^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$")
 CURRENCY_MINOR_UNITS = {"INR": 2, "USD": 2, "EUR": 2, "GBP": 2, "JPY": 0}
+EnumT = TypeVar("EnumT", bound=StrEnum)
 
 
 class ComponentValueClass(StrEnum):
     GUARANTEED = "guaranteed"
     CONDITIONAL = "conditional"
     ESTIMATED = "estimated"
+
+
+class RouteLayer(StrEnum):
+    """The route-graph position a component occupies, per `docs/PURCHASE-OPTIMIZER.md`.
+
+    Optional: a component with no declared layer is still ranked and shown,
+    just without this explicit categorization.
+    """
+
+    COUPON = "coupon"
+    PORTAL = "portal"
+    ISSUER_NETWORK_OFFER = "issuer_network_offer"
+    CARD_EARN = "card_earn"
+    MILESTONE = "milestone"
+    REDEMPTION = "redemption"
 
 
 class Freshness(StrEnum):
@@ -34,6 +51,15 @@ class LinkClass(StrEnum):
     OFFICIAL = "official"
     THIRD_PARTY = "third_party"
     AFFILIATE = "affiliate"
+
+
+class ActionLinkReviewState(StrEnum):
+    """Human review state of the URL a route would ask a user to follow."""
+
+    APPROVED = "approved"
+    NEEDS_REVIEW = "needs_review"
+    REJECTED = "rejected"
+    UNKNOWN = "unknown"
 
 
 class EvidenceTier(StrEnum):
@@ -142,7 +168,7 @@ class PurchaseScenario:
     as_of: date
     user_fees: tuple[UserFee, ...] = ()
     allowed_link_classes: frozenset[LinkClass] = frozenset(LinkClass)
-    approved_official_origins: frozenset[str] = frozenset()
+    admitted_action_origins: frozenset[str] = frozenset()
 
     def __post_init__(self) -> None:
         _money(self.amount, "purchase amount")
@@ -154,16 +180,16 @@ class PurchaseScenario:
         allowed_link_classes = _enum_set(self.allowed_link_classes, LinkClass, "allowed_link_classes")
         if not allowed_link_classes:
             raise ValueError("allowed_link_classes must not be empty")
-        approved_origins = frozenset(
-            canonical_https_origin(origin, "approved_official_origin", origin_entry=True)
-            for origin in self.approved_official_origins
+        admitted_origins = frozenset(
+            canonical_https_origin(origin, "admitted_action_origin", origin_entry=True)
+            for origin in self.admitted_action_origins
         )
-        if not approved_origins:
-            raise ValueError("approved_official_origins must not be empty")
+        if not admitted_origins:
+            raise ValueError("admitted_action_origins must not be empty")
         user_fees = tuple(self.user_fees)
         _fees_match_currency_and_are_unique(user_fees, self.currency, "scenario")
         object.__setattr__(self, "allowed_link_classes", allowed_link_classes)
-        object.__setattr__(self, "approved_official_origins", approved_origins)
+        object.__setattr__(self, "admitted_action_origins", admitted_origins)
         object.__setattr__(self, "user_fees", user_fees)
 
 
@@ -183,6 +209,7 @@ class RouteComponent:
     freshness: Freshness
     verified_on: date
     reviewed: bool
+    benefit_state: str = "verified"
     compatible_with: frozenset[str] = frozenset()
     conditions: tuple[str, ...] = ()
     assumptions: tuple[str, ...] = ()
@@ -192,15 +219,19 @@ class RouteComponent:
     cap_group: str | None = None
     time_limited: bool = False
     valuation_name: str | None = None
+    layer: RouteLayer | None = None
 
     def __post_init__(self) -> None:
         if not self.id or not self.label or not self.benefit_rule_id or not self.source_refs:
             raise ValueError("a component needs an ID, label, canonical benefit rule ID, and source reference")
+        if self.benefit_state != "verified":
+            raise ValueError("optimizer accepts only verified benefit state")
         _canonical_benefit_rule_id(self.benefit_rule_id)
         _currency(self.currency)
         value_class = _enum(self.value_class, ComponentValueClass, "value_class")
         evidence_tier = _enum(self.evidence_tier, EvidenceTier, "evidence_tier")
         freshness = _enum(self.freshness, Freshness, "freshness")
+        layer = None if self.layer is None else _enum(self.layer, RouteLayer, "layer")
         source_refs = tuple(canonical_https_url(source_ref, "source_ref") for source_ref in self.source_refs)
         _money(self.value_min, "component minimum")
         _money(self.value_max, "component maximum")
@@ -218,6 +249,7 @@ class RouteComponent:
         object.__setattr__(self, "value_class", value_class)
         object.__setattr__(self, "evidence_tier", evidence_tier)
         object.__setattr__(self, "freshness", freshness)
+        object.__setattr__(self, "layer", layer)
         object.__setattr__(self, "source_refs", source_refs)
         object.__setattr__(self, "compatible_with", frozenset(self.compatible_with))
         object.__setattr__(self, "conditions", tuple(self.conditions))
@@ -234,12 +266,18 @@ class RouteCandidate:
     instructions: tuple[str, ...]
     link_class: LinkClass
     official_reference: str
+    action_link_review_state: ActionLinkReviewState
     route_fees: tuple[UserFee, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.id or not self.label or not self.components or not self.instructions:
             raise ValueError("a route needs an ID, label, component, and instruction")
         link_class = _enum(self.link_class, LinkClass, "link_class")
+        action_link_review_state = _enum(
+            self.action_link_review_state,
+            ActionLinkReviewState,
+            "action_link_review_state",
+        )
         components = tuple(self.components)
         route_fees = tuple(self.route_fees)
         official_reference = canonical_https_url(self.official_reference, "official_reference")
@@ -248,6 +286,7 @@ class RouteCandidate:
             raise ValueError("route component IDs must be unique")
         _fees_are_unique(route_fees, "route")
         object.__setattr__(self, "link_class", link_class)
+        object.__setattr__(self, "action_link_review_state", action_link_review_state)
         object.__setattr__(self, "components", components)
         object.__setattr__(self, "instructions", tuple(self.instructions))
         object.__setattr__(self, "route_fees", route_fees)
@@ -269,6 +308,9 @@ class ComponentContribution:
     expires_on: date | None
     conditions: tuple[str, ...]
     assumptions: tuple[str, ...]
+    per_transaction_cap: Decimal | None = None
+    remaining_allowance: Decimal | None = None
+    layer: RouteLayer | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "value_class", _enum(self.value_class, ComponentValueClass, "value_class"))
@@ -324,7 +366,7 @@ class OptimizationResult:
     guidance: str
 
 
-def _enum[EnumT: StrEnum](value: object, enum_type: type[EnumT], field: str) -> EnumT:
+def _enum(value: object, enum_type: type[EnumT], field: str) -> EnumT:  # noqa: UP047
     if not isinstance(value, str):
         raise ValueError(f"{field} is unsupported")
     try:

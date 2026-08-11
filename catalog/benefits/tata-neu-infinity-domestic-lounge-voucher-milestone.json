@@ -1,0 +1,125 @@
+{
+  "id": "b3000001-0000-4000-8000-000000000006",
+  "offering_id": "3eeb4094-d452-5a33-9061-0e8999cd6c89",
+  "benefit_type": "lounge",
+  "title": "Tata Neu Infinity domestic lounge voucher milestone",
+  "status": "active",
+  "review_tier": "high_impact",
+  "effective_from": "2025-06-10",
+  "rule_version": 1,
+  "eligibility": [
+    {
+      "field": "calendar_quarter.eligible_net_posted_spend_inr",
+      "operator": "gte",
+      "value": 50000
+    },
+    {
+      "field": "spend_definition",
+      "operator": "equals",
+      "value": "posted purchases/debits after credits and reversals; only billed EMI principal counts"
+    },
+    {
+      "field": "card_instance_scope",
+      "operator": "equals",
+      "value": "for upgraded, replaced, lost, or reissued cards, only qualifying spend on the new card counts"
+    }
+  ],
+  "allowance": {
+    "unit": "domestic_lounge_access_voucher",
+    "count": 2,
+    "period": "qualifying_calendar_quarter",
+    "claim_window_days": 120,
+    "claim_route": "issuer/GyFTR communication to the registered contact, followed by the issuer-linked GyFTR claim route using the registered mobile/OTP",
+    "conditions": [
+      "voucher is non-transferable",
+      "identity/name matching is required",
+      "eligible lounge services, operating hours, stay limits, and extra charges remain operator-controlled"
+    ],
+    "not_claimed": [
+      "direct complimentary swipe access",
+      "unconditional 8 visits per year",
+      "voucher rollover",
+      "fixed voucher-validity duration",
+      "permanently fixed lounge list"
+    ]
+  },
+  "category": "lounge",
+  "owners": [
+    {
+      "kind": "issuer",
+      "id": "hdfc-bank",
+      "display_name": "HDFC Bank"
+    }
+  ],
+  "conditions": [
+    {
+      "type": "spend_triggered",
+      "operator": "gte",
+      "value": "INR 50,000 eligible net posted spend in one calendar quarter"
+    },
+    {
+      "type": "time_window",
+      "operator": "equals",
+      "value": "qualifying calendar quarter"
+    }
+  ],
+  "value_class": "conditional",
+  "evidence": [
+    {
+      "id": "60000001-0000-4000-8000-000000000006",
+      "source_policy_class": "issuer_document",
+      "url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/tata-neu-infinity-credit-card/pdf/milestone_lounge_tataneu-cc.pdf",
+      "content_sha256": "974da629d3567911201ecd7a73329ca335f5506347438e363d4f42ea9880b62e",
+      "retrieved_at": "2026-08-10T00:00:00Z",
+      "effective_from": "2025-06-10",
+      "confidence": "high",
+      "review_state": "approved",
+      "reviews": [
+        {
+          "id": "70000001-0000-4000-8000-000000000006",
+          "reviewer_id": "project-owner",
+          "reviewed_at": "2026-08-10T00:00:00Z",
+          "decision": "approved"
+        }
+      ]
+    }
+  ],
+  "exclusions": [],
+  "redemption_steps": [],
+  "provider": null,
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/tata-neu-infinity-credit-card/pdf/milestone_lounge_tataneu-cc.pdf",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "974da629d3567911201ecd7a73329ca335f5506347438e363d4f42ea9880b62e",
+  "retrieved_at": "2026-08-10T00:00:00Z",
+  "not_claimed": [
+    "direct complimentary swipe access",
+    "unconditional 8 visits per year",
+    "voucher rollover",
+    "fixed voucher-validity duration",
+    "permanently fixed lounge list"
+  ],
+  "state": "verified",
+  "provenance": [
+    {
+      "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/tata-neu-infinity-credit-card/pdf/milestone_lounge_tataneu-cc.pdf",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "974da629d3567911201ecd7a73329ca335f5506347438e363d4f42ea9880b62e",
+      "retrieved_at": "2026-08-10T00:00:00Z",
+      "id": "60000001-0000-4000-8000-000000000006",
+      "effective_from": "2025-06-10",
+      "confidence": "high",
+      "review_state": "approved",
+      "reviews": [
+        {
+          "id": "70000001-0000-4000-8000-000000000006",
+          "reviewer_id": "project-owner",
+          "reviewed_at": "2026-08-10T00:00:00Z",
+          "decision": "approved"
+        }
+      ]
+    }
+  ],
+  "conflicts_with": []
+}

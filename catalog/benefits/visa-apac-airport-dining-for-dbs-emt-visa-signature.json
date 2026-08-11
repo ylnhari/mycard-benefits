@@ -1,0 +1,39 @@
+{
+  "id": "82d0ae12-700d-517f-851b-4d0fb82812eb",
+  "offering_id": "784d30a2-d144-53dd-bfa1-88549e975d39",
+  "title": "Visa APAC airport dining for DBS EMT Visa Signature",
+  "benefit_type": "food",
+  "category": "food",
+  "allowance": {
+    "discount_percent": 20,
+    "period": "2026",
+    "participating_locations": true
+  },
+  "eligibility": [],
+  "conditions": [],
+  "exclusions": [],
+  "redemption_steps": [],
+  "provider": null,
+  "effective_from": "2026-01-01",
+  "effective_to": "2026-12-31",
+  "end_date_known": true,
+  "source_url": "https://www.visa.co.in/en_in/visa-offers-and-perks/visa-airport-dining/177766",
+  "source_policy_class": "network_rule",
+  "content_sha256": "939380e3607a5663098f4f179e4a40ee106bcd558d2c52e4d6738d583d0e168a",
+  "retrieved_at": "2026-08-10T00:00:00Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.visa.co.in/en_in/visa-offers-and-perks/visa-airport-dining/177766",
+      "source_policy_class": "network_rule",
+      "content_sha256": "939380e3607a5663098f4f179e4a40ee106bcd558d2c52e4d6738d583d0e168a",
+      "retrieved_at": "2026-08-10T00:00:00Z",
+      "id": "556e4653-93e2-5f55-9ca2-6ad95d9da29e",
+      "source_observation_id": "3b0464d2-55f1-52c5-9fc0-2b330f1eb74a",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "low",
+      "effective_from": "2026-01-01",
+      "effective_to": "2026-12-31"
+    }
+  ]
+}

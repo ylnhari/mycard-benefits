@@ -1,0 +1,43 @@
+{
+  "id": "b2000001-0000-4000-8000-000000000002",
+  "offering_id": "83a6036e-bd88-5cb8-aa8f-676521050f68",
+  "title": "Regalia Gold domestic lounge access",
+  "benefit_type": "lounge",
+  "category": "lounge",
+  "allowance": {
+    "cap": 3,
+    "period": "quarter",
+    "unit": "visit"
+  },
+  "eligibility": [
+    {
+      "field": "preceding_calendar_quarter_net_spend_inr",
+      "operator": "gte",
+      "value": 60000
+    }
+  ],
+  "conditions": [],
+  "exclusions": [],
+  "redemption_steps": [],
+  "provider": null,
+  "effective_from": "2026-07-01",
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/regalia-gold-credit-card/pdfs/lounge-t-and-cs-and-list-Regalia-Gold.pdf",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "39d3bf8aee91f086f2559c272286c60a3136f3d5ef3ab7de890d4b2b312647e9",
+  "retrieved_at": "2026-08-07T10:00:47Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/regalia-gold-credit-card/pdfs/lounge-t-and-cs-and-list-Regalia-Gold.pdf",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "39d3bf8aee91f086f2559c272286c60a3136f3d5ef3ab7de890d4b2b312647e9",
+      "retrieved_at": "2026-08-07T10:00:47Z",
+      "id": "98fc1f80-1e65-53f2-bd69-c3809f49e184",
+      "source_observation_id": "3c8b3358-50f6-5248-89db-e73293dd024f",
+      "confidence": "high",
+      "effective_from": "2026-07-01"
+    }
+  ]
+}

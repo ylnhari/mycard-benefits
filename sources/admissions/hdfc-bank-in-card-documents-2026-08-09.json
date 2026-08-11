@@ -1,0 +1,20 @@
+{
+  "id": "9a6660ed-d2f0-4a82-be08-b70e965cbc3e",
+  "name": "HDFC Bank public card terms and feature-change documents (hdfc.bank.in)",
+  "tier": 2,
+  "ingestion_class": "B",
+  "status": "candidate",
+  "url_prefixes": [
+    "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/",
+    "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/pdf/common/Credit-Cards/"
+  ],
+  "cadence_seconds": 604800,
+  "max_age_days": 90,
+  "time_limited": false,
+  "robots_url": "https://www.hdfc.bank.in/robots.txt",
+  "robots_sha256": "787f6789b04cf2d8ed383c1941a458084ecf18da98856dcdcba0b24cf48fc5cb",
+  "terms_url": "https://www.hdfc.bank.in/useful-links/website-usage-terms",
+  "terms_sha256": "62b627adf983799787f119a47f5e88b43e86d72cef5b4523ed77e9e45153d231",
+  "reviewed_at": "2026-08-09",
+  "human_reviewer_id": null
+}

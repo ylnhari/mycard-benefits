@@ -1,0 +1,51 @@
+{
+  "id": "863b87bc-ecfa-5754-8f1d-bd05849ddadf",
+  "offering_id": "8f4fc7eb-f070-59c0-926c-029897a8093c",
+  "title": "RBL Play welcome BookMyShow offer",
+  "benefit_type": "movie",
+  "category": "movie",
+  "allowance": {
+    "transaction_cap_inr": 500,
+    "uses_total": 1,
+    "issuer_first_statement_window_days": 60,
+    "bookmyshow_issuance_window_days": 90
+  },
+  "eligibility": [
+    {
+      "field": "days_from_issuance",
+      "operator": "lte",
+      "value": 90
+    }
+  ],
+  "conditions": [],
+  "exclusions": [
+    "No automated redemption authorization is implied.",
+    "Unknown stacking remains unapproved unless the terms explicitly support it."
+  ],
+  "redemption_steps": [
+    "Select the named offer at BookMyShow checkout.",
+    "Use the eligible card variant and complete payment.",
+    "Pay applicable processing or internet fees where required."
+  ],
+  "provider": "BookMyShow",
+  "effective_from": null,
+  "effective_to": "2027-03-31",
+  "end_date_known": true,
+  "source_url": "https://in.bookmyshow.com/offers/rbl-play-credit-card-%E2%80%93-welcome-offer/RBLPLWL222",
+  "source_policy_class": "administering_terms",
+  "content_sha256": "9db3074c82cc6512485ca2590154adb138d534a7a9adc725fe29f46f57309b2d",
+  "retrieved_at": "2026-08-10T00:00:00Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://in.bookmyshow.com/offers/rbl-play-credit-card-%E2%80%93-welcome-offer/RBLPLWL222",
+      "source_policy_class": "administering_terms",
+      "content_sha256": "9db3074c82cc6512485ca2590154adb138d534a7a9adc725fe29f46f57309b2d",
+      "retrieved_at": "2026-08-10T00:00:00Z",
+      "id": "f47a6006-492e-5ca2-9ead-94b3a7565fd6",
+      "source_observation_id": "bb11bcf8-13b8-5c98-9744-8a64e12dbc83",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "low"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "id": "b1000001-0000-4000-8000-000000000002",
+  "offering_id": "3eeb4094-d452-5a33-9061-0e8999cd6c89",
+  "title": "Tata Neu Infinity domestic lounge access",
+  "benefit_type": "lounge",
+  "category": "lounge",
+  "allowance": {
+    "cap": 2,
+    "period": "quarter",
+    "unit": "visit"
+  },
+  "eligibility": [
+    {
+      "field": "preceding_calendar_quarter_net_spend_inr",
+      "operator": "gte",
+      "value": 50000
+    }
+  ],
+  "conditions": [],
+  "exclusions": [],
+  "redemption_steps": [],
+  "provider": null,
+  "effective_from": "2025-06-10",
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/tata-neu-infinity-credit-card/pdf/complimentary-domestic-airport-lounge-access-tata-neu-infinity.pdf",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "1c8925b15782ab6e04dd6dc804a622ccda509fcf0db4ed49ab0e64454b33791c",
+  "retrieved_at": "2026-08-07T10:00:47Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/tata-neu-infinity-credit-card/pdf/complimentary-domestic-airport-lounge-access-tata-neu-infinity.pdf",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "1c8925b15782ab6e04dd6dc804a622ccda509fcf0db4ed49ab0e64454b33791c",
+      "retrieved_at": "2026-08-07T10:00:47Z",
+      "id": "6631ac01-0517-5d56-a6e7-577904dee7a5",
+      "source_observation_id": "1945622e-04af-5f0d-a88a-cdb8e00aa1c9",
+      "confidence": "high",
+      "effective_from": "2025-06-10"
+    }
+  ]
+}

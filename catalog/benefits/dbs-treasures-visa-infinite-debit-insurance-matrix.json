@@ -1,0 +1,45 @@
+{
+  "id": "f956d541-ad31-5614-849a-4445a8fdefa0",
+  "offering_id": "c2a6190e-7462-5b76-97ce-3b994c26d351",
+  "title": "DBS Treasures Visa Infinite debit insurance matrix",
+  "benefit_type": "other",
+  "category": "insurance",
+  "allowance": {
+    "unauthorized_use_inr": 500000,
+    "accident_inr": 300000,
+    "air_accident_inr": 10000000,
+    "purchase_inr": 100000,
+    "baggage_inr": 75000
+  },
+  "eligibility": [
+    {
+      "field": "transaction_in_preceding_days",
+      "operator": "lte",
+      "value": 90
+    }
+  ],
+  "conditions": [],
+  "exclusions": [],
+  "redemption_steps": [],
+  "provider": null,
+  "effective_from": null,
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.dbs.bank.in/digibank/in/debit-card-terms-and-conditions.page",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "c6ee6842c62b27ae310dcf69c10d3f7aba248f9f6f5d802455bfc16c9d16d20e",
+  "retrieved_at": "2026-08-10T00:00:00Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.dbs.bank.in/digibank/in/debit-card-terms-and-conditions.page",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "c6ee6842c62b27ae310dcf69c10d3f7aba248f9f6f5d802455bfc16c9d16d20e",
+      "retrieved_at": "2026-08-10T00:00:00Z",
+      "id": "834fde7f-48b9-5948-95a8-1c80d32becc8",
+      "source_observation_id": "a7def0f7-bce7-5dec-b4db-feaa8bc69a76",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "low"
+    }
+  ]
+}

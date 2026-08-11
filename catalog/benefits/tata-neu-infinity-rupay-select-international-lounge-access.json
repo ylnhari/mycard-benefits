@@ -1,0 +1,90 @@
+{
+  "id": "b3000001-0000-4000-8000-000000000007",
+  "offering_id": "3eeb4094-d452-5a33-9061-0e8999cd6c89",
+  "title": "Tata Neu Infinity RuPay Select international lounge access",
+  "benefit_type": "lounge",
+  "category": "lounge",
+  "allowance": {
+    "visits_per_year": 4,
+    "visits_per_quarter": 1,
+    "validation_fee_usd": "3.25",
+    "validation_fee_reversed": true
+  },
+  "eligibility": [
+    {
+      "field": "network_variant",
+      "operator": "equals",
+      "value": "rupay-select"
+    },
+    {
+      "field": "lounge_location",
+      "operator": "equals",
+      "value": "outside_india"
+    }
+  ],
+  "conditions": [],
+  "exclusions": [],
+  "redemption_steps": [],
+  "provider": null,
+  "effective_from": "2025-06-01",
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.hdfc.bank.in/credit-cards/tata-neu-infinity-hdfc-bank-credit-card",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "023c1924596467117f3acfb0be39223551a7020bd3561b535fdfd285768f0fd7",
+  "retrieved_at": "2026-08-09T18:36:39Z",
+  "state": "sources_differ",
+  "provenance": [
+    {
+      "source_url": "https://www.hdfcbank.com/personal/pay/cards/credit-cards/tata-neu-infinity-hdfc-bank-credit-card",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "df04886c5b39b03b4fe347a31303f95ec2908bbf020138834a73c00918bd88e3",
+      "retrieved_at": "2026-08-07T10:00:47Z",
+      "id": "98a2c0fd-9c9c-51a3-9150-9b91e28c09bf",
+      "source_observation_id": "96005eff-d2ca-578b-bf5c-c07c3fbcbdf2",
+      "confidence": "high",
+      "effective_from": "2025-04-01"
+    },
+    {
+      "source_url": "https://www.hdfc.bank.in/credit-cards/tata-neu-infinity-hdfc-bank-credit-card",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "023c1924596467117f3acfb0be39223551a7020bd3561b535fdfd285768f0fd7",
+      "retrieved_at": "2026-08-09T18:36:39Z",
+      "id": "496bf7a3-0584-52c4-99e9-2692758054a5",
+      "source_observation_id": "c3da4579-2503-5f2c-91e2-c617421d706e",
+      "confidence": "high",
+      "effective_from": "2025-06-01"
+    }
+  ],
+  "source_divergence": [
+    {
+      "source_url": "https://www.hdfcbank.com/personal/pay/cards/credit-cards/tata-neu-infinity-hdfc-bank-credit-card",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "df04886c5b39b03b4fe347a31303f95ec2908bbf020138834a73c00918bd88e3",
+      "retrieved_at": "2026-08-07T10:00:47Z",
+      "benefit_type": "priority_pass",
+      "category": "priority_pass",
+      "allowance": {
+        "cap": 1,
+        "period": "quarter",
+        "unit": "visit"
+      },
+      "effective_from": "2025-04-01"
+    },
+    {
+      "source_url": "https://www.hdfc.bank.in/credit-cards/tata-neu-infinity-hdfc-bank-credit-card",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "023c1924596467117f3acfb0be39223551a7020bd3561b535fdfd285768f0fd7",
+      "retrieved_at": "2026-08-09T18:36:39Z",
+      "benefit_type": "lounge",
+      "category": "lounge",
+      "allowance": {
+        "visits_per_year": 4,
+        "visits_per_quarter": 1,
+        "validation_fee_usd": "3.25",
+        "validation_fee_reversed": true
+      },
+      "effective_from": "2025-06-01"
+    }
+  ]
+}

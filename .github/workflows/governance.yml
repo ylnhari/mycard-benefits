@@ -1,0 +1,88 @@
+name: Offline governance
+
+on:
+  # pull_request_target evaluates this file from the trusted base branch. The
+  # PR checkout is never executed; its head is fetched only as diff input.
+  pull_request_target:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  governance:
+    runs-on: ubuntu-latest
+    env:
+      MYCARD_BENEFITS_NO_DOTENV: "1"
+      MYCARD_BENEFITS_LIVE_CHECKS: "0"
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.base.sha || github.sha }}
+      - uses: astral-sh/setup-uv@bd01e18f51369d5a26f1651c5e4c8f4f6b7c3d2a
+      - name: Resolve exact comparison base
+        id: range
+        shell: bash
+        env:
+          EXPECTED_CHECKOUT_SHA: ${{ github.event.pull_request.base.sha || github.sha }}
+          EXPECTED_PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_CHECKOUT_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$(git rev-parse HEAD)" == "$EXPECTED_CHECKOUT_SHA" ]]
+          base='${{ github.event.pull_request.base.sha || github.event.before }}'
+          if [[ "$base" == '0000000000000000000000000000000000000000' ]]; then
+            # An initial push has no commit parent. Retain an explicit mode so
+            # the scanner walks every pushed commit, including transient blobs.
+            empty_tree="$(git hash-object -t tree --stdin </dev/null)"
+            [[ "$empty_tree" == '4b825dc642cb6eb9a060e54bf8d69288fbee4904' ]]
+            base="$empty_tree"
+            echo "INITIAL_ARGS=--initial" >> "$GITHUB_ENV"
+          else
+            [[ "$base" =~ ^[0-9a-f]{40}$ ]]
+            git cat-file -e "$base^{commit}"
+            echo "INITIAL_ARGS=" >> "$GITHUB_ENV"
+          fi
+          echo "BASE_SHA=$base" >> "$GITHUB_ENV"
+          if [[ -n "$EXPECTED_PR_HEAD_SHA" ]]; then
+            # Fetch the event object ID directly; pull and branch refs are
+            # mutable across synchronize/force-push races and are not trusted.
+            [[ "$EXPECTED_PR_HEAD_SHA" =~ ^[0-9a-f]{40}$ ]]
+            # A depth-one fetch hides parents and transient blobs from an
+            # initial or force-like event. Fetch the immutable object and all
+            # reachable history; fail closed if Git still reports a shallow or
+            # disconnected object graph.
+            git fetch --no-tags origin "$EXPECTED_PR_HEAD_SHA"
+            fetched="$(git rev-parse --verify FETCH_HEAD^{commit})"
+            [[ "$fetched" == "$EXPECTED_PR_HEAD_SHA" ]]
+            git cat-file -e "$EXPECTED_PR_HEAD_SHA^{commit}"
+            [[ "$(git rev-parse --is-shallow-repository)" == false ]]
+            git fsck --connectivity-only --no-dangling "$EXPECTED_PR_HEAD_SHA"
+            head="$EXPECTED_PR_HEAD_SHA"
+          else
+            head="$GITHUB_SHA"
+            [[ "$(git rev-parse --is-shallow-repository)" == false ]]
+            git fsck --connectivity-only --no-dangling "$head"
+          fi
+          [[ "$head" =~ ^[0-9a-f]{40}$ ]]
+          git cat-file -e "$head^{commit}"
+          if [[ "$base" == '4b825dc642cb6eb9a060e54bf8d69288fbee4904' ]]; then
+            git fsck --connectivity-only --no-dangling "$head"
+          else
+            git fsck --connectivity-only --no-dangling "$base" "$head"
+          fi
+          echo "HEAD_SHA=$head" >> "$GITHUB_ENV"
+      # This step may acquire the frozen lockfile's packages. The steps below
+      # are deterministic and offline with respect to application behavior.
+      - run: uv sync --frozen --all-groups
+      - run: uv run --offline --no-sync python scripts/validate_contribution.py --schema catalog/schema/contribution.schema.json --check-schema --all
+      - run: uv run --offline --no-sync python scripts/check_policy_docs.py --offline
+      - run: uv run --offline --no-sync python scripts/release_candidate_check.py --base "$BASE_SHA" --head "$HEAD_SHA" $INITIAL_ARGS
+      - run: uv run --offline --no-sync python scripts/check_living_artifacts.py --base "$BASE_SHA" --head "$HEAD_SHA"
+      - run: uv run --offline --no-sync python scripts/generate_compliance_checklist.py
+      - run: uv run --offline --no-sync ruff check .
+      - run: uv run --offline --no-sync mypy src
+      - run: uv run --offline --no-sync pytest -q -m "not rendered_ui"
+      - run: node --check src/mycard_benefits/static/app.js
+      - run: uv build --offline

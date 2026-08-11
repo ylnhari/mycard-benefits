@@ -1,0 +1,43 @@
+{
+  "id": "d1e2fb98-f0b8-515b-b423-ea9ef9595e02",
+  "offering_id": "83a6036e-bd88-5cb8-aa8f-676521050f68",
+  "title": "Regalia Gold joining and renewal membership fee",
+  "benefit_type": "other",
+  "category": "other",
+  "allowance": {
+    "joining_fee_inr": 2500,
+    "renewal_fee_inr": 2500,
+    "taxes": "applicable"
+  },
+  "eligibility": [],
+  "conditions": [],
+  "exclusions": [],
+  "redemption_steps": [],
+  "provider": null,
+  "effective_from": null,
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.hdfc.bank.in/credit-cards/regalia-gold-credit-card/fees-and-charges",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "fb5ff7c96ba5aa7e38100c8c78ef422fd622eff2820304f5ea5bb5487611e645",
+  "retrieved_at": "2026-08-09T18:35:42Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.hdfc.bank.in/credit-cards/regalia-gold-credit-card",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "06a79a11c0db2f8b372be5eea6e4f0147297ccb1773acd5895cf5a181eb99160",
+      "retrieved_at": "2026-08-09T18:35:41Z",
+      "id": "f21ca056-6d72-5b33-8d74-0e6e0fa8bfc8",
+      "confidence": "high"
+    },
+    {
+      "source_url": "https://www.hdfc.bank.in/credit-cards/regalia-gold-credit-card/fees-and-charges",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "fb5ff7c96ba5aa7e38100c8c78ef422fd622eff2820304f5ea5bb5487611e645",
+      "retrieved_at": "2026-08-09T18:35:42Z",
+      "id": "9d6de74f-caa3-5a5a-b1f6-ba9f38264cca",
+      "confidence": "high"
+    }
+  ]
+}

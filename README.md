@@ -1,83 +1,85 @@
 # MyCard Benefits
 
-Know what your cards actually offer — with the evidence attached.
+Know what a card offers before you rely on it, while keeping your own card
+records private on your computer.
 
-Card benefits change quietly. Lounge access gets restricted, a voucher program
-ends, a blog post from two years ago still says otherwise. MyCard Benefits keeps
-a catalog of card benefits where every statement carries its source, the dates it
-covers, and whether a human has verified it — and keeps your own card records in
-an encrypted file on your own computer, separate from all of that.
+MyCard Benefits is local-first: the public catalog records card products,
+benefit evidence, dates, and review status; your encrypted vault holds your
+private card records separately. There is no MyCard account, cloud copy, or
+automatic sharing of card data.
 
-Everything runs locally. No account, no server, no upload, no cloud copy of your
-cards.
+**New here? Start with the [plain-language user guide](docs/USER-GUIDE.md).**
+It explains setup, private vaults, benefits, recovery, and the features that
+are not ready yet.
 
-**New here? Read the [User Guide](docs/USER-GUIDE.md).** It covers setup, the
-dashboard, importing your cards, phone access, and what stays private, without
-assuming you write software.
+## Start a safe demo
 
-## Try it in five minutes
-
-You need Python 3.12+ and [`uv`](https://docs.astral.sh/uv/getting-started/installation/).
-In Windows PowerShell, from your clone of this repository:
+Install Python 3.12+ and [uv](https://docs.astral.sh/uv/getting-started/installation/),
+then use Windows PowerShell in this project folder:
 
 ```powershell
 uv sync --locked
 uv run mycard-benefits --demo
 ```
 
-The app prints the address to open and binds only to `127.0.0.1`, meaning this
-computer only:
+Open the local address printed by the command. The demo is clearly marked,
+uses separate demo data, and never opens a private vault. Press `Ctrl+C` to
+stop it. When your private vault is ready, start the regular app with:
 
+```powershell
+uv run mycard-benefits
 ```
-MyCard Benefits [DEMO]
-App: http://127.0.0.1:8777
-Private data remains local. The application binds only to 127.0.0.1.
-```
 
-Use the address it prints. Press `Ctrl+C` to stop. Drop `--demo` once you have
-imported your own cards. `--demo` is a clearly labelled dry run: the page shows
-a permanent banner, demo activity uses a separate `demo-data` folder by
-default, and My Cards is switched off — a demo run never opens your vault.
-An explicit `--data-dir` changes the demo activity folder but does not enable
-My Cards.
+The app listens only on `127.0.0.1` (this computer). A phone or other-device
+setup needs an authenticated gateway or launcher that you control; it is
+separate software and does not change the app's local-only bind.
 
-## What works today
+## What is available now
 
-This is an early release, and the list is deliberately honest.
+- Search public card products; browse reviewed catalog material and inspect its
+  conditions, dates, evidence, and review state.
+- Use **My Cards** to search and filter a safe summary of imported cards, then
+  use fresh-passphrase protected local controls to add, edit, transition,
+  replace, or delete records. Private fields never return to the browser.
+- Compare public card products, ask local catalog questions, and use the
+  temporary purchase Planner.
+- Use local, privacy-preserving expiry reminders and an optional calendar export
+  when a compatible vault is available.
 
-**Working:** the local dashboard (desktop and phone, dark and light, keyboard
-navigable); a public catalog of **68 card variants** — real Indian credit cards,
-debit cards, lounge memberships, and pay-later products identified by bank,
-product, and network — searchable by bank, card, or network; **My Cards**, a
-read-only list of your imported cards shown as
-readable rows with their public catalog product, bank, network, lifecycle status,
-and record dates; browsing benefits with their dates and evidence; **Ask**, a
-deterministic question box answered from catalog facts with no AI model involved;
-**Compare** for two cards side by side; **Sources** for the evidence trail; and a
-command-line tool that creates your encrypted vault and imports your cards.
+## Important current limits
 
-**Not working yet:**
+- Protected card controls are local-only and require fresh passphrase
+  reauthentication for every action. They never reveal or copy plaintext.
+  Do not edit vault files by hand.
+  The supported first-time import and technical reconciliation reference are in
+  [Vault import](docs/VAULT-IMPORT.md).
+- An **archived** card record is retained history. It is not a statement that the physical card has expired.
+- A catalog product is not a verified benefit. `needs_review` is not a promise;
+  check the official issuer, network, or merchant terms before using a benefit.
+- The app does not automatically refresh live issuer pages or send network
+  notifications. It never pays, applies, books, redeems, or tracks spending.
+- Planner entries are your assumptions, not verified benefit claims. Affiliate
+  routes are disclosed and cannot improve a ranking.
 
-- **Most cards have no benefits listed.** A variant existing is not a claim about
-  what it offers — only benefits checked against current official terms and
-  approved by a human appear, and that review work is at an early stage. Expect a
-  long card list and a short benefit list. Nothing fetches live issuer pages
-  automatically.
-- **You cannot add, edit, delete, or reveal a card in the browser or through the
-  HTTP API.** My Cards is read-only, and secret values are never sent to it. Add,
-  edit, delete, reveal/copy, and owner/expiry/replacement reconciliation are all
-  future protected work with their own security reviews. The `mycard-vault`
-  command line remains the only write path; type nothing sensitive into the
-  dashboard.
-- **Expiring Soon**, **Updates**, and **Research Queue** appear in the sidebar but
-  are intentionally empty.
-- The purchase-route comparison engine is reachable through a local loopback
-  API but is not connected to any screen and cannot open a shopping link.
+## What this release does and does not claim
 
-## Your cards
+The public catalog contains a small reviewed set of active benefit claims. A
+candidate or `needs_review` item is not an approved benefit. A human reviewer
+must approve the evidence before a benefit can become active.
 
-Card records go in through a command line. Use the keyring option if you want the
-browser's My Cards view, which opens the vault through your OS keyring:
+The `c6a9081` baseline passed integrated, broad-review, clean-clone, scanner,
+and synthetic rendered gates, but owner user testing rejected the current
+consumer experience. The app is undergoing a consumer-first redesign and is
+not release-ready. Live source
+adapters and provider execution are disabled or separately gated. Owner-confirmed
+real offering mappings and coverage, candidate activation, remote push, and
+publication remain unperformed and owner-gated. No model, provider, or external
+service was invoked by this documentation checkpoint.
+
+## Private vault quick start
+
+Use the operating-system keyring option if you want the browser's protected
+**My Cards** view:
 
 ```powershell
 uv sync --locked --extra keyring
@@ -86,122 +88,49 @@ uv run mycard-vault --keyring verify
 ```
 
 `verify` reports a count and nothing else. For a typed passphrase instead, drop
-`--keyring` — fully supported by the CLI, but the browser view cannot prompt for
-it. Keep real manifests in the ignored `imports/` folder. If you lose your
+`--keyring`; this remains the explicit CLI alternative. My Cards also provides
+a protected loopback-only unlock for the current browser session. It never
+stores the passphrase or unlocked session, and locks on timeout or restart.
+Keep real manifests in the ignored `imports/` folder. If you lose your
 passphrase the vault cannot be recovered; there is no server to reset it from.
 Full walkthrough: [docs/VAULT-IMPORT.md](docs/VAULT-IMPORT.md); the tracked
 [samples/card-import.example.json](samples/card-import.example.json) is
 synthetic only.
 
-## My Cards, read-only
+## How benefit review works
 
-`GET /api/v1/private/cards` and the **My Cards** screen are local, read-only
-views. The app remains bound to loopback; it opens the OS-keyring-encrypted vault
-server-side and returns envelope metadata only — card UUID, catalog offering,
-lifecycle, created and updated timestamps, and a linked replacement card
-identifier — sent `no-store`, and refused outright if the vault yields any
-unexpected field. The browser joins that envelope to the public catalog so each
-card renders as a row with the product name, issuer/bank, network, lifecycle, and
-record dates; an identifier with no catalog match appears under a clearly labeled
-"Unmatched variant" row rather than a raw slug, with guidance to fix the import
-or request the catalog variant. Each row has a keyboard-
-reachable **View details** action that expands a read-only detail panel with the
-same safe fields — product, issuer, network, lifecycle, record dates, and any
-replacement relationship — resolved entirely from the envelope plus the public
-catalog. PAN, CVV, PIN, nickname, notes, cardholder name, and expiry are never
-returned.
+Catalog entries carry source links, dates, evidence, and a review state. A
+changed or conflicting source is not silently treated as a usable benefit.
+This release does not automatically fetch issuer pages or send notifications.
+When a benefit matters, open its official source and confirm the current terms
+yourself before relying on it.
 
-## Public versus private
+## Privacy and safety
 
-- **Public catalog:** card variants, reward rules, conversions, lounges, movies,
-  hotels, dining, vouchers, meet-and-greet, network programs, evidence, history.
-  Shareable; contains nothing about you.
-- **Private vault:** your card instances, lifecycle, PAN/CVV/PIN, notes,
-  allowances, reminders, attachments — encrypted, local, never uploaded.
-- **Never included:** spending ledger, bank login, OTP storage, payments, card
-  applications, bookings, redemptions, automatic document submission.
+The public catalog contains no personal card records. The private vault is
+encrypted and local. My Cards exposes only a safe summary such as public product
+match, lifecycle, and record dates; it never returns PAN, CVV, PIN, cardholder
+name, nickname, notes, or exact expiry to the browser. Automated helpers never
+receive decrypted vault values.
 
-The core works without an LLM. Optional agents see only public catalog facts and
-safe identifiers, never a decrypted value.
-
-## Using it from your phone
-
-The app answers only on `127.0.0.1`. If you want phone access, use any
-authenticated gateway or launcher you control to forward to that loopback
-address. The launcher is external to MyCard; it is not part of this repository
-or this app's identity. The app's bind never changes — do not set it to
-`0.0.0.0`, your LAN address, or a forwarded router port.
-
-## Family Finance
-
-The separate My Family Finance app stays fully standalone and keeps its own Cards
-page. Its optional **MyCard Benefits companion** button opens this app if you
-point it at the printed address; if this app is not installed or not running, the
-button opens setup documentation instead. The button sends no card, owner, or
-finance data. A one-time encrypted import is a later milestone with its own
-review — the two apps do not synchronize.
-See [docs/FAMILY-FINANCE-INTEGRATION.md](docs/FAMILY-FINANCE-INTEGRATION.md).
-
-## Verified versus needs review
-
-Every catalog statement carries its source and tier, a content fingerprint,
-retrieval time, effective dates, a confidence level, and a review state.
-**Approved** means a human checked the source; ambiguous or high-impact claims
-need two independent reviewers, and no agent can approve anything. **Needs
-review** means the evidence is missing, changed, or unchecked — such a statement
-is never treated as active, and is shown with its status rather than hidden.
-Expired benefits are kept as history. Before relying on a benefit, check its
-review state and dates.
-
-This is why the catalog lists many more cards than benefits: a card variant is a
-public product identity, while a benefit is a claim that has to earn its place. An
-empty benefit list means "not verified here yet," never "this card offers
-nothing." Details:
-[docs/SOURCE-POLICY.md](docs/SOURCE-POLICY.md) and
-[docs/CATALOG-GOVERNANCE.md](docs/CATALOG-GOVERNANCE.md).
-
-## Safety
-
-This is not a bank, payment processor, wallet, or financial adviser. It makes no
-PCI compliance claim. Always verify current eligibility and fulfillment with the
-official issuer, network, or merchant before relying on a benefit. Threat model
-and reporting: [SECURITY.md](SECURITY.md).
-
-## Files regular users can ignore
-
-`coordination/` is the maintainers' audit and resume trail: task briefs under
-`coordination/tasks/`, append-only `jobs.jsonl` / `events.jsonl`, and code-review
-results under `coordination/evidence/`. It exists because sensitive actions in
-this project require a dated written human approval that can be audited later,
-and because work spans sessions and must be resumable from disk rather than from
-someone's memory of a conversation. Files named like `*-review-001.md` are review
-records, not features or settings. Nothing there affects how the app behaves, and
-nothing there is a to-do list for you. The same goes for `tests/`, `.venv/`, and
-the raw files under `catalog/` — read the catalog through the dashboard instead.
+This is not a bank, payment service, wallet, or financial adviser, and it makes
+no PCI-compliance claim. Read [SECURITY.md](SECURITY.md) before reporting an
+issue, and never include real card data in a report.
 
 ## For maintainers and contributors
 
+The detailed operator, source, migration, and architecture runbooks remain in
+the documentation index: [docs/README.md](docs/README.md). Read
+[AGENTS.md](AGENTS.md), [PROJECT_STATUS.md](PROJECT_STATUS.md), and
+[DECISIONS.md](DECISIONS.md) before changing the project.
+
+Offline quality gates:
+
 ```powershell
-uv run ruff check .
-uv run pytest
-uv run mypy src
+uv run --offline ruff check .
+uv run --offline pytest
+uv run --offline mypy src
 ```
-
-Port resolution is `--port`, then `MYCARD_BENEFITS_PORT`, then the nearest
-`ports.json` entry, then the documented clone fallback; the app never hunts for a
-free port. Optional OS-keyring support installs with
-`uv sync --locked --extra keyring`.
-
-Read [AGENTS.md](AGENTS.md), [PROJECT_STATUS.md](PROJECT_STATUS.md), and
-[DECISIONS.md](DECISIONS.md) before contributing, plus
-[CONTRIBUTING.md](CONTRIBUTING.md) for the workflow. Product intent and new ideas
-live in [PRODUCT_REQUIREMENTS.md](PRODUCT_REQUIREMENTS.md),
-[ROADMAP.md](ROADMAP.md), and [docs/IDEA-LOG.md](docs/IDEA-LOG.md); the accepted
-questionnaire trace is in [docs/DECISION-TRACE.md](docs/DECISION-TRACE.md) with
-the complete numbered matrix in
-[docs/QUESTIONNAIRE-DECISIONS.md](docs/QUESTIONNAIRE-DECISIONS.md), so
-implementation never depends on chat history. The full documentation index is
-[docs/README.md](docs/README.md).
 
 ## License
 

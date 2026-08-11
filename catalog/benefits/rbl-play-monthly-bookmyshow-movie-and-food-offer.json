@@ -1,0 +1,56 @@
+{
+  "id": "fd45a812-32e0-5a9a-9511-182ac4743242",
+  "offering_id": "8f4fc7eb-f070-59c0-926c-029897a8093c",
+  "title": "RBL Play monthly BookMyShow movie and food offer",
+  "benefit_type": "movie",
+  "category": "movie",
+  "allowance": {
+    "transaction_cap_inr": 500,
+    "movie_ticket_cap_each_inr": 250,
+    "food_and_beverage_cap_inr": 100,
+    "uses_per_month": 1
+  },
+  "eligibility": [
+    {
+      "field": "billing_cycle_spend_inr",
+      "operator": "gte",
+      "value": 5000
+    },
+    {
+      "field": "movie_ticket_count",
+      "operator": "gte",
+      "value": 2
+    }
+  ],
+  "conditions": [],
+  "exclusions": [
+    "No automated redemption authorization is implied.",
+    "Unknown stacking remains unapproved unless the terms explicitly support it."
+  ],
+  "redemption_steps": [
+    "Select the named offer at BookMyShow checkout.",
+    "Use the eligible card variant and complete payment.",
+    "Pay applicable processing or internet fees where required."
+  ],
+  "provider": "BookMyShow",
+  "effective_from": null,
+  "effective_to": "2027-03-31",
+  "end_date_known": true,
+  "source_url": "https://in.bookmyshow.com/offers/rbl-play-credit-card---monthly-offer/RBLPLMN222",
+  "source_policy_class": "administering_terms",
+  "content_sha256": "c8be5051574204c6293f0cf214008e15876d466eb67e75b478f106452e5d87c4",
+  "retrieved_at": "2026-08-10T00:00:00Z",
+  "state": "sources_differ",
+  "provenance": [
+    {
+      "source_url": "https://in.bookmyshow.com/offers/rbl-play-credit-card---monthly-offer/RBLPLMN222",
+      "source_policy_class": "administering_terms",
+      "content_sha256": "c8be5051574204c6293f0cf214008e15876d466eb67e75b478f106452e5d87c4",
+      "retrieved_at": "2026-08-10T00:00:00Z",
+      "id": "e9c8c4db-3977-5f4b-b177-28b70a7a4ad1",
+      "source_observation_id": "3b926fe4-222f-54e5-b787-4cf7de12096c",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "low"
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "job_id": "visa-public-offers-smoke",
+  "purpose": "check one public official offer page after source approval",
+  "allowed_domains": ["www.visa.co.in"],
+  "seed_urls": ["https://www.visa.co.in/offers/"],
+  "source_admission_path": "sources/admissions/visa-co-in-offers-2026-08-09.json",
+  "evidence_retention": "local_metadata_only",
+  "budget": {
+    "max_requests": 1,
+    "max_search_queries": 0,
+    "max_input_tokens": 16000,
+    "max_output_tokens": 1000,
+    "timeout_seconds": 15,
+    "retry_attempts": 0
+  },
+  "providers": [
+    {
+      "provider": "gemini",
+      "model": "gemini-2.5-flash",
+      "stages": ["discovery", "verifier"],
+      "retention_policy": "provider_documented",
+      "fixed_provider": true,
+      "no_fallback": true
+    },
+    {
+      "provider": "openrouter",
+      "model": "openrouter/synthetic-text",
+      "stages": ["extraction"],
+      "retention_policy": "provider_documented",
+      "fixed_provider": true,
+      "no_fallback": true
+    }
+  ],
+  "discovery": {
+    "enabled": false,
+    "query_count": 0,
+    "provider": "gemini",
+    "model": "gemini-2.5-flash"
+  },
+  "extraction": {
+    "provider": "openrouter",
+    "model": "openrouter/synthetic-text",
+    "max_bytes_per_source": 120000,
+    "max_changed_sources": 1
+  },
+  "verifier": {
+    "enabled": true,
+    "provider": "gemini",
+    "model": "gemini-2.5-flash"
+  },
+  "output_state": "needs_review"
+}

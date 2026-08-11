@@ -1,0 +1,45 @@
+{
+  "id": "fa6bfa25-0fe2-527d-a0b4-06646e046bc1",
+  "offering_id": "c2a6190e-7462-5b76-97ce-3b994c26d351",
+  "title": "DBS Treasures Visa Infinite debit lounge access",
+  "benefit_type": "lounge",
+  "category": "lounge",
+  "allowance": {
+    "visits": 2,
+    "period": "quarter",
+    "validation_swipe_inr": 2,
+    "india_only": true
+  },
+  "eligibility": [
+    {
+      "field": "preceding_three_calendar_months_dbs_spend_inr",
+      "operator": "gte",
+      "value": 5000
+    }
+  ],
+  "conditions": [],
+  "exclusions": [],
+  "redemption_steps": [],
+  "provider": null,
+  "effective_from": "2026-04-01",
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.dbs.bank.in/in/iwov-resources/pdf/debit-card/dbs-bank-lounge-access-tnc.pdf",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "58269d16d39afcd4a0220048de52d1a0fe03db2851afe0b93711cfe656fadd87",
+  "retrieved_at": "2026-08-10T00:00:00Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.dbs.bank.in/in/iwov-resources/pdf/debit-card/dbs-bank-lounge-access-tnc.pdf",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "58269d16d39afcd4a0220048de52d1a0fe03db2851afe0b93711cfe656fadd87",
+      "retrieved_at": "2026-08-10T00:00:00Z",
+      "id": "82850236-e377-5964-8bd8-c95081ac1906",
+      "source_observation_id": "be04cf92-68f3-5552-8ccd-923b5e53f855",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "low",
+      "effective_from": "2026-04-01"
+    }
+  ]
+}

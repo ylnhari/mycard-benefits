@@ -1,0 +1,10 @@
+{
+  "id": "d39894b1-88a7-5791-abdc-72324176e30f",
+  "slug": "dbs-visa-platinum-debit-growth-max",
+  "display_name": "DBS Visa Platinum Debit Card (Growth Max)",
+  "issuer_id": "dbs-bank",
+  "product_variant_id": "visa-platinum-debit",
+  "network_id": "visa-platinum",
+  "market": "IN",
+  "aliases": []
+}

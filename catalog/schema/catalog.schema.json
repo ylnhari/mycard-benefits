@@ -13,6 +13,12 @@
     "uuid": {"type": "string", "format": "uuid"},
     "date": {"type": "string", "format": "date"},
     "timestamp": {"type": "string", "format": "date-time"},
+    "anonymousHttpsUri": {
+      "type": "string",
+      "format": "uri",
+      "maxLength": 2048,
+      "pattern": "^https://[^/@?#]+(?:\\.[^/@?#]+)+(?:[/?][^#]*)?$"
+    },
     "effectiveRange": {
       "type": "object",
       "properties": {
@@ -46,7 +52,7 @@
             "regulatory_context", "discovery_only"
           ]
         },
-        "url": {"type": "string", "format": "uri"},
+        "url": {"$ref": "#/$defs/anonymousHttpsUri"},
         "content_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
         "retrieved_at": {"$ref": "#/$defs/timestamp"},
         "effective_from": {"$ref": "#/$defs/date"},
@@ -122,8 +128,9 @@
         "offering_id": {"$ref": "#/$defs/uuid"},
         "benefit_type": {
           "enum": [
-            "reward_points", "conversion", "movie", "hotel", "food", "cashback", "voucher",
-            "meet_and_greet", "lounge", "priority_pass", "other"
+            "reward_points", "miles", "conversion", "movie", "hotel", "flight", "dining", "food", "fuel", "shopping", "cashback", "voucher", "coupon",
+            "meet_and_greet", "lounge", "priority_pass", "concierge", "travel_assistance", "insurance", "golf", "subscription", "railway_lounge",
+            "joining", "renewal", "annual_fee", "fee_waiver", "milestone", "other"
           ]
         },
         "title": {"type": "string", "minLength": 1},
@@ -135,10 +142,53 @@
         "supersedes": {"$ref": "#/$defs/uuid"},
         "eligibility": {"type": "array", "items": {"$ref": "#/$defs/predicate"}},
         "allowance": {"type": "object"},
+        "provider": {"type": "string", "minLength": 1, "maxLength": 160},
+        "official_reference": {"$ref": "#/$defs/anonymousHttpsUri"},
+        "redemption_steps": {
+          "type": "array", "minItems": 1, "maxItems": 12,
+          "items": {"type": "string", "minLength": 1, "maxLength": 240}
+        },
+        "exclusions": {
+          "type": "array", "maxItems": 32,
+          "items": {"type": "string", "minLength": 1, "maxLength": 240},
+          "uniqueItems": true
+        },
+        "category": {"type": "string", "minLength": 1},
+        "owners": {"type": "array", "items": {"$ref": "#/$defs/owner"}, "uniqueItems": true},
+        "conditions": {"type": "array", "items": {"$ref": "#/$defs/condition"}},
+        "earn": {"$ref": "#/$defs/earn"},
+        "conversion": {"$ref": "#/$defs/conversion"},
+        "valuations": {"type": "array", "items": {"$ref": "#/$defs/valuation"}},
+        "value_class": {"enum": ["guaranteed", "conditional", "estimated"]},
+        "inheritance": {"$ref": "#/$defs/inheritance"},
         "evidence": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/evidence"}},
         "conflicts_with": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/uuid"}}
-      }
+      },
+      "allOf": [{
+        "if": {"properties": {"benefit_type": {"const": "movie"}}},
+        "then": {"required": ["provider", "official_reference", "redemption_steps", "exclusions"]},
+        "else": {
+          "not": {"anyOf": [
+            {"required": ["provider"]},
+            {"required": ["official_reference"]},
+            {"required": ["redemption_steps"]},
+            {"required": ["exclusions"]}
+          ]}
+        }
+      }]
     },
+    "owner": {
+      "type": "object", "additionalProperties": false, "required": ["kind", "id", "display_name"],
+      "properties": {"kind": {"enum": ["issuer", "network", "co_brand", "merchant", "membership", "event"]}, "id": {"type": "string", "minLength": 1}, "display_name": {"type": "string", "minLength": 1, "maxLength": 160}}
+    },
+    "condition": {
+      "type": "object", "additionalProperties": false, "required": ["type", "operator"],
+      "properties": {"type": {"enum": ["welcome", "milestone", "annual_fee_waiver", "renewal", "spend_triggered", "geography", "currency", "channel", "mcc", "time_window"]}, "operator": {"enum": ["equals", "in", "not_in", "gte", "lte", "between", "exists"]}, "value": {}}
+    },
+    "earn": {"type": "object", "additionalProperties": false, "required": ["currency", "rate", "basis", "scope"], "properties": {"currency": {"type": "string", "minLength": 1}, "rate": {"type": "string", "minLength": 1}, "basis": {"type": "string", "minLength": 1}, "scope": {"type": "string", "minLength": 1}, "cap": {"type": ["object", "null"]}, "exclusions": {"type": "array", "items": {"type": "string"}}, "rounding": {"type": ["string", "null"]}, "reversal": {"type": ["string", "null"]}, "expiry": {"type": ["object", "null"]}}},
+    "conversion": {"type": "object", "additionalProperties": false, "required": ["partner_id", "ratio", "fee", "minimum", "increment", "expiry", "redemption_options"], "properties": {"partner_id": {"type": "string", "minLength": 1}, "ratio": {"type": "string", "minLength": 1}, "fee": {"type": ["object", "null"]}, "minimum": {"type": ["integer", "null"], "minimum": 0}, "increment": {"type": ["integer", "null"], "minimum": 1}, "expiry": {"type": ["object", "null"]}, "redemption_options": {"type": "array", "minItems": 1, "items": {"type": "string"}}}},
+    "valuation": {"type": "object", "additionalProperties": false, "required": ["name", "redemption_path", "currency", "minimum", "maximum"], "properties": {"name": {"type": "string", "minLength": 1}, "redemption_path": {"type": "string", "minLength": 1}, "currency": {"type": "string", "minLength": 1}, "minimum": {"type": "string", "minLength": 1}, "maximum": {"type": "string", "minLength": 1}}},
+    "inheritance": {"type": "object", "additionalProperties": false, "required": ["owner", "source_benefit_id", "source_offering_id", "target_offering_id", "source_network_id", "target_network_id", "source_co_brand_id", "target_co_brand_id", "review_state", "opt_in", "effective_from", "effective_to"], "properties": {"owner": {"$ref": "#/$defs/owner"}, "source_benefit_id": {"$ref": "#/$defs/uuid"}, "source_offering_id": {"$ref": "#/$defs/uuid"}, "target_offering_id": {"$ref": "#/$defs/uuid"}, "source_network_id": {"type": "string", "minLength": 1, "maxLength": 160}, "target_network_id": {"type": "string", "minLength": 1, "maxLength": 160}, "source_co_brand_id": {"type": ["string", "null"], "maxLength": 160}, "target_co_brand_id": {"type": ["string", "null"], "maxLength": 160}, "review_state": {"enum": ["approved", "needs_review"]}, "opt_in": {"const": true}, "effective_from": {"$ref": "#/$defs/date"}, "effective_to": {"$ref": "#/$defs/date"}}},
     "relationship": {
       "type": "object",
       "additionalProperties": false,

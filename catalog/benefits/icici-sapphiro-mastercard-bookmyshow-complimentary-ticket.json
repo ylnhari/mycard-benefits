@@ -1,0 +1,55 @@
+{
+  "id": "1289ebd8-9f78-5439-ad92-078566ecccf5",
+  "offering_id": "06bf6986-a99a-5bfd-99c1-68188a7242df",
+  "title": "ICICI Sapphiro Mastercard BookMyShow complimentary ticket",
+  "benefit_type": "movie",
+  "category": "movie",
+  "allowance": {
+    "complimentary_tickets": 1,
+    "second_ticket_cap_inr": 500,
+    "period": "month"
+  },
+  "eligibility": [
+    {
+      "field": "movie_ticket_count",
+      "operator": "gte",
+      "value": 2
+    },
+    {
+      "field": "preceding_spend_quarter_inr",
+      "operator": "gte",
+      "value": 25000
+    }
+  ],
+  "conditions": [],
+  "exclusions": [
+    "No automated redemption authorization is implied.",
+    "Unknown stacking remains unapproved unless the terms explicitly support it."
+  ],
+  "redemption_steps": [
+    "Select the named offer at BookMyShow checkout.",
+    "Use the eligible card variant and complete payment.",
+    "Pay applicable processing or internet fees where required."
+  ],
+  "provider": "BookMyShow",
+  "effective_from": null,
+  "effective_to": "2027-03-31",
+  "end_date_known": true,
+  "source_url": "https://in.bookmyshow.com/offers/icici-bank-complimentary-offer/ICICCOM426",
+  "source_policy_class": "administering_terms",
+  "content_sha256": "13c00fb3812bcad2a4f6c7283b75a118ae717e8b8eb63b8dfc8aae7155e6b08f",
+  "retrieved_at": "2026-08-10T00:00:00Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://in.bookmyshow.com/offers/icici-bank-complimentary-offer/ICICCOM426",
+      "source_policy_class": "administering_terms",
+      "content_sha256": "13c00fb3812bcad2a4f6c7283b75a118ae717e8b8eb63b8dfc8aae7155e6b08f",
+      "retrieved_at": "2026-08-10T00:00:00Z",
+      "id": "e0b60e18-e02f-5524-aceb-c68f29008a1a",
+      "source_observation_id": "a7187339-98d3-500a-8030-0430e8b9405d",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "low"
+    }
+  ]
+}

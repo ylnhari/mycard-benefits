@@ -1,0 +1,46 @@
+{
+  "id": "4f176875-4fea-50fa-8151-d4d678f5e39a",
+  "offering_id": "16f59859-681b-5934-8709-037f5fb1fdb0",
+  "title": "HDFC Millennia CashPoints statement-credit redemption",
+  "benefit_type": "conversion",
+  "category": "conversion",
+  "allowance": {
+    "inr_per_cashpoint": 1,
+    "redemption_fee_inr": 50,
+    "expiry_years": 2
+  },
+  "eligibility": [
+    {
+      "field": "cashpoints_to_redeem",
+      "operator": "between",
+      "value": [
+        500,
+        3000
+      ]
+    }
+  ],
+  "conditions": [],
+  "exclusions": [],
+  "redemption_steps": [],
+  "provider": null,
+  "effective_from": null,
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/millennia-credit-card/pdf/millennia-tnc-20th-jul26.pdf",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "e5dc77addbfba8169d8ed6f99aa7b188a24022247567f5d1c1b6a9f7b54ed5a5",
+  "retrieved_at": "2026-08-10T00:00:00Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/millennia-credit-card/pdf/millennia-tnc-20th-jul26.pdf",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "e5dc77addbfba8169d8ed6f99aa7b188a24022247567f5d1c1b6a9f7b54ed5a5",
+      "retrieved_at": "2026-08-10T00:00:00Z",
+      "id": "3a29ad8e-4a38-5f47-bc0b-a4fcea30a82b",
+      "source_observation_id": "ad77aaa7-2dc5-503d-9d0c-150b58692eac",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "low"
+    }
+  ]
+}

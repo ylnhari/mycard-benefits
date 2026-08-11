@@ -79,8 +79,9 @@ do not store a transcript or treat the answer as primary evidence.
    limits, or terms.
 3. Extract independently written structured facts with source URL, effective
    date, retrieval time, hash, confidence, and `needs_review` state.
-4. A human reviewer verifies the terms against the candidate. Ambiguous or
-   high-impact claims require two independent human reviewers.
+4. A human reviewer verifies the terms against the candidate. One dated human
+   approval is sufficient at every review tier; a second independent review is
+   recommended for ambiguous or high-impact claims when available.
 5. Only then may a reviewed fact appear in `catalog/`. A changed, expired, or
    missing source returns it to `needs_review`.
 

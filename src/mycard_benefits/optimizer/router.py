@@ -20,7 +20,7 @@ from __future__ import annotations
 
 from datetime import date
 from decimal import Decimal
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
@@ -36,6 +36,7 @@ from pydantic import (
 
 from .engine import optimize
 from .model import (
+    ActionLinkReviewState,
     ComponentValueClass,
     EvidenceTier,
     Freshness,
@@ -43,6 +44,7 @@ from .model import (
     PurchaseScenario,
     RouteCandidate,
     RouteComponent,
+    RouteLayer,
     UserFee,
     canonical_https_origin,
 )
@@ -116,12 +118,12 @@ def _require_unique_origins(values: list[str]) -> list[str]:
     for origin in values:
         try:
             canonical = canonical_https_origin(
-                origin, "approved_official_origin", origin_entry=True
+                origin, "admitted_action_origin", origin_entry=True
             )
         except ValueError:
             canonical = origin.casefold()
         if canonical in seen:
-            raise ValueError("approved official origins must be unique")
+            raise ValueError("admitted action origins must be unique")
         seen.add(canonical)
     return values
 
@@ -138,14 +140,14 @@ class ScenarioPayload(_RequestModel):
     as_of: date
     user_fees: list[FeePayload] = Field(default_factory=list, max_length=MAX_USER_FEES)
     allowed_link_classes: list[LinkClass] = Field(min_length=1, max_length=MAX_LINK_CLASSES)
-    approved_official_origins: list[UrlText] = Field(min_length=1, max_length=MAX_ORIGINS)
+    admitted_action_origins: list[UrlText] = Field(min_length=1, max_length=MAX_ORIGINS)
 
     @field_validator("allowed_link_classes")
     @classmethod
     def _no_duplicate_link_classes(cls, values: list[LinkClass]) -> list[LinkClass]:
         return _require_unique(values, "allowed link classes must be unique")
 
-    @field_validator("approved_official_origins")
+    @field_validator("admitted_action_origins")
     @classmethod
     def _no_duplicate_origins(cls, values: list[str]) -> list[str]:
         return _require_unique_origins(values)
@@ -164,6 +166,7 @@ class ComponentPayload(_RequestModel):
     freshness: Freshness
     verified_on: date
     reviewed: bool
+    benefit_state: Literal["verified"] = "verified"
     compatible_with: list[Text] = Field(default_factory=list, max_length=MAX_COMPATIBLE)
     conditions: list[LongText] = Field(default_factory=list, max_length=MAX_CONDITIONS)
     assumptions: list[LongText] = Field(default_factory=list, max_length=MAX_ASSUMPTIONS)
@@ -173,6 +176,7 @@ class ComponentPayload(_RequestModel):
     cap_group: Text | None = None
     time_limited: bool = False
     valuation_name: Text | None = None
+    layer: RouteLayer | None = None
 
     @field_validator("compatible_with")
     @classmethod
@@ -187,6 +191,7 @@ class RoutePayload(_RequestModel):
     instructions: list[LongText] = Field(min_length=1, max_length=MAX_INSTRUCTIONS)
     link_class: LinkClass
     official_reference: UrlText
+    action_link_review_state: ActionLinkReviewState
     route_fees: list[FeePayload] = Field(default_factory=list, max_length=MAX_ROUTE_FEES)
 
     @field_validator("components")
@@ -219,6 +224,9 @@ class ComponentContributionResponse(_ResponseModel):
     expires_on: date | None
     conditions: list[str]
     assumptions: list[str]
+    per_transaction_cap: MoneyResponse | None
+    remaining_allowance: MoneyResponse | None
+    layer: RouteLayer | None
 
 
 class RankedRouteResponse(_ResponseModel):
@@ -411,7 +419,7 @@ def _scenario(payload: ScenarioPayload) -> PurchaseScenario:
         as_of=payload.as_of,
         user_fees=tuple(_fee(fee) for fee in payload.user_fees),
         allowed_link_classes=frozenset(payload.allowed_link_classes),
-        approved_official_origins=frozenset(payload.approved_official_origins),
+        admitted_action_origins=frozenset(payload.admitted_action_origins),
     )
 
 
@@ -423,6 +431,7 @@ def _route(payload: RoutePayload) -> RouteCandidate:
         instructions=tuple(payload.instructions),
         link_class=payload.link_class,
         official_reference=payload.official_reference,
+        action_link_review_state=payload.action_link_review_state,
         route_fees=tuple(_fee(fee) for fee in payload.route_fees),
     )
 
@@ -441,6 +450,7 @@ def _component(payload: ComponentPayload) -> RouteComponent:
         freshness=payload.freshness,
         verified_on=payload.verified_on,
         reviewed=payload.reviewed,
+        benefit_state=payload.benefit_state,
         compatible_with=frozenset(payload.compatible_with),
         conditions=tuple(payload.conditions),
         assumptions=tuple(payload.assumptions),
@@ -450,6 +460,7 @@ def _component(payload: ComponentPayload) -> RouteComponent:
         cap_group=payload.cap_group,
         time_limited=payload.time_limited,
         valuation_name=payload.valuation_name,
+        layer=payload.layer,
     )
 
 

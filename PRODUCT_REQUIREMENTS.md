@@ -97,17 +97,14 @@ videos, social posts, and communities are discovery leads only. Public-source
 automation needs a human-approved source admission and may not bypass login,
 CAPTCHA, robots restrictions, access controls, rate limits, or terms.
 
-Agents write candidates in `needs_review`. At least one independent human
-reviews standard claims; ambiguous/high-impact claims require two. Changed,
-missing, or stale evidence withdraws an active claim pending review.
+Agents write candidates in `needs_review`. One dated human approval is
+sufficient for activation at every review tier; a second independent human
+reviewer may be recommended for enhanced, ambiguous, or high-impact claims but
+is not mandatory. Agents cannot approve candidates, and authors cannot approve
+their own work. Changed, missing, or stale evidence withdraws an active claim
+pending review.
 
-## Family Finance and remote access
-
-My Family Finance keeps its existing Cards page. Its optional companion button
-opens this separate application and shares no card or user data. When the
-companion is absent or stopped, it opens bundled setup documentation. The
-approved future migration is a previewed one-time encrypted import followed by
-independent stores, not continuous synchronization.
+## Remote access
 
 The application binds to loopback. Remote use, if enabled by an owner, goes
 through an authenticated external gateway or launcher; the direct app port is
@@ -124,6 +121,7 @@ and confidence—not project revenue.
 ## Current pilots and release boundary
 
 The first real offerings to research are Tata Neu HDFC Infinity and HDFC
-Regalia Gold. No real claims enter the catalog until official-source review.
-Local implementation and tests may proceed; creating a public remote or pushing
-requires a separate recorded human approval.
+Regalia Gold. The narrow Tata Neu Infinity HDFC Bank RuPay Select domestic
+lounge voucher milestone is locally active after its official-source review;
+other findings remain review-only. Local implementation and tests may proceed;
+creating a public remote or pushing requires a separate recorded human approval.

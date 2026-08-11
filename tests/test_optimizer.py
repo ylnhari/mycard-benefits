@@ -8,6 +8,7 @@ from uuid import NAMESPACE_DNS, NAMESPACE_URL, uuid1, uuid3, uuid4, uuid5
 import pytest
 
 from mycard_benefits.optimizer import (
+    ActionLinkReviewState,
     ComponentValueClass,
     EvidenceTier,
     Freshness,
@@ -78,31 +79,69 @@ def test_three_component_compatibility_must_be_mutual_for_every_pair() -> None:
     )
 
 
-def test_caps_currency_shared_cap_and_expiry_are_fail_closed_or_clamped() -> None:
+def test_caps_currency_missing_shared_cap_and_expiry_are_fail_closed_or_clamped() -> None:
     capped = _route(
         "SYNTHETIC-ONLY-CAPPED",
         (_component("capped", "guaranteed", "200", per_transaction_cap=Decimal("80"), remaining_allowance=Decimal("50")),),
     )
     currency = _route("SYNTHETIC-ONLY-CURRENCY", (_component("currency", "guaranteed", "1", currency="USD"),))
-    duplicate_cap = _route(
-        "SYNTHETIC-ONLY-SHARED-CAP",
+    undeclared_cap = _route(
+        "SYNTHETIC-ONLY-SHARED-CAP-UNDECLARED",
         _compatible_pair(
             _component("first-cap", "guaranteed", "1", cap_group="SYNTHETIC-ONLY-CAP"),
             _component("second-cap", "guaranteed", "1", cap_group="SYNTHETIC-ONLY-CAP"),
         ),
     )
+    mismatched_cap = _route(
+        "SYNTHETIC-ONLY-SHARED-CAP-MISMATCHED",
+        _compatible_pair(
+            _component("first-mismatch", "guaranteed", "1", cap_group="SYNTHETIC-ONLY-MISMATCH", per_transaction_cap=Decimal("50")),
+            _component("second-mismatch", "guaranteed", "1", cap_group="SYNTHETIC-ONLY-MISMATCH", per_transaction_cap=Decimal("60")),
+        ),
+    )
     expired = _route("SYNTHETIC-ONLY-EXPIRED", (_component("expired", "guaranteed", "1", expires_on=AS_OF - timedelta(days=1)),))
 
-    result = optimize(_scenario(), (capped, currency, duplicate_cap, expired))
+    result = optimize(_scenario(), (capped, currency, undeclared_cap, mismatched_cap, expired))
 
     assert result.ranked_routes[0].net_guaranteed == Decimal("50")
     reasons = {route.route_id: route.reasons for route in result.rejected_routes}
     assert "currency does not match scenario" in reasons["SYNTHETIC-ONLY-CURRENCY"][0]
-    assert "shared cap allocation" in reasons["SYNTHETIC-ONLY-SHARED-CAP"][0]
+    assert "must declare a per_transaction_cap" in reasons["SYNTHETIC-ONLY-SHARED-CAP-UNDECLARED"][0]
+    assert "must declare the same per_transaction_cap" in reasons["SYNTHETIC-ONLY-SHARED-CAP-MISMATCHED"][0]
     assert "expired" in reasons["SYNTHETIC-ONLY-EXPIRED"][0]
 
 
-def test_ties_are_deterministic_and_use_stalest_source_before_affiliate_penalty() -> None:
+def test_shared_cap_group_allocates_one_budget_across_its_members_without_double_counting() -> None:
+    """MC-103: a deterministic shared-cap case — two components draw from one budget."""
+    first = _component("first-shared", "guaranteed", "60", cap_group="SYNTHETIC-ONLY-SHARED", per_transaction_cap=Decimal("50"))
+    second = _component("second-shared", "guaranteed", "60", cap_group="SYNTHETIC-ONLY-SHARED", per_transaction_cap=Decimal("50"))
+    route = _route("SYNTHETIC-ONLY-SHARED-CAP", _compatible_pair(first, second))
+
+    ranked = optimize(_scenario(amount=Decimal("1000")), (route,)).ranked_routes[0]
+
+    # The group's one 50-unit budget is consumed in route order: first takes 50
+    # (its own individual value_max is 60, clamped to the group's 50), leaving
+    # 0 for second — never 100 (50+50) and never each independently clamped to 50.
+    by_id = {item.id: item for item in ranked.components}
+    assert by_id["first-shared"].value_max == Decimal("50")
+    assert by_id["second-shared"].value_max == Decimal("0")
+    assert ranked.guaranteed_before_fees == Decimal("50")
+
+
+def test_shared_cap_group_members_in_different_value_classes_still_share_one_budget() -> None:
+    guaranteed_member = _component("g-shared", "guaranteed", "40", cap_group="SYNTHETIC-ONLY-CROSS-CLASS", per_transaction_cap=Decimal("50"))
+    conditional_member = _component("c-shared", "conditional", "40", value_max="40", cap_group="SYNTHETIC-ONLY-CROSS-CLASS", per_transaction_cap=Decimal("50"))
+    route = _route("SYNTHETIC-ONLY-CROSS-CLASS-CAP", _compatible_pair(guaranteed_member, conditional_member))
+
+    ranked = optimize(_scenario(amount=Decimal("1000")), (route,)).ranked_routes[0]
+
+    by_id = {item.id: item for item in ranked.components}
+    assert by_id["g-shared"].value_max == Decimal("40")
+    # Only 10 of the shared 50 budget remains after the first (route-order) member.
+    assert by_id["c-shared"].value_max == Decimal("10")
+
+
+def test_ties_are_deterministic_and_use_stalest_source_without_affiliate_bias() -> None:
     newer = _route("SYNTHETIC-ONLY-NEWER", (_component("newer", "guaranteed", "10", verified_on=AS_OF),))
     older = _route("SYNTHETIC-ONLY-OLDER", (_component("older", "guaranteed", "10", verified_on=AS_OF - timedelta(days=1)),))
     affiliate = _route(
@@ -113,7 +152,7 @@ def test_ties_are_deterministic_and_use_stalest_source_before_affiliate_penalty(
     result = optimize(_scenario(), (affiliate, older, newer))
 
     assert [route.route_id for route in result.ranked_routes] == [
-        "SYNTHETIC-ONLY-NEWER", "SYNTHETIC-ONLY-AFFILIATE", "SYNTHETIC-ONLY-OLDER",
+        "SYNTHETIC-ONLY-AFFILIATE", "SYNTHETIC-ONLY-NEWER", "SYNTHETIC-ONLY-OLDER",
     ]
     reversed_result = optimize(_scenario(), tuple(reversed((affiliate, older, newer))))
     assert reversed_result.ranked_routes == result.ranked_routes
@@ -174,11 +213,16 @@ def test_validation_duplicate_routes_currency_and_purity() -> None:
     with pytest.raises(ValueError, match="currency"):
         _component("invalid", "guaranteed", "1", currency="inr")
     with pytest.raises(ValueError, match="official_reference"):
-        RouteCandidate("x", "x", (_component("x", "guaranteed", "1"),), ("x",), LinkClass.OFFICIAL, "")
+        RouteCandidate(
+            "x", "x", (_component("x", "guaranteed", "1"),), ("x",),
+            LinkClass.OFFICIAL, "", ActionLinkReviewState.APPROVED,
+        )
     with pytest.raises(ValueError, match="anonymous HTTPS"):
         _component("http", "guaranteed", "1", source_ref="http://example.invalid/source")
     with pytest.raises(ValueError, match="anonymous HTTPS"):
         _route("SYNTHETIC-ONLY-BAD-URL", (_component("url", "guaranteed", "1"),), official_reference="javascript:alert(1)")
+    with pytest.raises(ValueError, match="anonymous HTTPS"):
+        _route("SYNTHETIC-ONLY-DATA-URL", (_component("data-url", "guaranteed", "1"),), official_reference="data:text/plain,unsafe")
     with pytest.raises(ValueError, match="invalid HTTPS port"):
         _route("SYNTHETIC-ONLY-BAD-PORT", (_component("port", "guaranteed", "1"),), official_reference="https://example.invalid:99999")
     with pytest.raises(ValueError, match="named valuation"):
@@ -265,7 +309,6 @@ def test_canonical_benefit_rule_identity_prevents_alias_double_counting() -> Non
             "guaranteed",
             "40",
             benefit_rule_id=rule_id,
-            cap_group="SYNTHETIC-ONLY-CAP-ONE",
             source_ref="https://example.invalid/synthetic-alias-one",
         ),
         _component(
@@ -273,7 +316,6 @@ def test_canonical_benefit_rule_identity_prevents_alias_double_counting() -> Non
             "guaranteed",
             "40",
             benefit_rule_id=rule_id,
-            cap_group="SYNTHETIC-ONLY-CAP-TWO",
             source_ref="https://example.invalid/synthetic-alias-two",
         ),
     )
@@ -287,19 +329,29 @@ def test_canonical_benefit_rule_identity_prevents_alias_double_counting() -> Non
     )
 
 
-def test_official_routes_require_a_caller_approved_origin() -> None:
+def test_all_action_routes_require_a_caller_admitted_origin_and_review() -> None:
     approved = _route("SYNTHETIC-ONLY-APPROVED", (_component("approved", "guaranteed", "1"),))
-    mislabeled = _route(
+    unadmitted = _route(
         "SYNTHETIC-ONLY-MISLABELED",
         (_component("mislabeled", "guaranteed", "1"),),
         official_reference="https://affiliate.invalid/synthetic",
     )
+    unreviewed = _route(
+        "SYNTHETIC-ONLY-UNREVIEWED-ACTION",
+        (_component("unreviewed-action", "guaranteed", "1"),),
+        link_class=LinkClass.AFFILIATE,
+        action_link_review_state=ActionLinkReviewState.NEEDS_REVIEW,
+    )
 
-    result = optimize(_scenario(), (approved, mislabeled))
+    result = optimize(_scenario(), (approved, unadmitted, unreviewed))
 
     assert [route.route_id for route in result.ranked_routes] == ["SYNTHETIC-ONLY-APPROVED"]
-    assert result.rejected_routes[0].reasons == (
-        "official route origin is not in the caller-approved origin set",
+    reasons = {route.route_id: route.reasons for route in result.rejected_routes}
+    assert reasons["SYNTHETIC-ONLY-MISLABELED"] == (
+        "action route origin is not in the caller-admitted action origin set",
+    )
+    assert reasons["SYNTHETIC-ONLY-UNREVIEWED-ACTION"] == (
+        "action link is not human reviewed",
     )
 
 
@@ -331,7 +383,7 @@ def test_canonical_rule_ids_and_origins_are_strict_and_ports_are_exact() -> None
             _component("bypass", "guaranteed", "1", benefit_rule_id=bypass)
 
     host_case = optimize(
-        _scenario(approved_official_origins=frozenset({"https://EXAMPLE.invalid"})),
+        _scenario(admitted_action_origins=frozenset({"https://EXAMPLE.invalid"})),
         (_route("SYNTHETIC-ONLY-HOST-CASE", (_component("host-case", "guaranteed", "1"),)),),
     )
     default_port = optimize(
@@ -343,7 +395,7 @@ def test_canonical_rule_ids_and_origins_are_strict_and_ports_are_exact() -> None
         (_route("SYNTHETIC-ONLY-8443", (_component("8443", "guaranteed", "1"),), official_reference="https://example.invalid:8443/path"),),
     )
     admitted_8443 = optimize(
-        _scenario(approved_official_origins=frozenset({"https://example.invalid:8443"})),
+        _scenario(admitted_action_origins=frozenset({"https://example.invalid:8443"})),
         (_route("SYNTHETIC-ONLY-8443-ADMITTED", (_component("8443-admitted", "guaranteed", "1"),), official_reference="https://example.invalid:8443/path"),),
     )
 
@@ -352,7 +404,7 @@ def test_canonical_rule_ids_and_origins_are_strict_and_ports_are_exact() -> None
     assert "origin is not" in non_default.rejected_routes[0].reasons[0]
     assert admitted_8443.ranked_routes
     with pytest.raises(ValueError, match="path, query, or fragment"):
-        _scenario(approved_official_origins=frozenset({"https://example.invalid/path?query=1"}))
+        _scenario(admitted_action_origins=frozenset({"https://example.invalid/path?query=1"}))
     with pytest.raises(ValueError, match="anonymous HTTPS"):
         _route("SYNTHETIC-ONLY-USERINFO", (_component("userinfo", "guaranteed", "1"),), official_reference="https://user@example.invalid")
     with pytest.raises(ValueError, match="DNS host"):
@@ -367,7 +419,7 @@ def test_fixed_currency_minor_units_round_inr_and_jpy_and_reject_unknown_currenc
         amount=Decimal("100"),
         currency="JPY",
         as_of=AS_OF,
-        approved_official_origins=frozenset({"https://example.invalid"}),
+        admitted_action_origins=frozenset({"https://example.invalid"}),
     )
     jpy = optimize(jpy_scenario, (_route("SYNTHETIC-ONLY-JPY", (_component("jpy", "guaranteed", "1.5", currency="JPY"),)),))
 
@@ -381,7 +433,7 @@ def test_plain_string_enums_are_coerced_and_invalid_values_are_typed() -> None:
     scenario = PurchaseScenario(
         Decimal("1"), "INR", AS_OF,
         allowed_link_classes=frozenset({"official"}),  # type: ignore[arg-type]
-        approved_official_origins=frozenset({"https://example.invalid"}),
+        admitted_action_origins=frozenset({"https://example.invalid"}),
     )
     component = replace(
         _component("strings", "guaranteed", "1"),
@@ -395,11 +447,11 @@ def test_plain_string_enums_are_coerced_and_invalid_values_are_typed() -> None:
     with pytest.raises(ValueError, match="value_class"):
         replace(component, value_class="invalid")  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="allowed_link_classes"):
-        PurchaseScenario(Decimal("1"), "INR", AS_OF, allowed_link_classes=frozenset({"invalid"}), approved_official_origins=frozenset({"https://example.invalid"}))  # type: ignore[arg-type]
+        PurchaseScenario(Decimal("1"), "INR", AS_OF, allowed_link_classes=frozenset({"invalid"}), admitted_action_origins=frozenset({"https://example.invalid"}))  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="must not be empty"):
-        PurchaseScenario(Decimal("1"), "INR", AS_OF, allowed_link_classes=frozenset(), approved_official_origins=frozenset({"https://example.invalid"}))
+        PurchaseScenario(Decimal("1"), "INR", AS_OF, allowed_link_classes=frozenset(), admitted_action_origins=frozenset({"https://example.invalid"}))
     with pytest.raises(ValueError, match="must not be empty"):
-        PurchaseScenario(Decimal("1"), "INR", AS_OF, approved_official_origins=frozenset())
+        PurchaseScenario(Decimal("1"), "INR", AS_OF, admitted_action_origins=frozenset())
 
 
 def test_public_dns_source_refs_uuid_versions_and_idna_are_strict() -> None:
@@ -480,6 +532,95 @@ def test_input_collections_are_copied_and_zero_allowance_is_not_unlimited() -> N
     assert ranked.guaranteed_before_fees == Decimal("0")
 
 
+def test_net_guaranteed_never_includes_conditional_or_estimated_value() -> None:
+    route = _route(
+        "SYNTHETIC-ONLY-SEPARATION",
+        _compatible_components((
+            _component("g", "guaranteed", "10"),
+            _component("c", "conditional", "5000", value_max="9000"),
+            _component("e", "estimated", "7000", value_max="8000"),
+        )),
+    )
+    plain = _route("SYNTHETIC-ONLY-PLAIN", (_component("plain", "guaranteed", "10"),))
+    result = optimize(_scenario(amount=Decimal("10000")), (route, plain))
+
+    by_id = {item.route_id: item for item in result.ranked_routes}
+    assert by_id["SYNTHETIC-ONLY-SEPARATION"].net_guaranteed == Decimal("10")
+    assert by_id["SYNTHETIC-ONLY-PLAIN"].net_guaranteed == Decimal("10")
+    assert (by_id["SYNTHETIC-ONLY-SEPARATION"].conditional_min, by_id["SYNTHETIC-ONLY-SEPARATION"].conditional_max) == (Decimal("5000"), Decimal("9000"))
+    assert (by_id["SYNTHETIC-ONLY-SEPARATION"].estimated_min, by_id["SYNTHETIC-ONLY-SEPARATION"].estimated_max) == (Decimal("7000"), Decimal("8000"))
+    assert by_id["SYNTHETIC-ONLY-SEPARATION"].value_class_totals_are_non_additive is True
+    assert [item.route_id for item in result.ranked_routes] == ["SYNTHETIC-ONLY-PLAIN", "SYNTHETIC-ONLY-SEPARATION"]
+
+
+def test_per_transaction_cap_and_remaining_allowance_clamp_independently() -> None:
+    txn_capped = _route("SYNTHETIC-ONLY-TXN-CAP", (_component("txn", "guaranteed", "200", per_transaction_cap=Decimal("80")),))
+    allowance_capped = _route("SYNTHETIC-ONLY-ALLOWANCE", (_component("allow", "guaranteed", "200", remaining_allowance=Decimal("50")),))
+    result = optimize(_scenario(), (txn_capped, allowance_capped))
+    by_id = {item.route_id: item.net_guaranteed for item in result.ranked_routes}
+    assert by_id["SYNTHETIC-ONLY-TXN-CAP"] == Decimal("80")
+    assert by_id["SYNTHETIC-ONLY-ALLOWANCE"] == Decimal("50")
+
+
+def test_zero_caps_are_fail_closed_and_oversized_caps_do_not_inflate() -> None:
+    zero_txn = _route("SYNTHETIC-ONLY-ZERO-TXN", (_component("z", "guaranteed", "200", per_transaction_cap=Decimal("0")),))
+    zero_allowance = _route("SYNTHETIC-ONLY-ZERO-ALLOW", (_component("za", "guaranteed", "200", remaining_allowance=Decimal("0")),))
+    huge_cap = _route("SYNTHETIC-ONLY-HUGE-CAP", (_component("h", "guaranteed", "200", per_transaction_cap=Decimal("5000")),))
+    result = optimize(_scenario(amount=Decimal("100")), (zero_txn, zero_allowance, huge_cap))
+    by_id = {item.route_id: item.net_guaranteed for item in result.ranked_routes}
+    assert by_id["SYNTHETIC-ONLY-ZERO-TXN"] == Decimal("0")
+    assert by_id["SYNTHETIC-ONLY-ZERO-ALLOW"] == Decimal("0")
+    assert by_id["SYNTHETIC-ONLY-HUGE-CAP"] == Decimal("100")
+
+
+def test_caps_quantize_with_half_even_and_never_double_count_within_a_class() -> None:
+    first = _component("first", "guaranteed", "200", per_transaction_cap=Decimal("33.335"))
+    second = _component("second", "guaranteed", "200", per_transaction_cap=Decimal("33.335"))
+    route = _route("SYNTHETIC-ONLY-CAP-ROUNDING", _compatible_pair(first, second))
+    ranked = optimize(_scenario(amount=Decimal("100")), (route,)).ranked_routes[0]
+
+    assert [(item.value_min, item.value_max) for item in ranked.components] == [
+        (Decimal("33.34"), Decimal("33.34")),
+        (Decimal("33.34"), Decimal("33.34")),
+    ]
+    assert ranked.guaranteed_before_fees == Decimal("66.68")
+
+
+def test_range_components_are_flattened_to_the_cap_and_share_the_class_budget() -> None:
+    first = _component("first", "conditional", "40", value_max="70", per_transaction_cap=Decimal("50"))
+    second = _component("second", "conditional", "40", value_max="70")
+    route = _route("SYNTHETIC-ONLY-RANGE-CAP", _compatible_pair(first, second))
+    ranked = optimize(_scenario(), (route,)).ranked_routes[0]
+
+    assert [(item.value_min, item.value_max) for item in ranked.components] == [
+        (Decimal("40"), Decimal("50")),
+        (Decimal("40"), Decimal("50")),
+    ]
+    assert (ranked.conditional_min, ranked.conditional_max) == (Decimal("80"), Decimal("100"))
+
+
+def test_ranked_component_contributions_carry_their_declared_cap_allowance_and_expiry() -> None:
+    """MC-082: a rank must expose the caps/expiry behind it, not just the clamped value."""
+    capped = _component(
+        "capped",
+        "guaranteed",
+        "200",
+        per_transaction_cap=Decimal("80"),
+        remaining_allowance=Decimal("150"),
+        expires_on=AS_OF + timedelta(days=10),
+    )
+    uncapped = _component("uncapped", "conditional", "5", value_max="10")
+    route = _route("SYNTHETIC-ONLY-CAP-TRANSPARENCY", _compatible_pair(capped, uncapped))
+    ranked = optimize(_scenario(), (route,)).ranked_routes[0]
+    by_id = {item.id: item for item in ranked.components}
+    assert by_id["capped"].per_transaction_cap == Decimal("80")
+    assert by_id["capped"].remaining_allowance == Decimal("150")
+    assert by_id["capped"].expires_on == AS_OF + timedelta(days=10)
+    assert by_id["uncapped"].per_transaction_cap is None
+    assert by_id["uncapped"].remaining_allowance is None
+    assert by_id["uncapped"].expires_on is None
+
+
 def test_ranking_order_uses_only_policy_factors_then_route_id() -> None:
     simple_older = _route("SYNTHETIC-ONLY-SIMPLE", (_component("simple", "guaranteed", "10", verified_on=AS_OF - timedelta(days=1)),))
     fragile_newer = _route("SYNTHETIC-ONLY-FRAGILE-NEW", (_component("fragile", "guaranteed", "10", conditions=("SYNTHETIC-ONLY-CONDITION",)),))
@@ -505,7 +646,7 @@ def _scenario(
     amount: Decimal = Decimal("100"),
     user_fees: tuple[UserFee, ...] = (),
     allowed_link_classes: frozenset[LinkClass] = frozenset(LinkClass),
-    approved_official_origins: frozenset[str] = frozenset({"https://example.invalid"}),
+    admitted_action_origins: frozenset[str] = frozenset({"https://example.invalid"}),
 ) -> PurchaseScenario:
     return PurchaseScenario(
         amount=amount,
@@ -513,7 +654,7 @@ def _scenario(
         as_of=AS_OF,
         user_fees=user_fees,
         allowed_link_classes=allowed_link_classes,
-        approved_official_origins=approved_official_origins,
+        admitted_action_origins=admitted_action_origins,
     )
 
 
@@ -522,6 +663,7 @@ def _route(
     components: tuple[RouteComponent, ...],
     *,
     link_class: LinkClass = LinkClass.OFFICIAL,
+    action_link_review_state: ActionLinkReviewState = ActionLinkReviewState.APPROVED,
     route_fees: tuple[UserFee, ...] = (),
     official_reference: str = "https://example.invalid/synthetic-official",
 ) -> RouteCandidate:
@@ -532,6 +674,7 @@ def _route(
         instructions=("SYNTHETIC-ONLY-FOLLOW-INSTRUCTIONS",),
         link_class=link_class,
         official_reference=official_reference,
+        action_link_review_state=action_link_review_state,
         route_fees=route_fees,
     )
 

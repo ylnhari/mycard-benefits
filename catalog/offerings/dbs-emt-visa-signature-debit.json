@@ -1,0 +1,10 @@
+{
+  "id": "784d30a2-d144-53dd-bfa1-88549e975d39",
+  "slug": "dbs-emt-visa-signature-debit",
+  "display_name": "DBS EMT Visa Signature Debit Card",
+  "issuer_id": "dbs-bank",
+  "product_variant_id": "emt-visa-signature-debit",
+  "network_id": "visa-signature",
+  "market": "IN",
+  "aliases": []
+}

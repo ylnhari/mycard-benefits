@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "job_id": "synthetic-public-benefits",
+  "purpose": "parse synthetic public benefit terms",
+  "allowed_domains": ["example.invalid"],
+  "seed_urls": ["https://example.invalid/synthetic-benefits/"],
+  "source_admission_path": "sources/admissions/synthetic-example.json",
+  "evidence_retention": "local_metadata_only",
+  "budget": {
+    "max_requests": 2,
+    "max_search_queries": 0,
+    "max_input_tokens": 16000,
+    "max_output_tokens": 1000,
+    "timeout_seconds": 15,
+    "retry_attempts": 0
+  },
+  "providers": [
+    {
+      "provider": "gemini",
+      "model": "gemini-2.5-flash",
+      "stages": ["discovery", "verifier"],
+      "retention_policy": "provider_documented",
+      "fixed_provider": true,
+      "no_fallback": true
+    },
+    {
+      "provider": "openrouter",
+      "model": "openrouter/synthetic-text",
+      "stages": ["extraction"],
+      "retention_policy": "provider_documented",
+      "fixed_provider": true,
+      "no_fallback": true
+    }
+  ],
+  "discovery": {
+    "enabled": false,
+    "query_count": 0,
+    "provider": "gemini",
+    "model": "gemini-2.5-flash"
+  },
+  "extraction": {
+    "provider": "openrouter",
+    "model": "openrouter/synthetic-text",
+    "max_bytes_per_source": 120000,
+    "max_changed_sources": 1
+  },
+  "verifier": {
+    "enabled": true,
+    "provider": "gemini",
+    "model": "gemini-2.5-flash"
+  },
+  "output_state": "needs_review"
+}

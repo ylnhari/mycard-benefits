@@ -1,0 +1,43 @@
+{
+  "id": "c1750520-295c-5c15-af65-23f9994c668c",
+  "offering_id": "83a6036e-bd88-5cb8-aa8f-676521050f68",
+  "title": "Regalia Gold accelerated reward points at designated merchants",
+  "benefit_type": "reward_points",
+  "category": "reward_points",
+  "allowance": {
+    "multiplier": "5X",
+    "incremental_points_cap_per_month": 5000
+  },
+  "eligibility": [],
+  "conditions": [],
+  "exclusions": [],
+  "redemption_steps": [],
+  "provider": null,
+  "effective_from": "2026-05-15",
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/regalia-gold-credit-card/general-terms-and-conditions.pdf",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "1e280ecc978f58697a9b9c37b35d2622511bd33855e1e60781085dbb7fbb8a78",
+  "retrieved_at": "2026-08-09T18:35:44Z",
+  "state": "sources_differ",
+  "provenance": [
+    {
+      "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/regalia-gold-credit-card/pdfs/regalia-gold-credit-card-reward-points-t-and-cs.pdf",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "5586294b59cd369eb9012e4b93f4f066dc0ca5a5208d4484a2b32ee9067ed9db",
+      "retrieved_at": "2026-08-09T18:35:43Z",
+      "id": "b8a3c2ee-c37b-537d-8b85-f14c8a1238d2",
+      "confidence": "high",
+      "effective_from": "2026-05-15"
+    },
+    {
+      "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/regalia-gold-credit-card/general-terms-and-conditions.pdf",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "1e280ecc978f58697a9b9c37b35d2622511bd33855e1e60781085dbb7fbb8a78",
+      "retrieved_at": "2026-08-09T18:35:44Z",
+      "id": "c9431c62-0e55-5257-b580-66dcdf31a234",
+      "confidence": "high"
+    }
+  ]
+}

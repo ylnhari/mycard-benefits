@@ -14,10 +14,13 @@ from mycard_benefits.vault import (
     CardLifecycle,
     ChildRecordKind,
     ChildRecordLifecycle,
+    ReconciliationCard,
+    ReconciliationResult,
     VaultAccessError,
+    VaultConflictError,
     VaultError,
-    VaultStore,
 )
+from mycard_benefits.vault import VaultStore as _VaultStore
 from mycard_benefits.vault import core as vault_core
 
 
@@ -29,6 +32,27 @@ class _TestPermissions:
         return None
 
 
+class VaultStore(_VaultStore):
+    """Legacy test setup supplies the fresh proof explicitly to core methods."""
+
+    def create(self, passphrase: str):  # type: ignore[no-untyped-def]
+        session = super().create(passphrase)
+        add_card = session.add_card
+        replace_card = session.replace_card
+
+        def add_for_setup(*args: object, **kwargs: object) -> str:
+            kwargs["passphrase"] = passphrase
+            return add_card(*args, **kwargs)  # type: ignore[arg-type]
+
+        def replace_for_setup(*args: object, **kwargs: object) -> str:
+            kwargs["passphrase"] = passphrase
+            return replace_card(*args, **kwargs)  # type: ignore[arg-type]
+
+        session.add_card = add_for_setup  # type: ignore[method-assign]
+        session.replace_card = replace_for_setup  # type: ignore[method-assign]
+        return session
+
+
 def _store(tmp_path: Path) -> VaultStore:
     return VaultStore(tmp_path / "private" / "vault.json", _permissions=_TestPermissions())
 
@@ -37,7 +61,7 @@ def test_round_trip_uses_encrypted_payload_and_stable_nonsensitive_metadata(tmp_
     store = _store(tmp_path)
     session = store.create("synthetic passphrase")
     marker = "SYNTHETIC-SECRET-MARKER-ONLY"
-    card_id = session.add_card("offering-test", {"pan": marker, "cvv": "999"})
+    card_id = session.add_card("offering-test", {"pan": marker, "cvv": "999"}, passphrase="synthetic passphrase")
 
     payload = store.path.read_text(encoding="utf-8")
     assert marker not in payload
@@ -53,6 +77,96 @@ def test_round_trip_uses_encrypted_payload_and_stable_nonsensitive_metadata(tmp_
     assert reopened.list_cards()[0]["card_id"] == card_id
     authorization = reopened.authorize_reveal(card_id, "pan", passphrase="synthetic passphrase")
     assert reopened.consume_reveal(authorization) == marker
+
+
+def test_private_summary_derives_only_a_masked_last_four(tmp_path: Path) -> None:
+    store = _store(tmp_path)
+    session = store.create("synthetic passphrase")
+    card_id = session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-000000000001"})
+
+    summary = session.list_private_card_summaries()
+
+    assert summary == (
+        {
+            "card_id": card_id,
+            "offering_id": "offer",
+            "lifecycle": "active",
+            "created_at": summary[0]["created_at"],
+            "updated_at": summary[0]["updated_at"],
+            "masked_last4": "•••• 0001",
+        },
+    )
+    assert "SYNTHETIC-ONLY-PAN" not in str(summary)
+
+
+def test_reconciliation_binds_once_then_is_idempotent_and_preserves_values(
+    tmp_path: Path,
+) -> None:
+    store = _store(tmp_path)
+    session = store.create("synthetic passphrase")
+    card_id = session.add_card(
+        "offer",
+        {"pan": "SYNTHETIC-ONLY-PAN-000000000001", "nickname": "existing"},
+    )
+    source_id = "a" * 32
+    source = ReconciliationCard(
+        source_identity=source_id,
+        offering_id="offer",
+        lifecycle=CardLifecycle.ACTIVE,
+        secret_fields={
+            "pan": "SYNTHETIC-ONLY-PAN-000000000001",
+            "nickname": "existing",
+            "notes": "added from source",
+        },
+    )
+
+    first = session.reconcile_cards([source])
+    after_first = store.path.read_bytes()
+    second = session.reconcile_cards([source])
+
+    assert first == ReconciliationResult(imported=0, bound_existing=1, unchanged=0)
+    assert second == ReconciliationResult(imported=0, bound_existing=0, unchanged=1)
+    assert store.path.read_bytes() == after_first
+    assert session.list_cards()[0]["card_id"] == card_id
+
+
+def test_reconciliation_imports_unmatched_and_rejects_ambiguous_batch_atomically(
+    tmp_path: Path,
+) -> None:
+    store = _store(tmp_path)
+    session = store.create("synthetic passphrase")
+    imported = session.reconcile_cards(
+        [
+            ReconciliationCard(
+                source_identity="b" * 32,
+                offering_id=None,
+                lifecycle=CardLifecycle.ARCHIVED,
+                secret_fields={"pan": "SYNTHETIC-ONLY-PAN-000000000002"},
+            )
+        ]
+    )
+    assert imported == ReconciliationResult(imported=1, bound_existing=0, unchanged=0)
+    assert session.list_cards()[0]["offering_id"] == "unmatched-" + "b" * 32
+
+    before = store.path.read_bytes()
+    with pytest.raises(VaultConflictError):
+        session.reconcile_cards(
+            [
+                ReconciliationCard(
+                    source_identity="c" * 32,
+                    offering_id="offer",
+                    lifecycle=CardLifecycle.ACTIVE,
+                    secret_fields={"pan": "SYNTHETIC-ONLY-PAN-000000000003"},
+                ),
+                ReconciliationCard(
+                    source_identity="d" * 32,
+                    offering_id="offer",
+                    lifecycle=CardLifecycle.ACTIVE,
+                    secret_fields={"pan": "SYNTHETIC-ONLY-PAN-000000000003"},
+                ),
+            ]
+        )
+    assert store.path.read_bytes() == before
 
 
 def test_wrong_passphrase_and_tampered_or_corrupt_files_fail_closed(tmp_path: Path) -> None:
@@ -214,6 +328,31 @@ def test_reveal_requires_reauthentication_is_one_use_and_session_bound(tmp_path:
     assert not store.open("synthetic passphrase").locked
 
 
+def test_protected_actions_bind_record_action_and_session_and_purge_is_typed(
+    tmp_path: Path,
+) -> None:
+    store = _store(tmp_path)
+    session = store.create("synthetic passphrase")
+    card_id = session.add_card(
+        "offer", {"pan": "SYNTHETIC-ONLY-PAN-000000000001", "cvv": "999", "pin": "1234"}
+    )
+    token = session.authorize_action(
+        card_id, "copy", passphrase="synthetic passphrase", field="pan"
+    )
+    with pytest.raises(VaultAccessError):
+        session.consume_action(token, action="reveal")
+    with pytest.raises(VaultAccessError):
+        session.consume_action(token, action="copy")
+    with pytest.raises(VaultError, match="typed confirmation"):
+        session.purge_card(
+            card_id, confirmation="SYNTHETIC-ONLY-WRONG", passphrase="synthetic passphrase"
+        )
+    session.transition_card(card_id, CardLifecycle.CLOSED, passphrase="synthetic passphrase")
+    session.erase_cvv_pin(card_id, passphrase="synthetic passphrase")
+    session.purge_card(card_id, confirmation="DELETE CARD", passphrase="synthetic passphrase")
+    assert session.list_cards() == ()
+
+
 def test_uuid7_ids_and_failed_write_leave_memory_and_disk_unchanged(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     store = _store(tmp_path)
     session = store.create("synthetic passphrase")
@@ -241,7 +380,7 @@ def test_stale_session_conflicts_without_overwriting_newer_disk_state(tmp_path: 
     first.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-BRAVO"})
     current = store.path.read_bytes()
     with pytest.raises(vault_core.VaultConflictError):
-        stale.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-CHARLIE"})
+        stale.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-CHARLIE"}, passphrase="synthetic passphrase")
     assert store.path.read_bytes() == current
 
 
@@ -585,6 +724,87 @@ def test_replacement_chain_tampering_fails_after_mac_recomputation(tmp_path: Pat
         store.open("synthetic passphrase")
 
 
+def test_replacement_lineage_rejects_successor_before_predecessor_in_memory_and_on_reopen(
+    tmp_path: Path,
+) -> None:
+    store = _store(tmp_path)
+    session = store.create("synthetic passphrase")
+    old_id = session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-BRAVO"})
+    new_id = session.replace_card(
+        old_id,
+        {"pan": "SYNTHETIC-ONLY-PAN-CHARLIE"},
+        lifecycle=CardLifecycle.LOST,
+    )
+    old = session._records[old_id]
+    successor = session._records[new_id]
+    bad_successor = vault_core.replace(successor, created_at="2000-01-01T00:00:00Z")
+    bad_successor = vault_core.replace(
+        bad_successor,
+        ciphertext=session._encrypt_record(bad_successor, session._decrypt_record(successor)),
+    )
+    records = {old_id: old, new_id: bad_successor}
+
+    with pytest.raises(VaultError, match="replacement lineage is invalid"):
+        vault_core.VaultSession._validate_replacement_graph(records)
+
+    dek = session._dek
+    assert dek is not None
+    envelope = vault_core._serialize_envelope(
+        session._kdf,
+        session._wrapped_dek,
+        records,
+        {},
+        dek,
+    )
+    store.path.write_bytes(vault_core._encode_envelope(envelope))
+    with pytest.raises(VaultAccessError):
+        store.open("synthetic passphrase")
+
+
+def test_replacement_lineage_rejects_cycles_in_memory_and_on_reopen(tmp_path: Path) -> None:
+    store = _store(tmp_path)
+    session = store.create("synthetic passphrase")
+    old_id = session.add_card("offer", {"pan": "SYNTHETIC-ONLY-PAN-BRAVO"})
+    new_id = session.replace_card(
+        old_id,
+        {"pan": "SYNTHETIC-ONLY-PAN-CHARLIE"},
+        lifecycle=CardLifecycle.LOST,
+    )
+    old = session._records[old_id]
+    successor = session._records[new_id]
+    cycle_old = vault_core.replace(old, lifecycle=CardLifecycle.LOST)
+    cycle_old = vault_core.replace(
+        cycle_old,
+        ciphertext=session._encrypt_record(cycle_old, session._decrypt_record(old)),
+    )
+    cycle_successor = vault_core.replace(
+        successor,
+        lifecycle=CardLifecycle.LOST,
+        replacement_card_id=old_id,
+    )
+    cycle_successor = vault_core.replace(
+        cycle_successor,
+        ciphertext=session._encrypt_record(cycle_successor, session._decrypt_record(successor)),
+    )
+    records = {old_id: cycle_old, new_id: cycle_successor}
+
+    with pytest.raises(VaultError, match="replacement lineage is invalid"):
+        vault_core.VaultSession._validate_replacement_graph(records)
+
+    dek = session._dek
+    assert dek is not None
+    envelope = vault_core._serialize_envelope(
+        session._kdf,
+        session._wrapped_dek,
+        records,
+        {},
+        dek,
+    )
+    store.path.write_bytes(vault_core._encode_envelope(envelope))
+    with pytest.raises(VaultAccessError):
+        store.open("synthetic passphrase")
+
+
 def test_permission_failure_is_fail_closed(tmp_path: Path) -> None:
     class BrokenPermissions:
         def secure_directory(self, path: Path) -> None:
@@ -756,7 +976,7 @@ def test_passphrase_validation_is_strict_and_open_reauth_fail_generically(
 
 
 def test_unicode_passphrase_is_validated_by_utf8_byte_length(tmp_path: Path) -> None:
-    passphrase = "pässphrase12"
+    passphrase = "SYNTHETIC-ONLY-pässphrase12"
     store = _store(tmp_path)
     session = store.create(passphrase)
 

@@ -2,21 +2,15 @@
 
 ## Start here if you just want to use the app
 
-- **[USER-GUIDE.md](USER-GUIDE.md)** — the complete guide for a normal user:
-  what the app does and does not do, what actually works today, five-minute
-  Windows PowerShell setup, getting around the dashboard, searching the 69-variant
-  card catalog, importing your own cards and viewing them in the read-only **My
-  Cards** list, the optional Family Finance button, using it from your phone
-  through an authenticated gateway, what stays private, how to read verified
-  versus needs-review, troubleshooting, and removal.
-- [FAMILY-FINANCE-INTEGRATION.md](FAMILY-FINANCE-INTEGRATION.md) — the optional
-  companion button: setup, the privacy boundary, what happens when the app is
-  not running, and how to remove the link.
-- [VAULT-IMPORT.md](VAULT-IMPORT.md) — the supported one-time private card
-  import: manifest fields, interactive or OS-keyring unlock, the recovery
-  warning, and the count-only verification command. The CLI is still the only
-  write path; the browser **My Cards** view is read-only and needs the
-  keyring-backed vault plus a gateway-authenticated browser.
+- **[USER-GUIDE.md](USER-GUIDE.md)** — the complete plain-language guide for a
+  normal user: what the app does and does not do, Windows PowerShell setup,
+  dashboard help, private vaults, My Cards' protected local boundary, lifecycle words,
+  evidence states, reminders, Planner and affiliate disclosure, recovery,
+  privacy, troubleshooting, and removal.
+- [VAULT-IMPORT.md](VAULT-IMPORT.md) — the supported private card import:
+  manifest fields, interactive or OS-keyring unlock, recovery warning, and the
+  count-only verification command. This is the technical reference; the browser
+  **My Cards** view exposes only fresh-passphrase protected local actions.
 - [`../SECURITY.md`](../SECURITY.md) — what the vault protects against, what it
   cannot protect against, and how to report a problem safely.
 
@@ -27,22 +21,24 @@ project. You do not need any of it to use the app.
 
 **How a claim earns trust.** Every catalog statement keeps its source and source
 tier, a content fingerprint, a retrieval time, effective dates, a confidence
-level, and a review state — for its whole lifetime. A human must approve it;
-ambiguous or high-impact claims need two independent reviewers; no agent can
-approve anything. If evidence is missing or has changed, the statement moves to
-`needs_review` and is not treated as active. Expired benefits are kept as
-history rather than deleted. This is why the catalog currently lists far more card
-variants than benefits: a variant is a public product identity, while a benefit is
-a claim that must first pass official-source review.
+level, and a review state — for its whole lifetime. One dated human must
+approve it; a second independent reviewer may be recommended for enhanced,
+ambiguous, or high-impact claims but is not mandatory. No agent can approve
+anything, and authors cannot approve their own work. If evidence is missing or
+has changed, the statement moves to `needs_review` and is not treated as active.
+Expired benefits are kept as history rather than deleted. This is why the
+catalog lists far more card variants than benefits: a variant is a public
+product identity, while a benefit is a claim that must first pass official-source
+review.
 
-**Private cards stay private even when the browser shows them.** The read-only
+**Private cards stay private even when the browser shows them.** The protected local
 **My Cards** view requires a current signed browser session from the
 authenticated gateway, fails closed without one, opens the OS-keyring-encrypted
 vault server-side, and returns envelope metadata only — card UUID, catalog
 offering, lifecycle, timestamps, and any linked replacement record — with
 `no-store`. PAN, CVV, PIN, nickname, notes, cardholder name, and expiry are never
-sent to the browser. Add, edit, delete, reveal/copy, and owner/expiry/replacement
-reconciliation remain future protected work.
+sent to the browser. Add, edit, lifecycle, replace, and delete/purge actions
+require fresh passphrase reauthentication; reveal/copy remains disabled.
 
 **The hardest rule.** Source work, including scheduled and agent-driven work,
 may run unattended — but it may never bypass authentication, CAPTCHA, robots
@@ -68,12 +64,9 @@ documentation change — see each document's own notes on unresolved questions.
 - [EVIDENCE.md](EVIDENCE.md) — the structured record every piece of evidence
   must carry, its review states, and where raw retrieved content is (and is
   not) allowed to live.
-- [SOURCE-ADAPTER-RUNBOOK.md](SOURCE-ADAPTER-RUNBOOK.md) — how to build and
-  operate a parser adapter for an admitted source, including what to do when
-  a request is blocked.
 - [CATALOG-GOVERNANCE.md](CATALOG-GOVERNANCE.md) — how a candidate assertion
-  becomes a published catalog fact, independent review, the two-reviewer
-  rule for ambiguous/high-impact claims, and conflict handling.
+  becomes a published catalog fact, human approval, optional second-review
+  recommendations, and conflict handling.
 - [AGENT-OPERATIONS.md](AGENT-OPERATIONS.md) — what any background agent or
   delegated runner may and may not do, including the unattended-work
   boundary restated for agent operators specifically.
@@ -87,23 +80,17 @@ documentation change — see each document's own notes on unresolved questions.
   questionnaire and subsequent owner choices into the current contract.
 - [QUESTIONNAIRE-DECISIONS.md](QUESTIONNAIRE-DECISIONS.md) — numbered record of
   all 120 accepted defaults and the later revisions that supersede them.
-- [`research/pilot-official-source-leads.md`](research/pilot-official-source-leads.md)
-  — discovery-only official leads for the first two pilot offerings.
-- [`research/pilot-benefit-source-map-2026-08-07.md`](research/pilot-benefit-source-map-2026-08-07.md)
-  — current issuer/network candidates, evidence gaps, and conflicts for Tata
-  Neu Infinity and Regalia Gold; none is active merely because it appears here.
+- The historical research notes, including
+  [`research/pilot-official-source-leads.md`](research/pilot-official-source-leads.md),
+  are discovery records only; they do not change the public catalog.
 
-## Maintainer audit trail — not documentation
+## Maintainer audit trail — not user documentation
 
-`coordination/` outside this folder is the maintainers' audit and resume
-evidence, not guidance for anyone. It holds task briefs under
-`coordination/tasks/`, append-only `jobs.jsonl` and `events.jsonl` records, and
-code-review results under `coordination/evidence/`. Two reasons it is committed:
-sensitive actions in this project require a dated written human approval that
-can be audited afterwards rather than taken on trust, and work spans sessions
-and delegated runners, so resumable state must live on disk instead of in a
-transcript. Files named like `*-review-001.md` are review records. Regular users
-can ignore all of it; nothing there changes how the app behaves.
+`coordination/` contains only the append-only `jobs.jsonl` and `events.jsonl`
+ledgers for dated approvals and durable job state. Current work is summarized
+in the root `CONTINUE-HERE.md`, `PROJECT_STATUS.md`, and `TASKS.md`; superseded
+task briefs and review reports remain available through Git history. Regular
+users can ignore the coordination directory.
 
 ## See also
 

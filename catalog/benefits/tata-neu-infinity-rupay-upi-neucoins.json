@@ -1,0 +1,48 @@
+{
+  "id": "b3000001-0000-4000-8000-000000000002",
+  "offering_id": "3eeb4094-d452-5a33-9061-0e8999cd6c89",
+  "title": "Tata Neu Infinity RuPay UPI NeuCoins",
+  "benefit_type": "reward_points",
+  "category": "reward_points",
+  "allowance": {
+    "any_upi_percent": "0.5",
+    "tata_neu_upi_increment_percent": "1",
+    "monthly_cap_neucoins": 500
+  },
+  "eligibility": [
+    {
+      "field": "network_variant",
+      "operator": "equals",
+      "value": "rupay-select"
+    },
+    {
+      "field": "transaction.channel",
+      "operator": "equals",
+      "value": "upi"
+    }
+  ],
+  "conditions": [],
+  "exclusions": [],
+  "redemption_steps": [],
+  "provider": null,
+  "effective_from": "2025-10-27",
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/tata-neu-infinity-credit-card/pdf/additional-upi-neucoins-infinity.pdf",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "c03091e04530d12ebd4dd95d4af7772b6368ca6844c736b7a38f0fba49d43bfb",
+  "retrieved_at": "2026-08-09T18:36:39Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/tata-neu-infinity-credit-card/pdf/additional-upi-neucoins-infinity.pdf",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "c03091e04530d12ebd4dd95d4af7772b6368ca6844c736b7a38f0fba49d43bfb",
+      "retrieved_at": "2026-08-09T18:36:39Z",
+      "id": "44e5d756-a2eb-56ea-bf6a-334081e028cb",
+      "source_observation_id": "1e645840-e70b-5a14-8769-1cf98b493b18",
+      "confidence": "high",
+      "effective_from": "2025-10-27"
+    }
+  ]
+}

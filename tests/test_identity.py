@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import json
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pytest
@@ -37,3 +38,12 @@ def test_identity_rejects_invalid_nonce_and_tampering(tmp_path: Path) -> None:
     canonical = json.dumps(signed, sort_keys=True, separators=(",", ":")).encode()
     with pytest.raises(InvalidSignature):
         Ed25519PublicKey.from_public_bytes(_decode(identity.public_key)).verify(signature, canonical)
+
+
+def test_identity_creation_is_stable_under_concurrency(tmp_path: Path) -> None:
+    def load() -> str:
+        return InstallationIdentity.load_or_create(tmp_path).install_id
+
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        install_ids = list(executor.map(lambda _: load(), range(4)))
+    assert len(set(install_ids)) == 1

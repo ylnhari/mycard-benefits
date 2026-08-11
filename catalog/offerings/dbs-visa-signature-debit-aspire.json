@@ -1,0 +1,10 @@
+{
+  "id": "77204ea2-801f-55c2-b8a7-2eb87f743ced",
+  "slug": "dbs-visa-signature-debit-aspire",
+  "display_name": "DBS Visa Signature Debit Card (Aspire)",
+  "issuer_id": "dbs-bank",
+  "product_variant_id": "visa-signature-debit",
+  "network_id": "visa-signature",
+  "market": "IN",
+  "aliases": []
+}

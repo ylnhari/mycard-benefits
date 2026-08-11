@@ -1,0 +1,50 @@
+{
+  "id": "17a04923-f6f0-54c3-a195-46389389cb98",
+  "offering_id": "566f2db5-bc06-57d7-be94-086bb6f8c488",
+  "title": "IndusInd Nexxt BookMyShow BOGO",
+  "benefit_type": "movie",
+  "category": "movie",
+  "allowance": {
+    "complimentary_or_discounted_tickets": 2,
+    "ticket_cap_inr": 200,
+    "period": "month"
+  },
+  "eligibility": [
+    {
+      "field": "movie_ticket_count",
+      "operator": "gte",
+      "value": 2
+    }
+  ],
+  "conditions": [],
+  "exclusions": [
+    "No automated redemption authorization is implied.",
+    "Unknown stacking remains unapproved unless the terms explicitly support it."
+  ],
+  "redemption_steps": [
+    "Select the named offer at BookMyShow checkout.",
+    "Use the eligible card variant and complete payment.",
+    "Pay applicable processing or internet fees where required."
+  ],
+  "provider": "BookMyShow",
+  "effective_from": null,
+  "effective_to": "2027-03-31",
+  "end_date_known": true,
+  "source_url": "https://in.bookmyshow.com/offers/indusind-bank-credit-cards-buy-1-get-1-free-movie-ticket-offer-%28legend%2C-nexxt%2C-duo%2C-signature%2C-iconia%2C-intermiles%29/INDBOGO424",
+  "source_policy_class": "administering_terms",
+  "content_sha256": "5c2653bcb684aa0e7c0e8743cd20895dc514919db8648e5672390d8e43a54ea1",
+  "retrieved_at": "2026-08-10T00:00:00Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://in.bookmyshow.com/offers/indusind-bank-credit-cards-buy-1-get-1-free-movie-ticket-offer-%28legend%2C-nexxt%2C-duo%2C-signature%2C-iconia%2C-intermiles%29/INDBOGO424",
+      "source_policy_class": "administering_terms",
+      "content_sha256": "5c2653bcb684aa0e7c0e8743cd20895dc514919db8648e5672390d8e43a54ea1",
+      "retrieved_at": "2026-08-10T00:00:00Z",
+      "id": "0fe30a4b-2ad3-5159-8bb1-6ca281c60b90",
+      "source_observation_id": "5f56c252-8b07-562d-b2ed-43d50ce62001",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "low"
+    }
+  ]
+}

@@ -17,6 +17,7 @@ from mycard_benefits.app import create_app
 from mycard_benefits.config import Settings
 from mycard_benefits.optimizer.engine import optimize
 from mycard_benefits.optimizer.model import (
+    ActionLinkReviewState,
     LinkClass,
     PurchaseScenario,
     RouteCandidate,
@@ -83,6 +84,7 @@ def _route(
         "instructions": ["SYNTHETIC-ONLY-FOLLOW-INSTRUCTIONS"],
         "link_class": "official",
         "official_reference": f"{SYNTHETIC_ORIGIN}/synthetic-official",
+        "action_link_review_state": "approved",
     }
     payload.update(overrides)
     return payload
@@ -95,7 +97,7 @@ def _scenario(**overrides: Any) -> dict[str, Any]:
         "as_of": AS_OF.isoformat(),
         "user_fees": [],
         "allowed_link_classes": ["official", "third_party", "affiliate"],
-        "approved_official_origins": [SYNTHETIC_ORIGIN],
+        "admitted_action_origins": [SYNTHETIC_ORIGIN],
     }
     payload.update(overrides)
     return payload
@@ -120,9 +122,9 @@ def _engine_scenario(payload: dict[str, Any]) -> PurchaseScenario:
         allowed_link_classes=frozenset(
             LinkClass(value) for value in scenario["allowed_link_classes"]
         ),
-        approved_official_origins=frozenset(
-            canonical_https_origin(origin, "approved_official_origin", origin_entry=True)
-            for origin in scenario["approved_official_origins"]
+        admitted_action_origins=frozenset(
+            canonical_https_origin(origin, "admitted_action_origin", origin_entry=True)
+            for origin in scenario["admitted_action_origins"]
         ),
     )
 
@@ -135,6 +137,7 @@ def _engine_route(payload: dict[str, Any]) -> RouteCandidate:
         instructions=tuple(payload["instructions"]),
         link_class=LinkClass(payload["link_class"]),
         official_reference=payload["official_reference"],
+        action_link_review_state=ActionLinkReviewState(payload["action_link_review_state"]),
         route_fees=tuple(_engine_fee(fee) for fee in payload.get("route_fees", [])),
     )
 
@@ -231,6 +234,11 @@ def test_success_matches_engine_output_with_provenance_and_no_store(
             "SYNTHETIC-ONLY-UNREVIEWED",
             [_component("unreviewed", "guaranteed", "1", reviewed=False)],
         ),
+        _route(
+            "SYNTHETIC-ONLY-UNKNOWN-ACTION",
+            [_component("unknown-action", "guaranteed", "1")],
+            action_link_review_state="unknown",
+        ),
     ]
     payload = _request(routes)
 
@@ -272,6 +280,7 @@ def test_success_matches_engine_output_with_provenance_and_no_store(
     rejected = {item["route_id"]: " ".join(item["reasons"]) for item in body["rejected_routes"]}
     assert "source freshness is stale" in rejected["SYNTHETIC-ONLY-STALE"]
     assert "source is not human reviewed" in rejected["SYNTHETIC-ONLY-UNREVIEWED"]
+    assert "action link is not human reviewed" in rejected["SYNTHETIC-ONLY-UNKNOWN-ACTION"]
 
 
 def test_every_fail_closed_drop_class_is_reported_with_reasons(
@@ -329,6 +338,11 @@ def test_every_fail_closed_drop_class_is_reported_with_reasons(
             official_reference="https://other.invalid/synthetic",
         ),
         _route(
+            "SYNTHETIC-ONLY-UNREVIEWED-ACTION",
+            [_component("unreviewed-action", "guaranteed", "1")],
+            action_link_review_state="needs_review",
+        ),
+        _route(
             "SYNTHETIC-ONLY-SHARED-CAP",
             [
                 _component("cap-a", "guaranteed", "1", cap_group="SYNTHETIC-ONLY-CAP"),
@@ -350,6 +364,7 @@ def test_every_fail_closed_drop_class_is_reported_with_reasons(
     assert "source freshness is unknown" in reasons["SYNTHETIC-ONLY-UNKNOWN"]
     assert "source is not human reviewed" in reasons["SYNTHETIC-ONLY-UNREVIEWED"]
     assert "component expired before the scenario date" in reasons["SYNTHETIC-ONLY-EXPIRED"]
+    assert "action link is not human reviewed" in reasons["SYNTHETIC-ONLY-UNREVIEWED-ACTION"]
     assert "evidence is older than 90 days" in reasons["SYNTHETIC-ONLY-OLD-EVIDENCE"]
     assert "after the scenario date" in reasons["SYNTHETIC-ONLY-FUTURE"]
     assert (
@@ -357,10 +372,10 @@ def test_every_fail_closed_drop_class_is_reported_with_reasons(
     )
     assert "affiliate routes are hidden by the user" in reasons["SYNTHETIC-ONLY-AFFILIATE-HIDDEN"]
     assert (
-        "origin is not in the caller-approved origin set"
+        "origin is not in the caller-admitted action origin set"
         in reasons["SYNTHETIC-ONLY-UNAPPROVED-ORIGIN"]
     )
-    assert "shared cap allocation is not implemented" in reasons["SYNTHETIC-ONLY-SHARED-CAP"]
+    assert "a cap_group member must declare a per_transaction_cap" in reasons["SYNTHETIC-ONLY-SHARED-CAP"]
     assert (
         body["guidance"] == "Compare only the verified routes shown; no purchase action is taken."
     )
@@ -395,10 +410,10 @@ def test_malformed_inputs_are_rejected_without_echoing_values(
         ("over-precise amount", _request(scenario=_scenario(amount="100.0000001"))),
         ("money as JSON number", _request(scenario=_scenario(amount=100.5))),
         ("empty allowed link classes", _request(scenario=_scenario(allowed_link_classes=[]))),
-        ("empty approved origins", _request(scenario=_scenario(approved_official_origins=[]))),
+        ("empty admitted action origins", _request(scenario=_scenario(admitted_action_origins=[]))),
         (
             "origin with path",
-            _request(scenario=_scenario(approved_official_origins=[f"{SYNTHETIC_ORIGIN}/path"])),
+            _request(scenario=_scenario(admitted_action_origins=[f"{SYNTHETIC_ORIGIN}/path"])),
         ),
         (
             "duplicate route ids",
@@ -414,6 +429,18 @@ def test_malformed_inputs_are_rejected_without_echoing_values(
             _request(
                 routes=[_route("X", [_component("x", source_refs=["http://example.invalid/s"])])]
             ),
+        ),
+        (
+            "javascript action reference",
+            _request(routes=[_route("X", official_reference="javascript:alert(1)")]),
+        ),
+        (
+            "data action reference",
+            _request(routes=[_route("X", official_reference="data:text/plain,unsafe")]),
+        ),
+        (
+            "unknown action review state",
+            _request(routes=[_route("X", action_link_review_state="bogus")]),
         ),
         (
             "invalid value class",
@@ -666,16 +693,16 @@ def test_duplicate_collection_entries_fail_closed(tmp_path: Path) -> None:
             _request(scenario=_scenario(allowed_link_classes=["official", "official"])),
         ),
         (
-            "duplicate approved origin",
+            "duplicate admitted action origin",
             _request(
-                scenario=_scenario(approved_official_origins=[SYNTHETIC_ORIGIN, SYNTHETIC_ORIGIN])
+                scenario=_scenario(admitted_action_origins=[SYNTHETIC_ORIGIN, SYNTHETIC_ORIGIN])
             ),
         ),
         (
-            "duplicate approved origin after canonicalization",
+            "duplicate admitted action origin after canonicalization",
             _request(
                 scenario=_scenario(
-                    approved_official_origins=[
+                    admitted_action_origins=[
                         "https://Example.invalid",
                         "https://example.invalid",
                     ]
@@ -709,6 +736,137 @@ def test_duplicate_collection_entries_fail_closed(tmp_path: Path) -> None:
         assert isinstance(detail, list) and detail, label
         assert MARKER not in str(detail), label
         assert response.headers["cache-control"] == "no-store", label
+
+
+def test_api_ranked_route_exposes_only_separate_totals_with_no_summed_field(
+    tmp_path: Path,
+) -> None:
+    payload = _request(
+        [
+            _route(
+                "SYNTHETIC-ONLY-SEPARATE",
+                [
+                    _component("g", "guaranteed", "10"),
+                    _component(
+                        "c",
+                        "conditional",
+                        "5000",
+                        value_max="9000",
+                    ),
+                    _component(
+                        "e",
+                        "estimated",
+                        "7000",
+                        value_max="8000",
+                        valuation_name="SYNTHETIC-ONLY-VALUATION",
+                    ),
+                ],
+            )
+        ],
+        scenario=_scenario(amount="10000"),
+    )
+
+    with _client(tmp_path) as client:
+        response = client.post("/api/v1/optimizer/routes", json=payload)
+
+    assert response.status_code == 200
+    ranked = response.json()["ranked_routes"][0]
+    assert set(ranked) == {
+        "route_id",
+        "label",
+        "guaranteed_before_fees",
+        "scenario_fees",
+        "route_fees",
+        "total_fees",
+        "net_guaranteed",
+        "conditional_min",
+        "conditional_max",
+        "estimated_min",
+        "estimated_max",
+        "components",
+        "assumptions",
+        "source_refs",
+        "explanation",
+        "link_class",
+        "official_reference",
+        "value_class_totals_are_non_additive",
+    }
+    assert ranked["net_guaranteed"] == "10.00"
+    assert ranked["conditional_min"] == "5000.00"
+    assert ranked["conditional_max"] == "9000.00"
+    assert ranked["estimated_min"] == "7000.00"
+    assert ranked["estimated_max"] == "8000.00"
+    assert ranked["value_class_totals_are_non_additive"] is True
+    assert "not included in net guaranteed value" in " ".join(ranked["explanation"])
+
+
+def test_api_caps_round_trip_exactly_and_never_double_count(tmp_path: Path) -> None:
+    payload = _request(
+        [
+            _route(
+                "SYNTHETIC-ONLY-CAPS",
+                [
+                    _component("g", "guaranteed", "200", per_transaction_cap="80"),
+                    _component(
+                        "c",
+                        "conditional",
+                        "20",
+                        value_max="100",
+                        remaining_allowance="50",
+                    ),
+                    _component(
+                        "e",
+                        "estimated",
+                        "5",
+                        value_max="30",
+                        valuation_name="SYNTHETIC-ONLY-VALUATION",
+                        per_transaction_cap="10",
+                    ),
+                ],
+            )
+        ]
+    )
+
+    with _client(tmp_path) as client:
+        response = client.post("/api/v1/optimizer/routes", json=payload)
+
+    assert response.status_code == 200
+    ranked = response.json()["ranked_routes"][0]
+    assert ranked["net_guaranteed"] == "80.00"
+    assert ranked["guaranteed_before_fees"] == "80.00"
+    assert ranked["conditional_min"] == "20.00"
+    assert ranked["conditional_max"] == "50.00"
+    assert ranked["estimated_min"] == "5.00"
+    assert ranked["estimated_max"] == "10.00"
+    components_by_id = {item["id"]: item for item in ranked["components"]}
+    assert components_by_id["g"]["per_transaction_cap"] == "80"
+    assert components_by_id["g"]["remaining_allowance"] is None
+    assert components_by_id["c"]["remaining_allowance"] == "50"
+    assert components_by_id["c"]["per_transaction_cap"] is None
+    assert components_by_id["e"]["per_transaction_cap"] == "10"
+
+
+def test_api_component_expiry_is_never_silently_dropped(tmp_path: Path) -> None:
+    """MC-082: a rank must expose the expiry (or its absence) behind each component."""
+    payload = _request(
+        [
+            _route(
+                "SYNTHETIC-ONLY-EXPIRY-VISIBLE",
+                [
+                    _component("dated", "guaranteed", "10", expires_on="2026-12-01"),
+                    _component("undated", "guaranteed", "10"),
+                ],
+            )
+        ]
+    )
+
+    with _client(tmp_path) as client:
+        response = client.post("/api/v1/optimizer/routes", json=payload)
+
+    assert response.status_code == 200
+    components_by_id = {item["id"]: item for item in response.json()["ranked_routes"][0]["components"]}
+    assert components_by_id["dated"]["expires_on"] == "2026-12-01"
+    assert components_by_id["undated"]["expires_on"] is None
 
 
 def _optimizer_scope(*, content_length: int | None) -> dict[str, Any]:

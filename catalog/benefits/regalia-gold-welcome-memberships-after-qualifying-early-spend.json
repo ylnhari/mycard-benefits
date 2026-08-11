@@ -1,0 +1,48 @@
+{
+  "id": "bd4321e5-9e0a-5e81-a7ef-32d163569a0f",
+  "offering_id": "83a6036e-bd88-5cb8-aa8f-676521050f68",
+  "title": "Regalia Gold welcome memberships after qualifying early spend",
+  "benefit_type": "voucher",
+  "category": "voucher",
+  "allowance": {
+    "qualification_window_days": 90,
+    "download_window_days": 60
+  },
+  "eligibility": [
+    {
+      "field": "first_90_day_net_retail_spend_inr",
+      "operator": "gte",
+      "value": 100000
+    }
+  ],
+  "conditions": [],
+  "exclusions": [],
+  "redemption_steps": [],
+  "provider": null,
+  "effective_from": null,
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/regalia-gold-credit-card/general-terms-and-conditions.pdf",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "1e280ecc978f58697a9b9c37b35d2622511bd33855e1e60781085dbb7fbb8a78",
+  "retrieved_at": "2026-08-09T18:35:44Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.hdfc.bank.in/credit-cards/regalia-gold-credit-card",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "06a79a11c0db2f8b372be5eea6e4f0147297ccb1773acd5895cf5a181eb99160",
+      "retrieved_at": "2026-08-09T18:35:41Z",
+      "id": "f21ca056-6d72-5b33-8d74-0e6e0fa8bfc8",
+      "confidence": "high"
+    },
+    {
+      "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/regalia-gold-credit-card/general-terms-and-conditions.pdf",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "1e280ecc978f58697a9b9c37b35d2622511bd33855e1e60781085dbb7fbb8a78",
+      "retrieved_at": "2026-08-09T18:35:44Z",
+      "id": "c9431c62-0e55-5257-b580-66dcdf31a234",
+      "confidence": "high"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "id": "b2000001-0000-4000-8000-000000000003",
+  "offering_id": "83a6036e-bd88-5cb8-aa8f-676521050f68",
+  "title": "Regalia Gold international lounge access via Priority Pass",
+  "benefit_type": "priority_pass",
+  "category": "priority_pass",
+  "allowance": {
+    "cap": 6,
+    "period": "year",
+    "unit": "visit"
+  },
+  "eligibility": [
+    {
+      "field": "lounge_location",
+      "operator": "equals",
+      "value": "outside_india"
+    }
+  ],
+  "conditions": [],
+  "exclusions": [],
+  "redemption_steps": [],
+  "provider": null,
+  "effective_from": "2026-01-01",
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/regalia-gold-credit-card/Priority_Pass_Regalia.pdf",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "737ee0feed10437092c8e1c46896adafcd44f7b46d6ff345841fc6f21890ef00",
+  "retrieved_at": "2026-08-07T10:00:47Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/regalia-gold-credit-card/Priority_Pass_Regalia.pdf",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "737ee0feed10437092c8e1c46896adafcd44f7b46d6ff345841fc6f21890ef00",
+      "retrieved_at": "2026-08-07T10:00:47Z",
+      "id": "01767011-c2b0-592c-9b5f-b60088f3b7c4",
+      "source_observation_id": "1b22e96c-7ddd-5d97-b9df-b0b7a29d32cc",
+      "confidence": "high",
+      "effective_from": "2026-01-01"
+    }
+  ]
+}

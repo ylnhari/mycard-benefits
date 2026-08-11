@@ -1,0 +1,35 @@
+{
+  "id": "0d341109-9352-54b2-aeb2-7296e4a0a399",
+  "offering_id": "83a6036e-bd88-5cb8-aa8f-676521050f68",
+  "title": "Regalia Gold retail reward earning, expiry and excluded transactions",
+  "benefit_type": "reward_points",
+  "category": "reward_points",
+  "allowance": {
+    "reward_point_expiry": "two years from accumulation",
+    "statement_cycle_cap": 50000
+  },
+  "eligibility": [],
+  "conditions": [],
+  "exclusions": [],
+  "redemption_steps": [],
+  "provider": null,
+  "effective_from": "2026-05-15",
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/regalia-gold-credit-card/pdfs/regalia-gold-credit-card-reward-points-t-and-cs.pdf",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "5586294b59cd369eb9012e4b93f4f066dc0ca5a5208d4484a2b32ee9067ed9db",
+  "retrieved_at": "2026-08-09T18:35:43Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/regalia-gold-credit-card/pdfs/regalia-gold-credit-card-reward-points-t-and-cs.pdf",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "5586294b59cd369eb9012e4b93f4f066dc0ca5a5208d4484a2b32ee9067ed9db",
+      "retrieved_at": "2026-08-09T18:35:43Z",
+      "id": "b8a3c2ee-c37b-537d-8b85-f14c8a1238d2",
+      "confidence": "high",
+      "effective_from": "2026-05-15"
+    }
+  ]
+}

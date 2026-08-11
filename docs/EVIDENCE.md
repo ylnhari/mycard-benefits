@@ -34,9 +34,7 @@ Every evidence record carries:
   hash no longer matches the last-approved retrieval. Not eligible to back
   an active catalog assertion.
 - `reviewed` — a reviewer has read the evidence and the linked assertion, and
-  believes they match, but full approval criteria (see
-  `CATALOG-GOVERNANCE.md`) are not yet met (e.g. a second reviewer is still
-  required for a high-impact claim).
+  has not yet recorded the approval needed by `CATALOG-GOVERNANCE.md`.
 - `approved` — the evidence is sufficient to back its linked assertion(s).
 - `rejected` — the evidence does not support the linked assertion; the
   assertion must be revised or removed.
@@ -44,7 +42,9 @@ Every evidence record carries:
   assertion; kept for history, not for active backing.
 
 An assertion is only `active` in the published catalog while it has at least
-one `approved` evidence record with a current (unchanged) content hash.
+one `approved` evidence record with a current (unchanged) content hash and one
+dated human approval. Additional review may be recommended by risk tier but is
+not required for activation.
 
 ## Immutability and audit trail
 
@@ -64,6 +64,19 @@ document in `docs/` may contain only the structured evidence record fields
 above: URL, tier, party, dates, hash, confidence, review state, and linked
 assertion IDs. See `SOURCE-POLICY.md` for why source prose is never
 reproduced into tracked files.
+
+## Canonical graph boundary
+
+MC-215 adds `mycard_benefits.evidence_graph` as the lossless public interchange
+form. Its immutable nodes bind an assertion to an admitted source document,
+observation, and exact extraction span. The graph stores hashes and bounded
+coordinates only, never raw source text or private values. Unknown fields and
+future schema versions fail closed; its canonical hash is the candidate/release
+binding.
+
+Legacy records may be wrapped for migration, but a migrated record remains
+`needs_review` and is not promotion-eligible until each current document,
+observation, span, review, effective-state, and payload binding is revalidated.
 
 ## Change detection
 
@@ -87,5 +100,4 @@ public hash/history record.
 ## Related documents
 
 - `SOURCE-POLICY.md` — source tiers, admission, and automation boundaries.
-- `SOURCE-ADAPTER-RUNBOOK.md` — how an adapter produces evidence records.
 - `CATALOG-GOVERNANCE.md` — how evidence review states gate publication.

@@ -2,6 +2,7 @@
 
 from .engine import optimize
 from .model import (
+    ActionLinkReviewState,
     ComponentValueClass,
     EvidenceTier,
     Freshness,
@@ -15,6 +16,7 @@ from .model import (
 
 __all__ = [
     "ComponentValueClass",
+    "ActionLinkReviewState",
     "EvidenceTier",
     "Freshness",
     "LinkClass",

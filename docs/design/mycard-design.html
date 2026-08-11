@@ -1,0 +1,633 @@
+<title>MyCard Benefits — Design Specification</title>
+<style>
+:root{
+  --ink:#14161A; --paper:#F5F6F8; --surface:#FFFFFF; --surface-2:#EDEFF3;
+  --slate:#5A6170; --slate-2:#7C8494; --rule:#DDE1E8;
+  --accent:#2B44C7; --accent-soft:#E6E9FB;
+  --ok:#1F7A4D; --ok-bg:#E4F2EA; --warn:#8A5A00; --warn-bg:#FBF0DC; --bad:#A81E17; --bad-bg:#FAE6E4;
+  --shadow:0 1px 2px rgba(20,22,26,.06),0 8px 24px -12px rgba(20,22,26,.18);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"Cascadia Mono","SF Mono",Menlo,Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --ink:#E9EBEF; --paper:#0E1013; --surface:#171A20; --surface-2:#1F232B;
+    --slate:#A0A8B8; --slate-2:#7C8494; --rule:#2A2F39;
+    --accent:#93A2FF; --accent-soft:#1C2340;
+    --ok:#5BD79C; --ok-bg:#123024; --warn:#F0B429; --warn-bg:#33260A; --bad:#FF7A6E; --bad-bg:#381714;
+    --shadow:0 1px 2px rgba(0,0,0,.5),0 10px 30px -14px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#E9EBEF; --paper:#0E1013; --surface:#171A20; --surface-2:#1F232B;
+  --slate:#A0A8B8; --slate-2:#7C8494; --rule:#2A2F39;
+  --accent:#93A2FF; --accent-soft:#1C2340;
+  --ok:#5BD79C; --ok-bg:#123024; --warn:#F0B429; --warn-bg:#33260A; --bad:#FF7A6E; --bad-bg:#381714;
+  --shadow:0 1px 2px rgba(0,0,0,.5),0 10px 30px -14px rgba(0,0,0,.8);
+}
+:root[data-theme="light"]{
+  --ink:#14161A; --paper:#F5F6F8; --surface:#FFFFFF; --surface-2:#EDEFF3;
+  --slate:#5A6170; --slate-2:#7C8494; --rule:#DDE1E8;
+  --accent:#2B44C7; --accent-soft:#E6E9FB;
+  --ok:#1F7A4D; --ok-bg:#E4F2EA; --warn:#8A5A00; --warn-bg:#FBF0DC; --bad:#A81E17; --bad-bg:#FAE6E4;
+  --shadow:0 1px 2px rgba(20,22,26,.06),0 8px 24px -12px rgba(20,22,26,.18);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+  font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:40px 24px 80px}
+h1,h2,h3,h4{margin:0;text-wrap:balance;font-weight:600}
+p{margin:0}
+a{color:var(--accent)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--slate-2);margin:0}
+
+/* masthead */
+.masthead{border-bottom:2px solid var(--ink);padding-bottom:20px;margin-bottom:8px;
+  display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;justify-content:space-between}
+.masthead h1{font-family:var(--serif);font-size:clamp(30px,4.4vw,46px);line-height:1.05;letter-spacing:-.015em}
+.masthead .sub{color:var(--slate);max-width:56ch;margin-top:10px;font-size:15px}
+.stamp{font-family:var(--mono);font-size:11px;color:var(--slate-2);text-align:right;line-height:1.8;
+  letter-spacing:.04em}
+.themebtn{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  background:none;border:1px solid var(--rule);color:var(--slate);padding:7px 12px;border-radius:99px;cursor:pointer}
+.themebtn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* screen plates */
+.plate{margin-top:56px;scroll-margin-top:16px}
+.plate-head{display:flex;gap:14px;align-items:baseline;border-bottom:1px solid var(--rule);
+  padding-bottom:10px;margin-bottom:8px;flex-wrap:wrap}
+.plate-num{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.1em}
+.plate-head h2{font-family:var(--serif);font-size:25px;letter-spacing:-.01em}
+.plate-note{color:var(--slate);font-size:14px;max-width:70ch;margin:12px 0 20px}
+
+/* device frame */
+.screen{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);
+  box-shadow:var(--shadow);overflow:hidden}
+.chrome{display:flex;align-items:center;gap:8px;padding:9px 14px;background:var(--surface-2);
+  border-bottom:1px solid var(--rule)}
+.dot{width:9px;height:9px;border-radius:99px;background:var(--rule)}
+.chrome .addr{font-family:var(--mono);font-size:11px;color:var(--slate-2);margin-left:8px}
+.app{display:grid;grid-template-columns:186px 1fr;min-height:420px}
+.rail{background:var(--ink);padding:18px 14px;display:flex;flex-direction:column;gap:4px}
+:root[data-theme="dark"] .rail,
+@media (prefers-color-scheme:dark){.rail{background:#05070A}}
+.rail .brand{font-family:var(--serif);font-size:17px;color:#F5F6F8;margin-bottom:16px;letter-spacing:-.01em}
+.rail .brand b{font-weight:400;opacity:.62;display:block;font-size:11px;font-family:var(--mono);
+  letter-spacing:.12em;text-transform:uppercase;margin-top:3px}
+.navi{color:#AEB6C6;font-size:14px;padding:8px 10px;border-radius:7px;text-decoration:none;display:block}
+.navi.on{background:rgba(255,255,255,.11);color:#fff;font-weight:600}
+.rail .foot{margin-top:auto;font-family:var(--mono);font-size:10px;color:#6C7688;letter-spacing:.06em;line-height:1.7}
+.body{padding:22px 24px 26px;min-width:0}
+.body h3{font-family:var(--serif);font-size:22px;letter-spacing:-.01em}
+.lede{color:var(--slate);font-size:14px;margin-top:4px}
+
+/* toolbar */
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 18px;align-items:center}
+.chip{font-size:12.5px;padding:6px 11px;border:1px solid var(--rule);border-radius:99px;
+  color:var(--slate);background:var(--surface);white-space:nowrap}
+.chip.sel{background:var(--ink);color:var(--paper);border-color:var(--ink);font-weight:600}
+.search{flex:1;min-width:180px;border:1px solid var(--rule);border-radius:8px;padding:8px 12px;
+  color:var(--slate-2);font-size:13.5px;background:var(--surface-2);font-family:var(--sans)}
+.count{font-family:var(--mono);font-size:11px;color:var(--slate-2);letter-spacing:.06em}
+
+/* CARD OBJECTS — the only saturated colour in the product */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(216px,1fr));gap:14px}
+.pcard{aspect-ratio:1.586;border-radius:11px;padding:13px 14px;display:flex;flex-direction:column;
+  justify-content:space-between;color:#fff;position:relative;overflow:hidden;
+  box-shadow:0 1px 2px rgba(0,0,0,.2),0 10px 22px -14px rgba(0,0,0,.55)}
+.pcard::after{content:"";position:absolute;inset:0;
+  background:radial-gradient(120% 90% at 88% 6%,rgba(255,255,255,.20),transparent 60%);pointer-events:none}
+.pc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.pc-iss{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;opacity:.82}
+.pc-pip{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  background:rgba(255,255,255,.2);padding:3px 7px;border-radius:99px;white-space:nowrap}
+.pc-name{font-family:var(--serif);font-size:15.5px;line-height:1.2;letter-spacing:-.005em}
+.pc-bot{display:flex;justify-content:space-between;align-items:flex-end;gap:8px}
+.pc-num{font-family:var(--mono);font-size:13px;letter-spacing:.13em}
+.pc-num.none{opacity:.5;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.pc-net{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;opacity:.95}
+.pc-ben{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;opacity:.8;margin-top:5px}
+.hdfc{background:linear-gradient(150deg,#0B2A5B,#17457F 62%,#0E3266)}
+.tata{background:linear-gradient(150deg,#3B1560,#5B2483 60%,#3A1459)}
+.icici{background:linear-gradient(150deg,#8C3407,#C4611A 62%,#8A3609)}
+.axis{background:linear-gradient(150deg,#6E0F2C,#9C1F46 62%,#6B1029)}
+.dbs{background:linear-gradient(150deg,#8E1019,#C01F2B 62%,#8B1018)}
+.indus{background:linear-gradient(150deg,#4B1020,#7A1D38 62%,#4A0F1F)}
+.grey{background:linear-gradient(150deg,#2C3138,#464D57 62%,#2B3037)}
+.arch{filter:saturate(.18) brightness(.82)}
+
+/* benefit rows */
+.catbar{display:flex;align-items:baseline;gap:10px;margin:22px 0 10px;padding-bottom:7px;
+  border-bottom:1px solid var(--rule)}
+.catbar h4{font-family:var(--serif);font-size:17px}
+.catbar .n{font-family:var(--mono);font-size:11px;color:var(--slate-2);letter-spacing:.08em}
+.catbar .mine{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--accent);background:var(--accent-soft);padding:3px 8px;border-radius:99px}
+.brow{display:grid;grid-template-columns:1fr auto;gap:12px;padding:13px 0;border-bottom:1px solid var(--rule);align-items:start}
+.brow:last-child{border-bottom:0}
+.b-card{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--slate-2)}
+.b-title{font-size:15px;font-weight:600;margin-top:3px}
+.b-val{font-family:var(--mono);font-size:13.5px;color:var(--ink);margin-top:5px;font-variant-numeric:tabular-nums}
+.b-cond{font-size:13px;color:var(--slate);margin-top:3px}
+.b-right{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.state{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;
+  padding:4px 9px;border-radius:99px;white-space:nowrap;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+.state::before{content:"";width:6px;height:6px;border-radius:99px;background:currentColor}
+.s-ok{color:var(--ok);background:var(--ok-bg)}
+.s-warn{color:var(--warn);background:var(--warn-bg)}
+.s-bad{color:var(--bad);background:var(--bad-bg)}
+.asof{font-family:var(--mono);font-size:10.5px;color:var(--slate-2);letter-spacing:.03em}
+.srclink{font-size:12.5px;color:var(--accent);text-decoration:underline;text-underline-offset:2px}
+
+/* detail panel */
+.detail{border:1px solid var(--rule);border-radius:var(--r);padding:18px;background:var(--surface-2);margin-top:6px}
+.dl{display:grid;grid-template-columns:132px 1fr;gap:9px 16px;margin-top:14px;font-size:13.5px}
+.dl dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--slate-2);padding-top:2px}
+.dl dd{margin:0;color:var(--ink)}
+.notclaim{margin-top:14px;border-left:2px solid var(--bad);padding:9px 0 9px 13px;background:var(--bad-bg);
+  border-radius:0 6px 6px 0}
+.notclaim .h{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--bad);font-weight:700}
+.notclaim ul{margin:6px 0 0;padding-left:17px;font-size:13px;color:var(--ink)}
+
+/* onboarding */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:16px}
+.step{border:1px solid var(--rule);border-radius:var(--r);padding:15px;background:var(--surface)}
+.step .k{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--accent);text-transform:uppercase}
+.step h5{margin:7px 0 5px;font-size:14.5px;font-weight:600}
+.step p{font-size:13px;color:var(--slate)}
+.picker{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.pick{font-size:12.5px;padding:6px 10px;border:1px solid var(--rule);border-radius:7px;color:var(--slate);background:var(--surface)}
+.pick.on{border-color:var(--ink);background:var(--ink);color:var(--paper);font-weight:600}
+.pick .tick{color:var(--ok);font-weight:700}
+
+/* reveal / password */
+.modal{border:1px solid var(--rule);border-radius:var(--r);background:var(--surface);
+  box-shadow:var(--shadow);padding:20px;max-width:400px}
+.modal h4{font-family:var(--serif);font-size:19px}
+.field{margin-top:13px}
+.field label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--slate-2);display:block}
+.input{margin-top:5px;border:1px solid var(--rule);border-radius:7px;padding:9px 12px;background:var(--surface-2);
+  font-family:var(--mono);font-size:14px;color:var(--slate-2);letter-spacing:.2em}
+.seg{display:flex;gap:0;margin-top:6px;border:1px solid var(--rule);border-radius:7px;overflow:hidden;width:fit-content}
+.seg span{font-size:12.5px;padding:6px 14px;color:var(--slate)}
+.seg span.on{background:var(--ink);color:var(--paper);font-weight:600}
+.btn{margin-top:15px;display:inline-block;background:var(--accent);color:#fff;border-radius:7px;
+  padding:10px 18px;font-size:14px;font-weight:600}
+.btn.ghost{background:none;color:var(--slate);border:1px solid var(--rule);margin-left:8px}
+.revealed{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:11px 13px;
+  border:1px solid var(--rule);border-radius:8px;background:var(--surface-2);margin-top:9px}
+.revealed .v{font-family:var(--mono);font-size:15px;letter-spacing:.15em;font-variant-numeric:tabular-nums}
+.revealed .k{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--slate-2)}
+.timer{font-family:var(--mono);font-size:11px;color:var(--warn);letter-spacing:.06em;white-space:nowrap}
+
+/* spec notes */
+.spec{margin-top:16px;border-left:2px solid var(--accent);padding-left:16px}
+.spec h5{font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--accent);margin:0 0 8px}
+.spec ol{margin:0;padding-left:19px;color:var(--slate);font-size:13.5px}
+.spec li{margin-bottom:5px}
+.spec b{color:var(--ink);font-weight:600}
+code{font-family:var(--mono);font-size:.88em;background:var(--surface-2);padding:1px 5px;border-radius:4px;
+  border:1px solid var(--rule)}
+
+/* rules table */
+.rules{width:100%;border-collapse:collapse;margin-top:14px;font-size:13.5px}
+.rules th{text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--slate-2);border-bottom:1px solid var(--ink);padding:0 12px 7px 0;font-weight:600}
+.rules td{padding:10px 12px 10px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+.rules td:first-child{color:var(--bad);font-weight:600;width:33%}
+.scroller{overflow-x:auto}
+
+@media (max-width:760px){
+  .wrap{padding:26px 16px 60px}
+  .app{grid-template-columns:1fr}
+  .rail{flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px;padding:11px}
+  .rail .brand,.rail .foot{display:none}
+  .dl{grid-template-columns:1fr;gap:3px 0}
+  .dl dd{margin-bottom:7px}
+  .brow{grid-template-columns:1fr}
+  .b-right{align-items:flex-start;text-align:left;flex-direction:row;flex-wrap:wrap}
+}
+</style>
+
+<div class="wrap">
+
+  <div class="masthead">
+    <div>
+      <p class="eyebrow">Design specification · for implementation</p>
+      <h1>MyCard&nbsp;Benefits</h1>
+      <p class="sub">A local-first wallet that answers one question well: <em>what do my cards actually
+      get me, and can I trust the answer?</em> Four screens. Every claim carries its evidence.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px">
+      <button class="themebtn" id="tt" type="button">Theme</button>
+      <p class="stamp">10 Aug 2026<br>72 cards · 61 benefits · 57 sources</p>
+    </div>
+  </div>
+
+  <!-- ══ 1 ONBOARDING ══ -->
+  <section class="plate">
+    <div class="plate-head"><span class="plate-num">01</span><h2>Onboarding — get every card in, fast</h2></div>
+    <p class="plate-note">The vault starts empty. The whole job of this screen is to get a real wallet
+      in without 80 separate form submissions. Pick issuers, then tick products. No password is asked
+      for anywhere in this flow.</p>
+
+    <div class="screen">
+      <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="addr">127.0.0.1:8777</span></div>
+      <div class="app">
+        <div class="rail">
+          <div class="brand">MyCard<b>Benefits</b></div>
+          <a class="navi on" href="#">Setting up</a>
+          <div class="foot">LOCAL ONLY<br>127.0.0.1</div>
+        </div>
+        <div class="body">
+          <h3>Add your cards</h3>
+          <p class="lede">Tick everything in your wallet. You can add details later — nothing is required now.</p>
+
+          <div class="steps">
+            <div class="step"><span class="k">Step 1</span><h5>Pick your banks</h5>
+              <p>Narrows 72 products to the ones you could plausibly hold.</p></div>
+            <div class="step"><span class="k">Step 2</span><h5>Tick your cards</h5>
+              <p>Multi-select. Added in one action, not one at a time.</p></div>
+            <div class="step"><span class="k">Step 3</span><h5>Last 4, optional</h5>
+              <p>Only so you can tell two of the same product apart.</p></div>
+          </div>
+
+          <div class="toolbar" style="margin-top:22px">
+            <span class="chip sel">HDFC</span><span class="chip sel">ICICI</span><span class="chip sel">Axis</span>
+            <span class="chip">DBS</span><span class="chip sel">IndusInd</span><span class="chip">SBI</span>
+            <span class="chip">Kotak</span><span class="chip">+ 9 more</span>
+          </div>
+
+          <div class="catbar"><h4>HDFC Bank</h4><span class="n">8 PRODUCTS</span></div>
+          <div class="picker">
+            <span class="pick on"><span class="tick">✓</span> Regalia Gold Credit Card</span>
+            <span class="pick on"><span class="tick">✓</span> Tata Neu Infinity RuPay Select</span>
+            <span class="pick on"><span class="tick">✓</span> Millennia Credit Card</span>
+            <span class="pick">Swiggy Mastercard</span>
+            <span class="pick">Pixel Credit Card</span>
+            <span class="pick">Millennia Debit Card</span>
+          </div>
+
+          <div class="catbar"><h4>ICICI Bank</h4><span class="n">14 PRODUCTS</span></div>
+          <div class="picker">
+            <span class="pick on"><span class="tick">✓</span> Amazon Pay Visa Credit Card</span>
+            <span class="pick on"><span class="tick">✓</span> Coral Visa Platinum</span>
+            <span class="pick">Sapphiro Mastercard</span>
+            <span class="pick">Rubyx Credit Card</span>
+          </div>
+
+          <div style="margin-top:20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+            <span class="btn">Add 5 cards</span>
+            <span class="count">NOTHING LEAVES THIS COMPUTER</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spec"><h5>Build notes</h5><ol>
+      <li>Issuer chips filter the product list. <b>Multi-select, one submit</b> — never one form per card.</li>
+      <li>No credential is requested at any point in onboarding. The vault is created unlocked.</li>
+      <li>Last-4 is a follow-up prompt after adding, never a blocker.</li>
+      <li>Skipping entirely is allowed — the catalog is browsable with zero cards.</li>
+    </ol></div>
+  </section>
+
+  <!-- ══ 2 MY CARDS ══ -->
+  <section class="plate">
+    <div class="plate-head"><span class="plate-num">02</span><h2>My Cards — recognisable at a glance</h2></div>
+    <p class="plate-note">The old build rendered 80 identical text rows reading “Last four unavailable”.
+      Here the card <em>is</em> the object: issuer colourway, network mark, lifecycle pip, benefit count.
+      This is the only place saturated colour appears in the entire product — which is exactly why it works.</p>
+
+    <div class="screen">
+      <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="addr">127.0.0.1:8777/#cards</span></div>
+      <div class="app">
+        <div class="rail">
+          <div class="brand">MyCard<b>Benefits</b></div>
+          <a class="navi on" href="#">My Cards</a>
+          <a class="navi" href="#">Benefits</a>
+          <a class="navi" href="#">Search</a>
+          <a class="navi" href="#">Settings</a>
+          <div class="foot">UNLOCKED<br>LOCAL ONLY</div>
+        </div>
+        <div class="body">
+          <h3>My Cards</h3>
+          <p class="lede">20 in use · 60 archived · 13 with benefits recorded</p>
+
+          <div class="toolbar">
+            <span class="chip sel">In use</span><span class="chip">Archived</span>
+            <span class="chip">Credit</span><span class="chip">Debit</span>
+            <span class="chip">Has lounge</span><span class="chip">Has movie</span>
+            <span class="chip">HDFC ▾</span><span class="chip">RuPay ▾</span>
+            <span class="search">Search your cards…</span>
+          </div>
+
+          <div class="cards">
+            <div class="pcard hdfc">
+              <div class="pc-top"><span class="pc-iss">HDFC Bank</span><span class="pc-pip">In use</span></div>
+              <div><p class="pc-name">Regalia Gold</p><p class="pc-ben">17 BENEFITS · 2 CONFLICTS</p></div>
+              <div class="pc-bot"><span class="pc-num">•••• 4417</span><span class="pc-net">VISA</span></div>
+            </div>
+            <div class="pcard tata">
+              <div class="pc-top"><span class="pc-iss">HDFC Bank</span><span class="pc-pip">In use</span></div>
+              <div><p class="pc-name">Tata Neu Infinity</p><p class="pc-ben">9 BENEFITS · 1 VERIFIED</p></div>
+              <div class="pc-bot"><span class="pc-num none">Add last 4</span><span class="pc-net">RUPAY</span></div>
+            </div>
+            <div class="pcard hdfc">
+              <div class="pc-top"><span class="pc-iss">HDFC Bank</span><span class="pc-pip">In use</span></div>
+              <div><p class="pc-name">Millennia</p><p class="pc-ben">8 BENEFITS</p></div>
+              <div class="pc-bot"><span class="pc-num">•••• 0912</span><span class="pc-net">MC</span></div>
+            </div>
+            <div class="pcard icici">
+              <div class="pc-top"><span class="pc-iss">ICICI Bank</span><span class="pc-pip">In use</span></div>
+              <div><p class="pc-name">Amazon Pay</p><p class="pc-ben">NO BENEFITS RECORDED</p></div>
+              <div class="pc-bot"><span class="pc-num">•••• 3388</span><span class="pc-net">VISA</span></div>
+            </div>
+            <div class="pcard indus">
+              <div class="pc-top"><span class="pc-iss">IndusInd</span><span class="pc-pip">In use</span></div>
+              <div><p class="pc-name">Legend Visa</p><p class="pc-ben">1 BENEFIT · SOURCES DIFFER</p></div>
+              <div class="pc-bot"><span class="pc-num">•••• 7701</span><span class="pc-net">VISA</span></div>
+            </div>
+            <div class="pcard grey arch">
+              <div class="pc-top"><span class="pc-iss">Axis Bank</span><span class="pc-pip">Archived</span></div>
+              <div><p class="pc-name">MY ZONE</p><p class="pc-ben">KEPT FOR HISTORY</p></div>
+              <div class="pc-bot"><span class="pc-num none">No digits</span><span class="pc-net">—</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spec"><h5>Build notes</h5><ol>
+      <li>True <code>aspect-ratio:1.586</code>. Colourway is <b>generated from the issuer id</b>, not hand-assigned — new issuers must work automatically.</li>
+      <li>A card with no last-4 shows <b>“Add last 4”</b> as an affordance, never “unavailable” as an error.</li>
+      <li>Archived cards desaturate and drop to the end. Archived is history, not a problem.</li>
+      <li>Benefit count on the face is the honest hook — including <b>“No benefits recorded”</b>, which is a content gap, not a failure.</li>
+      <li>Filters are real controls in the main toolbar, never behind a mode toggle.</li>
+    </ol></div>
+  </section>
+
+  <!-- ══ 3 BENEFITS ══ -->
+  <section class="plate">
+    <div class="plate-head"><span class="plate-num">03</span><h2>Benefits — by category, yours first</h2></div>
+    <p class="plate-note">Two axes in one list. Your cards lead each category; the rest of the catalog
+      follows underneath. Every single row carries a state chip and an as-of date, so the epistemology
+      is learned by scanning rather than by reading a paragraph of disclaimers.</p>
+
+    <div class="screen">
+      <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="addr">127.0.0.1:8777/#benefits</span></div>
+      <div class="app">
+        <div class="rail">
+          <div class="brand">MyCard<b>Benefits</b></div>
+          <a class="navi" href="#">My Cards</a>
+          <a class="navi on" href="#">Benefits</a>
+          <a class="navi" href="#">Search</a>
+          <a class="navi" href="#">Settings</a>
+          <div class="foot">UNLOCKED<br>LOCAL ONLY</div>
+        </div>
+        <div class="body">
+          <h3>Benefits</h3>
+          <p class="lede">Grouped by what you'd actually go looking for.</p>
+
+          <div class="toolbar">
+            <span class="chip sel">My cards only</span><span class="chip">All 72 cards</span>
+            <span class="chip">Lounge 8</span><span class="chip">Movie 12</span><span class="chip">Rewards 9</span>
+            <span class="chip">Dining 4</span><span class="chip">Cashback 2</span><span class="chip">Vouchers 5</span>
+          </div>
+
+          <div class="catbar"><h4>Airport lounge</h4><span class="mine">On your cards</span><span class="n">3 OF 8</span></div>
+
+          <div class="brow">
+            <div>
+              <p class="b-card">Tata Neu Infinity · RuPay Select</p>
+              <p class="b-title">Domestic lounge voucher milestone</p>
+              <p class="b-val">2 vouchers per qualifying quarter</p>
+              <p class="b-cond">Needs ₹50,000 eligible net posted spend in that calendar quarter. Claim within 120 days.</p>
+            </div>
+            <div class="b-right"><span class="state s-ok">Verified</span>
+              <span class="asof">HDFC · 10 Aug 26</span><a class="srclink" href="#">Official terms</a></div>
+          </div>
+
+          <div class="brow">
+            <div>
+              <p class="b-card">HDFC Regalia Gold</p>
+              <p class="b-title">Domestic lounge access</p>
+              <p class="b-val">Up to 3 visits per quarter</p>
+              <p class="b-cond">Source is linked but current terms are unconfirmed. Check before you travel.</p>
+            </div>
+            <div class="b-right"><span class="state s-warn">Check before use</span>
+              <span class="asof">HDFC · 9 Aug 26</span><a class="srclink" href="#">Official terms</a></div>
+          </div>
+
+          <div class="brow">
+            <div>
+              <p class="b-card">HDFC Regalia Gold</p>
+              <p class="b-title">International lounge access via Priority Pass</p>
+              <p class="b-val">Up to 6 visits per year</p>
+              <p class="b-cond">Guest access is not recorded in the source. Treat as unknown.</p>
+            </div>
+            <div class="b-right"><span class="state s-warn">Check before use</span>
+              <span class="asof">HDFC · 9 Aug 26</span><a class="srclink" href="#">Official terms</a></div>
+          </div>
+
+          <div class="catbar"><h4>Movie &amp; entertainment</h4><span class="mine">On your cards</span><span class="n">4 OF 12</span></div>
+
+          <div class="brow">
+            <div>
+              <p class="b-card">IndusInd Legend Visa</p>
+              <p class="b-title">BookMyShow buy-one-get-one</p>
+              <p class="b-val">1 free ticket · second ticket capped at ₹200</p>
+              <p class="b-cond">Two recorded sources disagree on the monthly limit. Read the current terms first.</p>
+            </div>
+            <div class="b-right"><span class="state s-bad">Sources differ</span>
+              <span class="asof">BookMyShow · 8 Aug 26</span><a class="srclink" href="#">Official terms</a></div>
+          </div>
+
+          <div class="brow">
+            <div>
+              <p class="b-card">HDFC Millennia</p>
+              <p class="b-title">Accelerated CashPoints on eligible merchants</p>
+              <p class="b-val">5% CashPoints · capped at 1,000 a month</p>
+              <p class="b-cond">Non-EMI transactions at eligible merchants only.</p>
+            </div>
+            <div class="b-right"><span class="state s-warn">Check before use</span>
+              <span class="asof">HDFC · 9 Aug 26</span><a class="srclink" href="#">Official terms</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spec"><h5>Build notes</h5><ol>
+      <li>Category groups, never one flat alphabetical list. Owned cards lead every group.</li>
+      <li><b>Three states only</b> — Verified / Check before use / Sources differ. Never the word “Activated”.</li>
+      <li>The headline value is chosen by a <b>per-category priority</b>, never <code>sorted(allowance)[0]</code>. Lounge leads with visits, rewards with the rate, fees with the amount.</li>
+      <li>Decimals survive: <b>5%</b>, <b>0.5 airmiles</b>, <b>$3.25</b> — never <code>0 5</code>.</li>
+      <li>Unknowns are stated as unknown (“Guest access is not recorded”), never omitted or guessed.</li>
+    </ol></div>
+  </section>
+
+  <!-- ══ 4 SEARCH ══ -->
+  <section class="plate">
+    <div class="plate-head"><span class="plate-num">04</span><h2>Search — one box, both axes</h2></div>
+    <p class="plate-note">The question Hari asked out loud: <em>“which of my cards gives free meet-and-greet?”</em>
+      When there's no data, the honest answer is a real answer — say what's missing and why, never
+      “no matching benefit found”.</p>
+
+    <div class="screen">
+      <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="addr">127.0.0.1:8777/#search</span></div>
+      <div class="app">
+        <div class="rail">
+          <div class="brand">MyCard<b>Benefits</b></div>
+          <a class="navi" href="#">My Cards</a>
+          <a class="navi" href="#">Benefits</a>
+          <a class="navi on" href="#">Search</a>
+          <a class="navi" href="#">Settings</a>
+          <div class="foot">UNLOCKED<br>LOCAL ONLY</div>
+        </div>
+        <div class="body">
+          <div class="toolbar" style="margin-top:0">
+            <span class="search" style="font-family:var(--sans);color:var(--ink);font-size:15px">movie ticket discount</span>
+            <span class="chip sel">My cards</span><span class="chip">Everything</span>
+          </div>
+          <p class="count">4 ON YOUR CARDS · 8 ELSEWHERE IN THE CATALOG</p>
+
+          <div class="brow" style="border-top:1px solid var(--rule);margin-top:10px">
+            <div>
+              <p class="b-card">IndusInd Legend Visa · in use</p>
+              <p class="b-title">BookMyShow buy-one-get-one</p>
+              <p class="b-val">1 free ticket · second capped ₹200 · 1 use a month</p>
+              <p class="b-cond">Buy at least 2 tickets on BookMyShow web or app.</p>
+            </div>
+            <div class="b-right"><span class="state s-bad">Sources differ</span><span class="asof">8 Aug 26</span></div>
+          </div>
+
+          <div class="detail">
+            <p class="eyebrow">Selected · what you need to know</p>
+            <h4 style="font-family:var(--serif);font-size:19px;margin-top:6px">BookMyShow buy-one-get-one</h4>
+            <dl class="dl">
+              <dt>Most you get</dt><dd>One free ticket, with the second capped at ₹200.</dd>
+              <dt>To qualify</dt><dd>Book two or more tickets in a single transaction.</dd>
+              <dt>How to claim</dt><dd>Pay with the card on BookMyShow's site or app. The discount applies at checkout — no code, no reimbursement.</dd>
+              <dt>Guests</dt><dd>Not recorded in the source.</dd>
+              <dt>Evidence</dt><dd>BookMyShow offer page · retrieved 8 Aug 2026 · content hash recorded</dd>
+            </dl>
+            <div class="notclaim"><span class="h">This is not claimed</span>
+              <ul><li>Unlimited monthly use — one source says once a month, another is silent</li>
+                  <li>Any IMAX or premium-format guarantee</li></ul></div>
+          </div>
+
+          <div class="catbar" style="margin-top:24px"><h4>Meet &amp; greet</h4><span class="n">NO DATA YET</span></div>
+          <div class="brow">
+            <div>
+              <p class="b-title">Nothing recorded for any of your cards</p>
+              <p class="b-cond">MyCard has no verified meet-and-greet terms yet — for your cards or any of the
+                other 72. This is missing research, not a “no”. Your card may still offer it; check the issuer directly.</p>
+            </div>
+            <div class="b-right"><span class="state s-warn">Not researched</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spec"><h5>Build notes</h5><ol>
+      <li>One index spans owned and catalog. The scope toggle is <b>always visible</b>, never behind contributor mode.</li>
+      <li>Empty results distinguish <b>“no data collected”</b> from <b>“your cards don't have this”</b>. Those are different answers.</li>
+      <li>Detail always answers: most you get · to qualify · how to claim · guests · evidence.</li>
+      <li><b>“This is not claimed”</b> renders the source's <code>not_claimed</code> list. This is the product's spine — the reason a fabricated “8 vouchers per year” can never reappear.</li>
+    </ol></div>
+  </section>
+
+  <!-- ══ 5 REVEAL ══ -->
+  <section class="plate">
+    <div class="plate-head"><span class="plate-num">05</span><h2>Full details — the only locked door</h2></div>
+    <p class="plate-note">Everything above works with no credential at all. A PIN or passphrase is asked
+      for exactly once, the first time you reveal a card number, and reused silently after that. Nothing
+      else in the app is ever gated.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:18px">
+      <div>
+        <p class="eyebrow" style="margin-bottom:9px">First reveal, ever</p>
+        <div class="modal">
+          <h4>Create a code for card details</h4>
+          <p style="font-size:13.5px;color:var(--slate);margin-top:7px">You'll be asked for this whenever you
+            show a full card number, CVV or PIN. Nothing else needs it.</p>
+          <div class="field"><label>Use a</label>
+            <div class="seg"><span class="on">6-digit PIN</span><span>Passphrase</span></div></div>
+          <div class="field"><label>Your PIN</label><div class="input">••••••</div></div>
+          <div class="field"><label>Confirm</label><div class="input">••••••</div></div>
+          <div><span class="btn">Create &amp; show details</span></div>
+          <p style="font-size:12px;color:var(--slate-2);margin-top:11px">Stored only on this computer. If you
+            lose it, card details can't be recovered — the rest of the app keeps working.</p>
+        </div>
+      </div>
+
+      <div>
+        <p class="eyebrow" style="margin-bottom:9px">Revealed · every time after</p>
+        <div class="modal">
+          <h4>Regalia Gold</h4>
+          <p style="font-size:13px;color:var(--slate);margin-top:5px">Hidden again in 30 seconds.</p>
+          <div class="revealed"><div><span class="k">Card number</span>
+            <div class="v">4317 •••• •••• 4417</div></div><span class="timer">COPY · 0:28</span></div>
+          <div class="revealed"><div><span class="k">Expiry</span><div class="v">08 / 29</div></div>
+            <span class="timer">COPY</span></div>
+          <div class="revealed"><div><span class="k">CVV</span><div class="v">•••</div></div>
+            <span class="timer">SHOW</span></div>
+          <div><span class="btn ghost" style="margin-left:0">Hide now</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spec"><h5>Build notes</h5><ol>
+      <li><b>No default credential ships in the repository.</b> A fresh clone has none; the user creates theirs on first reveal.</li>
+      <li>PIN minimum 6 digits. Argon2id at high cost, escalating delay and lockout on repeated failure.</li>
+      <li>Copy writes to the clipboard and <b>auto-clears</b>, with the countdown visible. Fields re-hide on a timer and on tab blur.</li>
+      <li>Changing the code requires the current one. Plaintext never touches a log, a tracked file, or a prompt.</li>
+      <li>This modal is the <em>only</em> credential surface in the product. There is no lock/unlock state anywhere else.</li>
+    </ol></div>
+  </section>
+
+  <!-- ══ RULES ══ -->
+  <section class="plate">
+    <div class="plate-head"><span class="plate-num">06</span><h2>Seven things that must never come back</h2></div>
+    <p class="plate-note">Each of these was verified in the previous build. They are the reason it lost
+      trust, and they are all easy to recreate by accident.</p>
+    <div class="scroller">
+      <table class="rules">
+        <thead><tr><th>Never</th><th>What went wrong before</th><th>Instead</th></tr></thead>
+        <tbody>
+          <tr><td>Invent an entitlement</td><td>Rendered “8 vouchers per year” while that rule's own <code>not_claimed</code> rejected exactly that.</td><td>Suppress anything the source contradicts; show <code>not_claimed</code> openly.</td></tr>
+          <tr><td>Mangle a number</td><td><code>"0.5"</code> printed as <code>0 5</code> — readable as 5, a tenfold overstatement.</td><td>Coerce numerics before formatting. Decimals survive intact.</td></tr>
+          <tr><td>Call archived “active”</td><td>Said “an active local card matches” about an archived card.</td><td>Ownership carries lifecycle; copy derives from it.</td></tr>
+          <tr><td>Leak machine language</td><td><code>calendar_quarter.eligible_net_posted_spend_inr gte 50000</code>, <code>Cap: 2</code>.</td><td>Closed label map. No label means it doesn't render.</td></tr>
+          <tr><td>Pick a headline alphabetically</td><td>Lounge led with “Claim within 120 days” instead of the voucher count.</td><td>Per-category priority order.</td></tr>
+          <tr><td>Ship a control that can't work</td><td>A purchase form that always answered “not available yet”; seven buttons that always said “no match”.</td><td>If it can't answer, it doesn't exist.</td></tr>
+          <tr><td>Claim a remaining count</td><td>Implied visits remained when usage was never tracked.</td><td>Show the allowance, the condition, and the source.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <p style="margin-top:52px;padding-top:18px;border-top:1px solid var(--rule);font-size:12.5px;color:var(--slate-2)">
+    Companion documents: <code>docs/REBUILD-BRIEF-2026-08-10.md</code> ·
+    <code>docs/CLAUDE-FINAL-PRODUCT-REVIEW-2026-08-10.md</code>
+  </p>
+</div>
+
+<script>
+(function(){
+  var b=document.getElementById('tt');
+  b.addEventListener('click',function(){
+    var cur=document.documentElement.getAttribute('data-theme');
+    if(!cur){cur=window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';}
+    document.documentElement.setAttribute('data-theme',cur==='dark'?'light':'dark');
+  });
+})();
+</script>

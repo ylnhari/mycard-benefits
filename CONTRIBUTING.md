@@ -10,7 +10,9 @@ Contributions are welcome after the foundation milestone. Read `AGENTS.md` and
 - Do not copy source prose, screenshots, PDFs, logos, or bulk catalogs.
 - Do not automate a source until its admission record allows it.
 - Add tests and update durable task/status records.
-- A contributor or agent cannot approve its own catalog assertion.
+- One dated human approval is sufficient for activation; a second human review
+  may be recommended for enhanced, ambiguous, or high-impact claims but is not
+  mandatory. A contributor or agent cannot approve its own catalog assertion.
 
 No pull request may contain credentials, private records, raw evidence, local
 machine paths, or generated runtime state.

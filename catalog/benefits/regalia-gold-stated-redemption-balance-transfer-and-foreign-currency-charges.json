@@ -1,0 +1,53 @@
+{
+  "id": "292f1356-253a-5288-aebc-319a00d15fd6",
+  "offering_id": "83a6036e-bd88-5cb8-aa8f-676521050f68",
+  "title": "Regalia Gold stated redemption, balance-transfer and foreign-currency charges",
+  "benefit_type": "other",
+  "category": "other",
+  "allowance": {
+    "foreign_currency_markup_percent": 2,
+    "reward_redemption_fee_inr": 99,
+    "balance_transfer_fee": "one percent or INR 250, whichever is higher",
+    "dynamic_currency_conversion_markup_percent": "1.75"
+  },
+  "eligibility": [],
+  "conditions": [],
+  "exclusions": [],
+  "redemption_steps": [],
+  "provider": null,
+  "effective_from": "2026-05-15",
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/regalia-gold-credit-card/pdfs/regalia-gold-credit-card-reward-points-t-and-cs.pdf",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "5586294b59cd369eb9012e4b93f4f066dc0ca5a5208d4484a2b32ee9067ed9db",
+  "retrieved_at": "2026-08-09T18:35:43Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.hdfc.bank.in/credit-cards/regalia-gold-credit-card",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "06a79a11c0db2f8b372be5eea6e4f0147297ccb1773acd5895cf5a181eb99160",
+      "retrieved_at": "2026-08-09T18:35:41Z",
+      "id": "f21ca056-6d72-5b33-8d74-0e6e0fa8bfc8",
+      "confidence": "high"
+    },
+    {
+      "source_url": "https://www.hdfc.bank.in/credit-cards/regalia-gold-credit-card/fees-and-charges",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "fb5ff7c96ba5aa7e38100c8c78ef422fd622eff2820304f5ea5bb5487611e645",
+      "retrieved_at": "2026-08-09T18:35:42Z",
+      "id": "9d6de74f-caa3-5a5a-b1f6-ba9f38264cca",
+      "confidence": "high"
+    },
+    {
+      "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/regalia-gold-credit-card/pdfs/regalia-gold-credit-card-reward-points-t-and-cs.pdf",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "5586294b59cd369eb9012e4b93f4f066dc0ca5a5208d4484a2b32ee9067ed9db",
+      "retrieved_at": "2026-08-09T18:35:43Z",
+      "id": "b8a3c2ee-c37b-537d-8b85-f14c8a1238d2",
+      "confidence": "high",
+      "effective_from": "2026-05-15"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+name: Opt-in live source checks
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_live_source_checks:
+        description: "Run the separate, non-blocking live-check harness"
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  live-source-checks:
+    if: ${{ inputs.run_live_source_checks == true }}
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    env:
+      MYCARD_BENEFITS_ENABLE_LIVE_CHECKS: "1"
+      MYCARD_BENEFITS_NO_DOTENV: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen --all-groups
+      - run: uv run --no-sync python scripts/check_live_sources.py

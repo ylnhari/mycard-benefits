@@ -1,0 +1,56 @@
+{
+  "id": "b3000001-0000-4000-8000-000000000004",
+  "offering_id": "3eeb4094-d452-5a33-9061-0e8999cd6c89",
+  "title": "Tata Neu Infinity NeuCoins transfer and redemption",
+  "benefit_type": "conversion",
+  "category": "conversion",
+  "allowance": {
+    "neucoins_per_inr": 1,
+    "bank_transfer_target_days_after_statement": 7
+  },
+  "eligibility": [
+    {
+      "field": "redemption.channel",
+      "operator": "in",
+      "value": [
+        "tata_pay",
+        "neucoins",
+        "loyalty_redemption"
+      ]
+    }
+  ],
+  "conditions": [],
+  "exclusions": [],
+  "redemption_steps": [],
+  "provider": null,
+  "effective_from": "2025-06-01",
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/tata-neu-infinity-credit-card/pdf/tata_neu_infinity_card_faq.pdf",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "a73fb7151b84ad90793a203e4e8c4aa34d003f64b04e0e1632e9aa87d519abbb",
+  "retrieved_at": "2026-08-09T18:36:39Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.hdfc.bank.in/credit-cards/tata-neu-infinity-hdfc-bank-credit-card",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "023c1924596467117f3acfb0be39223551a7020bd3561b535fdfd285768f0fd7",
+      "retrieved_at": "2026-08-09T18:36:39Z",
+      "id": "0e67692e-3869-5441-9877-fc67701101f2",
+      "source_observation_id": "c3da4579-2503-5f2c-91e2-c617421d706e",
+      "confidence": "high",
+      "effective_from": "2025-06-01"
+    },
+    {
+      "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/tata-neu-infinity-credit-card/pdf/tata_neu_infinity_card_faq.pdf",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "a73fb7151b84ad90793a203e4e8c4aa34d003f64b04e0e1632e9aa87d519abbb",
+      "retrieved_at": "2026-08-09T18:36:39Z",
+      "id": "3f6cd866-9313-5195-a617-eb239a8fe69b",
+      "source_observation_id": "54e360bf-3e2d-5682-8dd8-77584da916c7",
+      "confidence": "high",
+      "effective_from": "2025-07-15"
+    }
+  ]
+}

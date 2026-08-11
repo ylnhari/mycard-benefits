@@ -1,0 +1,12 @@
+.git
+.venv
+.env
+data
+demo-data
+imports
+*.sqlite3
+*.vault
+logs
+coordination
+tests
+__pycache__

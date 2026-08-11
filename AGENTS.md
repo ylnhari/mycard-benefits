@@ -20,8 +20,9 @@ personal card records are private, local, and encrypted.
 4. Do not bypass authentication, CAPTCHA, robots restrictions, access controls,
    rate limits, or source terms. Block and report instead.
 5. Source agents create candidates only. Publishing a catalog change requires
-   approval by a human reviewer; ambiguous or high-impact claims require two
-   independent human reviewers. Agents may assist review but cannot approve.
+   approval by a human reviewer. A second independent human reviewer may be
+   recommended for enhanced, high-impact, or ambiguous claims, but is not a
+   mandatory activation gate. Agents may assist review but cannot approve.
 6. No purchase, card application, booking, redemption, upload, paid model call,
    public remote, push, or publication without its explicit gate. A gate is a
    dated human approval naming the exact action, transcribed to
@@ -51,18 +52,34 @@ default. Read `docs/SOURCE-POLICY.md` before adding a source or adapter.
 
 ## Agent coordination
 
-- Read `PROJECT_STATUS.md`, `DECISIONS.md`, and the assigned file under
-  `coordination/tasks/` before starting.
+- Read `CONTINUE-HERE.md`, `PROJECT_STATUS.md`, `DECISIONS.md`, and the
+  relevant entries in `TASKS.md` before starting.
 - For bounded public-code or public-research work, prefer the lowest-cost
   verified capable runner in this order: the owner's authenticated Claude Code
   subscription, the locally listed `opencode/deepseek-v4-flash-free` route,
   then smaller host workers. Reserve the primary agent for intent, security
   judgment, integration, and verification. Verify runner/model identity at
   each use; never use `--dangerously-skip-permissions`.
+- When delegating to Codex, resume the existing session rather than starting a
+  fresh one: `codex exec --sandbox <mode> -m <model> -o <file> resume <id>
+  "prompt"`. A fresh session re-reads this repository from scratch, costing
+  400–600k tokens and 20–40 minutes, and it does not know any constraint you
+  forget to repeat. Flags must precede `resume`, and `-m` is required or the
+  session silently changes model. Start a fresh session only when a clean
+  context is the point, such as an audit that should not inherit your theory.
+- Never pipe a live Codex run through `tail`; the report is discarded when the
+  process outlives the pipe. Use `--output-last-message`. If a run writes no
+  files and reports it could not proceed, check `~/.codex/models_cache.json`
+  for corruption before diagnosing anything else. Judge liveness from the
+  newest `~/.codex/sessions/**/rollout-*.jsonl`, never from `ps`.
+- Codex reads for 10–15 minutes before its first write on this repository. Do
+  not treat silence as a stall.
 - Append honest job/event state. Do not leave resumable context only in chat.
 - Work only in the assigned files and scope. Stop after 2–3 repeated failures.
 - A worker cannot approve its own change. Provide tests and evidence with every
-  handoff.
+  handoff. Verify a worker's claim by re-running the measurement yourself, and
+  measure what a user sees rather than what the code returns: a green suite has
+  coexisted here with a screen rendering one benefit out of sixty.
 - Claude and other delegated runners receive public code/data only. Quota
   blocks use `deferred_quota`; resume from the on-disk task, not memory.
 
@@ -71,10 +88,7 @@ default. Read `docs/SOURCE-POLICY.md` before adding a source or adapter.
 - Python 3.12, FastAPI, SQLite/SQLAlchemy/Alembic, Jinja, and browser JavaScript.
 - `src/mycard_benefits/catalog/`: catalog loading, validation, rule evaluation.
 - `src/mycard_benefits/vault/`: cryptography and private persistence boundary.
-- `src/mycard_benefits/candidates/`: immutable public candidate review store.
-- `src/mycard_benefits/research/`: offline admitted-source job orchestration.
 - `src/mycard_benefits/optimizer/`: pure purchase-route ranking engine.
-- `src/mycard_benefits/qa/`: deterministic public catalog question answering.
 - `src/mycard_benefits/templates/` and `static/`: human-facing public dashboard.
 - `catalog/`: public authoring sources and generated release inputs.
 - `tests/`: no network, no real data, temporary runtime directories only.
@@ -115,7 +129,9 @@ remote or push without citing that record.
 
 `PRODUCT_REQUIREMENTS.md`, `ROADMAP.md`, `PROJECT_STATUS.md`, `DECISIONS.md`,
 `docs/DECISION-TRACE.md`, `docs/QUESTIONNAIRE-DECISIONS.md`,
-`docs/IDEA-LOG.md`, and the append-only files under `coordination/` describe
-the current project. Update them in the same change whenever implementation,
-requirements, decisions, or resumable job state changes; leaving them stale is
-a defect.
+`docs/IDEA-LOG.md`, `CONTINUE-HERE.md`, and the append-only
+`coordination/events.jsonl` and `coordination/jobs.jsonl` describe the current
+project. Update the relevant living documents in the same change whenever
+implementation, requirements, decisions, or resumable job state changes;
+leaving them stale is a defect. Superseded task briefs and review reports live
+in Git history, not in the working tree.

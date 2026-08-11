@@ -1,0 +1,46 @@
+{
+  "id": "e4646640-d01c-5829-aefb-eb3c8d274afb",
+  "offering_id": "16f59859-681b-5934-8709-037f5fb1fdb0",
+  "title": "HDFC Millennia quarterly milestone choice",
+  "benefit_type": "voucher",
+  "category": "milestone",
+  "allowance": {
+    "choice": [
+      "brand_voucher_inr_1000",
+      "HOI_domestic_lounge_voucher"
+    ],
+    "claim_window_days": 120,
+    "voucher_validity_months": 3
+  },
+  "eligibility": [
+    {
+      "field": "calendar_quarter_net_settled_spend_inr",
+      "operator": "gte",
+      "value": 100000
+    }
+  ],
+  "conditions": [],
+  "exclusions": [],
+  "redemption_steps": [],
+  "provider": null,
+  "effective_from": null,
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/millennia-credit-card/pdf/quarterly-spends-milestone-program.pdf",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "40bcc5bf18067a1c0240f62799762efefa6231bd7f8a1ce077a7ecbef204d36f",
+  "retrieved_at": "2026-08-10T00:00:00Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/millennia-credit-card/pdf/quarterly-spends-milestone-program.pdf",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "40bcc5bf18067a1c0240f62799762efefa6231bd7f8a1ce077a7ecbef204d36f",
+      "retrieved_at": "2026-08-10T00:00:00Z",
+      "id": "e1bb2d0f-392b-53d6-95db-abdbc36d0b79",
+      "source_observation_id": "6babb29d-375d-5612-a931-2af8a0a9a682",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "low"
+    }
+  ]
+}

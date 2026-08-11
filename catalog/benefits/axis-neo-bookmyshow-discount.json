@@ -1,0 +1,53 @@
+{
+  "id": "5ea448b3-7a44-57f0-a3a9-d62f852b3675",
+  "offering_id": "ccc0bef8-14d9-523e-ad39-817060cddd3e",
+  "title": "Axis NEO BookMyShow discount",
+  "benefit_type": "movie",
+  "category": "movie",
+  "allowance": {
+    "discount_percent": 10,
+    "monthly_cap_inr": 100,
+    "period": "month"
+  },
+  "eligibility": [
+    {
+      "field": "checkout.channel",
+      "operator": "in",
+      "value": [
+        "web",
+        "app"
+      ]
+    }
+  ],
+  "conditions": [],
+  "exclusions": [
+    "No automated redemption authorization is implied.",
+    "Unknown stacking remains unapproved unless the terms explicitly support it."
+  ],
+  "redemption_steps": [
+    "Select the named offer at BookMyShow checkout.",
+    "Use the eligible card variant and complete payment.",
+    "Pay applicable processing or internet fees where required."
+  ],
+  "provider": "BookMyShow",
+  "effective_from": null,
+  "effective_to": "2027-03-31",
+  "end_date_known": true,
+  "source_url": "https://in.bookmyshow.com/offers/axis-bank-neo-and-indian-oil-credit-card-offer/AXSIN0324",
+  "source_policy_class": "administering_terms",
+  "content_sha256": "d1ad7786bbaace2fdea927fb36e473baf2f0e97e3ce7e357b4ce4862dce9acd9",
+  "retrieved_at": "2026-08-10T00:00:00Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://in.bookmyshow.com/offers/axis-bank-neo-and-indian-oil-credit-card-offer/AXSIN0324",
+      "source_policy_class": "administering_terms",
+      "content_sha256": "d1ad7786bbaace2fdea927fb36e473baf2f0e97e3ce7e357b4ce4862dce9acd9",
+      "retrieved_at": "2026-08-10T00:00:00Z",
+      "id": "8b4d33d1-73b3-526a-9886-cbd5b5ea0609",
+      "source_observation_id": "da5f09c3-3065-5db8-94e2-a688ea9b32e4",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "low"
+    }
+  ]
+}

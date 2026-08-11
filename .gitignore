@@ -33,3 +33,10 @@ Thumbs.db
 .claude/
 .codex/
 coordination/evidence/private/
+
+# Runtime identity and key material written by ad-hoc runs with a custom data
+# directory. The named runtime paths above do not cover these, so a stray
+# `git add -A` could otherwise commit a private key.
+__synthetic_tmp_never_used__/
+**/installation-identity.json
+**/installation-identity.json.lock

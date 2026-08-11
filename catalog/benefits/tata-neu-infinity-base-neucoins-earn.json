@@ -1,0 +1,47 @@
+{
+  "id": "b3000001-0000-4000-8000-000000000001",
+  "offering_id": "3eeb4094-d452-5a33-9061-0e8999cd6c89",
+  "title": "Tata Neu Infinity base NeuCoins earn",
+  "benefit_type": "reward_points",
+  "category": "reward_points",
+  "allowance": {
+    "partner_tata_non_emi_percent": "5",
+    "other_non_emi_percent": "1.5",
+    "merchant_emi_percent": "1.5"
+  },
+  "eligibility": [
+    {
+      "field": "transaction.kind",
+      "operator": "in",
+      "value": [
+        "non_emi_partner_tata",
+        "non_emi_non_tata",
+        "merchant_emi"
+      ]
+    }
+  ],
+  "conditions": [],
+  "exclusions": [],
+  "redemption_steps": [],
+  "provider": null,
+  "effective_from": "2026-01-03",
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/tata-neu-infinity-credit-card/pdf/tata_neu_infinity_card_tnc.pdf",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "cc667649571b5bc439d9a24c64f2fd3681f5ad24ce50ec0b2a846d215b2f773b",
+  "retrieved_at": "2026-08-09T18:36:39Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/tata-neu-infinity-credit-card/pdf/tata_neu_infinity_card_tnc.pdf",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "cc667649571b5bc439d9a24c64f2fd3681f5ad24ce50ec0b2a846d215b2f773b",
+      "retrieved_at": "2026-08-09T18:36:39Z",
+      "id": "c02dc380-acea-53ea-b87f-05af03ae8989",
+      "source_observation_id": "45870617-0027-5174-ab48-50eadc05f88c",
+      "confidence": "high",
+      "effective_from": "2026-01-03"
+    }
+  ]
+}

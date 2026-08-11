@@ -51,7 +51,7 @@ uv run mycard-vault --keyring import --manifest imports/cards.json --create
 To use another app-owned data root, place the global option before the command:
 
 ```powershell
-uv run mycard-vault --data-dir D:\MyCardData --keyring import --manifest imports/cards.json --create
+uv run mycard-vault --data-dir <data-dir> --keyring import --manifest imports/cards.json --create
 ```
 
 The tool always owns and restricts the `<data-dir>/private` child directory. Do
@@ -73,5 +73,27 @@ Verify integrity and the non-secret record count without revealing fields:
 uv run mycard-vault --keyring verify
 ```
 
-The browser dashboard and HTTP API still do not expose real-card records. This
-CLI is the deliberately narrow initial import surface.
+## Reconcile an existing private inventory
+
+When an owner-authorized local inventory has already been captured, use the
+separate reconciliation manifest rather than importing the same cards again.
+It requires a 32-character opaque `source_identity`, a full PAN in the ignored
+manifest, a lifecycle, an optional confirmed `offering_id` (use `null` when
+unconfirmed), and the other encrypted secret fields. The tool matches by the
+PAN inside the local process, binds an unbound existing record or adds a new
+record with an `unmatched-<source_identity>` offering, and never overwrites an
+existing value. Conflicts fail the complete batch before persistence.
+
+```powershell
+uv run mycard-vault --keyring reconcile --manifest imports/reconciliation.json
+```
+
+The command reports only a count. Repeating the same manifest is idempotent;
+unchanged records do not create another vault revision. Keep this manifest
+ignored and permission-restricted. It must never be pasted into an agent
+prompt, committed, logged, or shown in a screenshot.
+
+The browser dashboard and HTTP API expose only envelope metadata plus a
+server-derived mask such as `•••• 0001` when a valid full PAN is stored. They
+never expose the PAN, CVV, PIN, cardholder name, expiry, source identity, or
+source path.

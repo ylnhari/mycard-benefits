@@ -21,24 +21,21 @@ def test_dashboard_has_all_public_navigation_and_honest_vault_gate(tmp_path: Pat
         page = client.get("/")
 
     assert page.status_code == 200
-    for item in (
-        "Overview",
-        "My Cards",
-        "Benefits",
-        "Ask",
-        "Compare",
-        "Expiring Soon",
-        "Updates",
-        "Sources",
-        "Research Queue",
-        "Settings",
-    ):
+    for item in ("My Cards", "Benefits", "Search", "Settings"):
         assert item in page.text
-    assert 'href="#ask"' in page.text
+    assert 'href="#search"' in page.text
+    assert 'href="#which-card"' not in page.text
     assert "external launcher" not in page.text
-    assert "Secret card fields are never returned" in page.text
-    assert "PAN, CVV, PIN" in page.text
-    assert "disabled" in page.text
+    assert "Card numbers, CVV, PIN, names, notes, and exact expiry details are kept private." in page.text
+    assert "Privacy details" in page.text
+    for removed_id in (
+        'id="vaultControl"',
+        'id="cardSetupPanel"',
+        'id="vaultUnlockPanel"',
+        'id="myCardsBadge"',
+    ):
+        assert removed_id not in page.text
+    assert "Checking access" not in page.text
 
 
 def test_catalog_dashboard_assets_use_read_only_endpoints_and_safe_dom_updates() -> None:
@@ -54,6 +51,14 @@ def test_catalog_dashboard_assets_use_read_only_endpoints_and_safe_dom_updates()
     assert "Companion Dashboard" not in script
     assert "function renderPrivateCards" in script
     assert "textContent" in script
+    for fragment in (
+        "benefit.provider",
+        "benefit.official_reference",
+        "benefit.redemption_steps",
+        "benefit.exclusions",
+        "safeHref(benefit.official_reference)",
+    ):
+        assert fragment in script
     assert "innerHTML" not in script
     assert "insertAdjacentHTML" not in script
     assert 'rel = "noopener noreferrer"' in script
@@ -72,66 +77,10 @@ def test_dashboard_accessibility_follow_up_has_target_sizes_and_focus_fallback()
         in style
     )
     assert "function viewFromHash()" in script
-    assert 'return views.has(requested) ? requested : "overview"' in script
+    assert "legacyViewAliases" in script
     assert "heading.focus({ preventScroll: true })" in script
     assert "showView(initialView);" in script
-    assert "showView(view, { focus: true });" in script
     assert "innerHTML" not in script
-
-
-def test_qa_ui_is_accessible_bounded_and_uses_post_only(tmp_path: Path) -> None:
-    with _client(tmp_path) as client:
-        page = client.get("/")
-    script = (ROOT / "src" / "mycard_benefits" / "static" / "app.js").read_text(encoding="utf-8")
-    style = (ROOT / "src" / "mycard_benefits" / "static" / "app.css").read_text(encoding="utf-8")
-
-    for fragment in (
-        'id="qaForm"',
-        'id="qaQuery"',
-        'maxlength="500"',
-        'id="qaStatus"',
-        'role="status"',
-        'aria-live="polite"',
-        'id="qaResults"',
-    ):
-        assert fragment in page.text
-    assert 'fetch("/api/v1/qa", { method: "POST"' in script
-    assert 'method: "GET"' not in script
-    assert "value.length > 500" in script
-    assert 'event.key === "Enter"' in script and "event.isComposing" in script
-    assert 'event.key === "Escape"' in script
-    assert "submit.disabled = true" in script and 'form.setAttribute("aria-busy", "true")' in script
-    assert "heading.focus({ preventScroll: true })" in script
-    assert "innerHTML" not in script and "insertAdjacentHTML" not in script
-    assert ".qa-controls input" in style and "min-height:44px" in style
-    assert ".qa-controls { display:grid; grid-template-columns:1fr; }" in style
-
-
-def test_qa_renderer_covers_safe_results_examples_and_fallbacks() -> None:
-    script = (ROOT / "src" / "mycard_benefits" / "static" / "app.js").read_text(encoding="utf-8")
-
-    for fragment in (
-        "function renderQaResult",
-        "result.message",
-        "result.benefits",
-        "result.offerings",
-        "result.choices",
-        "result.suggestions",
-        'result.intent === "no_result"',
-        "function qaFactCard",
-        "function qaLink",
-        "safeHref(url)",
-    ):
-        assert fragment in script
-    assert 'link.target = "_blank"' in script and 'link.rel = "noopener noreferrer"' in script
-    assert "Public catalog unavailable — no private fallback is used." in script
-    assert "Unable to answer that question. Try a supported public catalog question." in script
-    assert (
-        "data-qa-example" in script
-        and "function supportedSuggestion" in script
-        and "function qaButton" in script
-    )
-    assert "localStorage" not in script[script.index("function setQaStatus") :]
 
 
 def test_private_cards_rows_join_public_catalog_metadata_without_secret_fallbacks() -> None:
@@ -139,15 +88,14 @@ def test_private_cards_rows_join_public_catalog_metadata_without_secret_fallback
 
     assert "function offeringForCard" in script
     assert "candidate.slug === card.offering_id" in script
-    assert "function privateCardRow" in script
-    assert "offering.issuer_id" in script and "offering.network_id.replaceAll" in script
+    assert "function referenceCardRow" in script
+    assert "cardFaceData(card, offering)" in script
+    assert "offering.issuer_id" in script and "networkLabel(offering?.network_id)" in script
     assert "offering.display_name" in script
     assert "UNMATCHED_CARD_LABEL" in script
     assert '"Unmatched variant"' in script
     assert "card.offering_id.replaceAll" not in script
     assert "Local card" not in script
-    assert "function privateCardDates" in script
-    assert "card.created_at" in script and "card.updated_at" in script
 
 
 def test_private_card_search_covers_product_issuer_network_lifecycle_and_safe_identifiers() -> None:
@@ -164,11 +112,9 @@ def test_private_card_search_covers_product_issuer_network_lifecycle_and_safe_id
         "card.card_id",
     ):
         assert field in script
-    assert (
-        "if (query && !cardSearchText(card, offeringForCard(card)).includes(query)) return false;"
-        in script
-    )
-    assert "if (lifecycle && card.lifecycle !== lifecycle) return false;" in script
+    assert "if (query && !cardSearchText(card, offeringForCard(card)).includes(query)) return false;" in script
+    assert "if (filters.lifecycle.size && !filters.lifecycle.has(card.lifecycle)) return false;" in script
+    assert "if (filters.type.size && !filters.type.has(cardTypeForOffering(offering))) return false;" in script
 
 
 def test_private_cards_empty_and_unavailable_states_are_explicit_and_actionable(
@@ -178,12 +124,10 @@ def test_private_cards_empty_and_unavailable_states_are_explicit_and_actionable(
     with _client(tmp_path) as client:
         page = client.get("/").text
 
-    assert (
-        "No card records are in this vault yet. Import cards with the mycard-vault command line, then return here to see them listed."
-        in script
-    )
+    assert "Your wallet is empty" in script
+    assert "Add my first card" in script
     assert "No cards match the current search and lifecycle filter." in script
-    assert "no fallback data was used" in script
+    assert "Your existing cards have not been changed." in script
     assert "const VAULT_DIAGNOSTICS" in script
     for code in (
         "demo",
@@ -195,20 +139,54 @@ def test_private_cards_empty_and_unavailable_states_are_explicit_and_actionable(
         "generic",
     ):
         assert f"{code}: {{" in script, code
-    assert "mycard-vault --create" in script
-    assert "operating-system keyring" in script
-    assert "passphrase-only" in script
-    assert "--data-dir" in script
-    assert "credential manager or keychain" in script
+    assert 'action: "Try again"' in script
+    assert "function unlockVault" not in script
+    assert "function setupVault" not in script
+    assert "function lockVault" not in script
+    assert "mycard-vault --create" not in script
+    assert "credential manager or keychain" not in script
     assert 'typeof body.detail === "object"' in script
     assert "VAULT_DIAGNOSTICS[code] || VAULT_DIAGNOSTICS.generic" in script
     assert "This card's product identifier has no match in the public catalog." in script
-    assert "secret_fields" not in script
+    assert "secret_fields: secretFieldsFrom" in script
     assert 'id="myCardList"' in page and 'aria-live="polite"' in page
     assert "Product, bank, network, or status" in page
 
 
-def test_private_cards_keep_read_only_boundary_and_browser_cache_policy() -> None:
+def test_device_bootstrap_render_contract_has_no_vault_credential_surface() -> None:
+    script = (ROOT / "src" / "mycard_benefits" / "static" / "app.js").read_text(
+        encoding="utf-8"
+    )
+    template = (ROOT / "src" / "mycard_benefits" / "templates" / "index.html").read_text(
+        encoding="utf-8"
+    )
+    for removed_id in (
+        "vaultControl",
+        "cardSetupPanel",
+        "vaultUnlockPanel",
+        "myCardsBadge",
+    ):
+        assert f'id="{removed_id}"' not in template
+        assert f'#{removed_id}' not in script
+    assert "function unlockVault" not in script
+    assert "function setupVault" not in script
+    assert "function lockVault" not in script
+    assert "function setPrivateUnavailable" in script
+    assert "setProtectedActionAvailability(true)" in script
+
+
+def test_private_card_reload_has_no_dangling_vault_controls() -> None:
+    script = (ROOT / "src" / "mycard_benefits" / "static" / "app.js").read_text(encoding="utf-8")
+    for selector in (
+        'document.querySelector("#vaultControl")',
+        'document.querySelector("#cardSetupPanel")',
+        'document.querySelector("#vaultUnlockPanel")',
+        'document.querySelector("#myCardsBadge")',
+    ):
+        assert selector not in script
+
+
+def test_private_cards_keep_protected_boundary_and_browser_cache_policy() -> None:
     script = (ROOT / "src" / "mycard_benefits" / "static" / "app.js").read_text(encoding="utf-8")
     template = (ROOT / "src" / "mycard_benefits" / "templates" / "index.html").read_text(
         encoding="utf-8"
@@ -223,104 +201,35 @@ def test_private_cards_keep_read_only_boundary_and_browser_cache_policy() -> Non
     assert "innerHTML" not in script and "insertAdjacentHTML" not in script
     assert ".unmatched-note" in style
     assert 'placeholder="Product, bank, network, or status"' in template
-    assert "PAN, CVV, PIN" in template
+    assert "Card numbers, CVV, PIN" in template
 
 
 def test_private_card_detail_shows_only_allowlisted_public_and_envelope_fields() -> None:
     script = (ROOT / "src" / "mycard_benefits" / "static" / "app.js").read_text(encoding="utf-8")
+    template = (ROOT / "src" / "mycard_benefits" / "templates" / "index.html").read_text(encoding="utf-8")
 
-    assert "function cardDetailSection" in script
-    assert "function detailRow" in script
-    for label in (
-        "Product",
-        "Issuer",
-        "Network",
-        "Lifecycle",
-        "Added",
-        "Updated",
-        "Replacement",
-        "Replaces",
-    ):
-        assert f'detailRow("{label}"' in script
-    assert "offering.display_name" in script and "offering.issuer_id" in script
-    assert "offering.network_id.replaceAll" in script
-    assert "Not matched in the public catalog" in script
-    assert "secret_fields" not in script
+    assert "secretFieldsFrom" in script
+    assert "Secret fields were cleared" in script
+    assert "Card numbers, CVV, PIN, names, notes, and exact expiry details are kept private." in template
+    assert 'id="cardAddForm"' in template and 'id="cardDeleteForm"' in template
     assert 'node("dd", card.offering_id)' not in script
     assert 'node("dd", card.card_id)' not in script
     assert 'node("dd", card.replacement_card_id)' not in script
     assert "card.secret" not in script
 
 
-def test_private_card_detail_is_keyboard_reachable_and_escape_closes() -> None:
+def test_private_card_reveal_control_is_keyboard_reachable_and_protected() -> None:
     script = (ROOT / "src" / "mycard_benefits" / "static" / "app.js").read_text(encoding="utf-8")
 
-    assert "View details" in script and "Hide details" in script
-    assert "card-detail-toggle" in script
-    assert "aria-expanded" in script and "aria-controls" in script
-    assert "aria-label" in script
-    assert "function toggleCardDetail" in script
-    assert 'event.key === "Escape"' in script
-    assert "heading.focus({ preventScroll: true })" in script
-    assert "button.focus()" in script
+    assert "function referenceCardRow" in script
+    assert 'node("button", "Show full details", "secondary reveal-trigger")' in script
+    assert "revealController.open(card, offering)" in script
+    assert "reveal-trigger" in script
     assert 'button.type = "button"' in script
 
 
-def test_private_card_detail_replacement_links_and_unmatched_state_are_safe() -> None:
-    script = (ROOT / "src" / "mycard_benefits" / "static" / "app.js").read_text(encoding="utf-8")
-
-    assert "function replacementText" in script and "function replacementOfText" in script
-    assert "Replaced by" in script
-    assert "Replaced by a card not listed in this vault." in script
-    assert "This card replaced" in script
-    assert "UNMATCHED_CARD_LABEL" in script
-    assert "replacement_card_id" in script
-    assert "Replacement history is linked." in script
-    assert "card-detail" in script and "card-detail-list" in script
-    assert "Fix the identifier in the import file or request the card variant" in script
 
 
-def test_private_card_detail_renders_linked_child_records_without_secrets() -> None:
-    script = (ROOT / "src" / "mycard_benefits" / "static" / "app.js").read_text(encoding="utf-8")
-    style = (ROOT / "src" / "mycard_benefits" / "static" / "app.css").read_text(encoding="utf-8")
-
-    assert "function childRecordsSection" in script
-    assert "function childRecordRow" in script
-    assert "function childRecordBadge" in script
-    assert "const CHILD_RECORD_KIND_LABELS" in script
-    for label in (
-        "Priority Pass",
-        "Lounge credential",
-        "Membership",
-        "Voucher",
-        "Companion credential",
-    ):
-        assert label in script
-    assert (
-        "No Priority Pass, lounge, membership, voucher, or companion credentials are linked to this card."
-        in script
-    )
-    assert "card.child_records" in script
-    assert "record.kind" in script and "record.lifecycle" in script
-    assert "record.expiry_signal" in script
-    assert "const CHILD_RECORD_EXPIRY_SIGNAL_TEXT" in script
-    assert "section.append(childRecordsSection(card));" in script
-    assert "innerHTML" not in script and "insertAdjacentHTML" not in script
-    # There is no free-text label field at all: display text is always the
-    # allowlisted kind label, and the exact expiry date never crosses this
-    # boundary — only the bounded expiry_signal does.
-    for field in (
-        "record.label",
-        "record.expiry_date",
-        "record.membership_number",
-        "record.credential_secret",
-        "record.barcode",
-        "record.pan",
-        "record.cvv",
-        "record.pin",
-    ):
-        assert field not in script
-    assert ".child-records" in style and ".child-record-row" in style
 
 
 def test_demo_run_shows_persistent_banner_and_switches_off_my_cards(tmp_path: Path) -> None:
@@ -387,10 +296,10 @@ def test_active_surfaces_have_neutral_copy_and_self_contained_startup(
     assert "Public catalog · private vault" in template
     assert "Local-first" in template
 
-    assert "<h3>Remote access</h3>" in template
-    assert "127.0.0.1" in template
-    assert "authenticated gateway or launcher you control" in template
-    assert "never part of this app" in template
+    assert '<h2 id="data-location-title">Data location</h2>' in template
+    assert "LOCAL ONLY" in template
+    assert "Your private card data stays local" in template
+    assert "<h3>Remote access</h3>" not in template
     assert "external launcher" not in template
 
     with _client(tmp_path) as client:
@@ -398,17 +307,17 @@ def test_active_surfaces_have_neutral_copy_and_self_contained_startup(
         assert page.status_code == 200
         assert "MyCard" in page.text and "Benefits" in page.text
         assert "Public catalog · private vault" in page.text
-        assert "<h3>Remote access</h3>" in page.text
+        assert "Data location" in page.text
+        assert "LOCAL ONLY" in page.text
 
         health = client.get("/api/v1/health").json()
         assert health["status"] == "ok"
         assert health["app_id"] == "mycard-benefits"
 
         cards_resp = client.get("/api/v1/private/cards")
-        assert cards_resp.status_code == 503
-        detail = cards_resp.json()["detail"]
-        assert detail["code"] == "vault_missing"
-        assert detail["message"]
+        assert cards_resp.status_code == 200
+        assert cards_resp.json()["cards"] == []
+        assert (tmp_path / "data" / "private" / "vault.json").is_file()
 
 
 def test_unmatched_variant_state_is_friendly_and_never_renders_raw_identifier() -> None:
@@ -419,9 +328,9 @@ def test_unmatched_variant_state_is_friendly_and_never_renders_raw_identifier() 
     assert 'node("p", UNMATCHED_NOTE, "unmatched-note")' in script, (
         "the friendly guidance note must be used by the row"
     )
-    assert script.count('node("p", UNMATCHED_NOTE, "unmatched-note")') == 2
+    assert script.count('node("p", UNMATCHED_NOTE, "unmatched-note")') == 1
     assert (
-        'aria-label", `View details for ${matched ? offering.display_name : "unmatched variant"}`'
+        'revealButton.setAttribute("aria-label", `Show full details for ${offering?.display_name || "this card"}`)'
         in script
     )
     assert '"unmatched card"' not in script
@@ -438,10 +347,120 @@ def test_unmatched_variant_state_is_friendly_and_never_renders_raw_identifier() 
         'node("p", card.replacement_card_id)',
     ):
         assert fragment not in script, fragment
-    assert script.count("card.offering_id") == 2, (
-        "only offeringForCard and cardSearchText may read it"
-    )
-    assert script.count("offering?.slug") == 1, "only cardSearchText may read the slug"
-    assert script.count("card.card_id") == 3, (
-        "cardSearchText plus the two replacement lookups are the only readers"
-    )
+    card_row = script[script.index("function referenceCardRow") : script.index("function refreshCardFilters")]
+    for rendered in (card_row,):
+        assert 'node("p", card.offering_id)' not in rendered
+        assert 'node("h3", card.offering_id)' not in rendered
+        assert 'node("dd", card.offering_id)' not in rendered
+        assert 'node("p", card.card_id)' not in rendered
+        assert 'node("h3", card.card_id)' not in rendered
+        assert 'node("dd", card.card_id)' not in rendered
+        assert 'node("p", card.replacement_card_id)' not in rendered
+    assert "cardFaceData(card, offering)" in card_row and "card.card_id" in card_row
+    for visible_use in (
+        'node("p", card.card_id)',
+        'node("h3", card.card_id)',
+        'node("dd", card.card_id)',
+        'node("a", card.card_id)',
+        'setAttribute("aria-label", card.card_id)',
+        'setAttribute("href", card.card_id)',
+        'dataset.card_id = card.card_id',
+        'dataset.cardId = card.card_id',
+    ):
+        assert visible_use not in script, visible_use
+
+
+def test_removed_planner_surface_matches_the_four_screen_dashboard(
+    tmp_path: Path,
+) -> None:
+    with _client(tmp_path) as client:
+        page = client.get("/")
+    assert page.status_code == 200
+    assert 'data-view="search"' in page.text
+    assert 'href="#which-card"' not in page.text
+    for fragment in (
+        'id="planner"',
+        'id="purchaseChoiceForm"',
+        'id="purchaseMerchant"',
+        'id="purchaseCategory"',
+        'id="purchaseAmount"',
+        'id="purchaseCardChoices"',
+        'id="plannerForm"',
+        'id="plannerMerchant"',
+        'maxlength="200"',
+        'id="plannerCategory"',
+        'id="plannerAmount"',
+        'id="plannerDate"',
+        'id="plannerCurrency"',
+        'id="plannerChannelOfficial"',
+        'id="plannerChannelThirdParty"',
+        'id="plannerChannelAffiliate"',
+        'id="plannerCards"',
+        'id="plannerAddCard"',
+        'id="plannerSubmit"',
+        'id="plannerReset"',
+        'id="plannerStatus"',
+        'id="plannerResults"',
+    ):
+        assert fragment not in page.text, fragment
+
+
+
+
+
+
+
+
+
+
+def test_benefit_detail_distinguishes_public_terms_from_local_product_matches(
+    tmp_path: Path,
+) -> None:
+    with _client(tmp_path) as client:
+        page = client.get("/")
+    script = (ROOT / "src" / "mycard_benefits" / "static" / "app.js").read_text(encoding="utf-8")
+    style = (ROOT / "src" / "mycard_benefits" / "static" / "app.css").read_text(encoding="utf-8")
+
+    assert page.status_code == 200
+    for fragment in (
+        'id="benefitDetail"',
+        "Select a benefit to see what it is, how to qualify, how to claim it, and the official terms.",
+    ):
+        assert fragment in page.text, fragment
+    for fragment in (
+        "function renderBenefitDetail",
+        "function selectBenefit",
+        "function localBenefitMatch",
+        "function alternativeBenefitCard",
+        "function formatEligibility",
+        "function benefitDates",
+        "local product match is shown separately from the public benefit",
+        "It never proves eligibility",
+        "Other public card alternatives",
+        "category. That category does not make their benefits equivalent",
+        "benefit.eligibility",
+        "benefit.redemption_steps",
+        "benefit.exclusions",
+        "safeHref(benefit.official_reference)",
+    ):
+        assert fragment in script, fragment
+    detail_slice = script[script.index("function localBenefitMatch") : script.index("function selectBenefit")]
+    for private_field in ("card.pan", "card.cvv", "card.pin", "card.card_id", "card.offering_id"):
+        assert private_field not in detail_slice, private_field
+    assert ".benefit-detail-card" in style and ".benefit-match-card" in style
+    assert "innerHTML" not in script and "insertAdjacentHTML" not in script
+
+
+def test_archived_and_expired_card_wording_remain_distinct() -> None:
+    script = (ROOT / "src" / "mycard_benefits" / "static" / "app.js").read_text(encoding="utf-8")
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    guide = (ROOT / "docs" / "USER-GUIDE.md").read_text(encoding="utf-8")
+
+    assert 'c.lifecycle === "archived" ? "archived" : "in use"' in script
+    assert "Archived local record — kept for history. Archived does not mean expired." in script
+    assert 'expired: "Expired"' in script
+    assert "**archived** card record is retained history" in readme
+    assert "It is not a statement that the" in readme
+    assert "physical card has expired" in readme
+    assert "`archived` retains a historical record" in guide
+    assert "An **archived** row means the record is kept as history" in guide

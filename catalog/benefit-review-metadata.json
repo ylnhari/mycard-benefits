@@ -1,0 +1,978 @@
+{
+  "schema_version": "1.0.0",
+  "description": "Public archive of non-redundant review metadata from the 61 registered benefit proposals rescued into catalog/benefits.",
+  "source_proposal_count": 61,
+  "rescued_benefit_count": 60,
+  "confidence_observation_count": 71,
+  "confidence_value_counts": {
+    "high": 35,
+    "low": 36
+  },
+  "merged_proposals": {
+    "b1000001-0000-4000-8000-000000000004": "b3000001-0000-4000-8000-000000000007"
+  },
+  "records": {
+    "06236b2b-30cc-50f1-b0bd-d2c0956bd13b": {
+      "benefit_id": "06236b2b-30cc-50f1-b0bd-d2c0956bd13b",
+      "rescued_benefit_id": "06236b2b-30cc-50f1-b0bd-d2c0956bd13b",
+      "title": "DBS EMT zero foreign-exchange markup",
+      "offering_id": "784d30a2-d144-53dd-bfa1-88549e975d39",
+      "review_tier": "standard",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.dbs.bank.in/digibank/in/cards/debit-cards/ease-my-trip",
+          "value": "low"
+        }
+      ]
+    },
+    "09e37042-313e-5531-a49d-690a206e8099": {
+      "benefit_id": "09e37042-313e-5531-a49d-690a206e8099",
+      "rescued_benefit_id": "09e37042-313e-5531-a49d-690a206e8099",
+      "title": "IndusInd Legend Visa Signature BookMyShow BOGO",
+      "offering_id": "dcd9e7cc-bca6-5169-adcc-e54f806a91d8",
+      "review_tier": "ambiguous",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch. The report preserves a historical issuer-page quota conflict; one monthly use is not approved as final truth.",
+      "official_reference": "https://in.bookmyshow.com/offers/indusind-bank-credit-cards-buy-1-get-1-free-movie-ticket-offer-%28legend%2C-nexxt%2C-duo%2C-signature%2C-iconia%2C-intermiles%29/INDBOGO424",
+      "confidence": [
+        {
+          "source_url": "https://in.bookmyshow.com/offers/indusind-bank-credit-cards-buy-1-get-1-free-movie-ticket-offer-%28legend%2C-nexxt%2C-duo%2C-signature%2C-iconia%2C-intermiles%29/INDBOGO424",
+          "value": "low"
+        }
+      ]
+    },
+    "0d341109-9352-54b2-aeb2-7296e4a0a399": {
+      "benefit_id": "0d341109-9352-54b2-aeb2-7296e4a0a399",
+      "rescued_benefit_id": "0d341109-9352-54b2-aeb2-7296e4a0a399",
+      "title": "Regalia Gold retail reward earning, expiry and excluded transactions",
+      "offering_id": "83a6036e-bd88-5cb8-aa8f-676521050f68",
+      "review_tier": "standard",
+      "review_note": "Issuer terms support retail-only accrual, a two-year expiry and multiple transaction exclusions; exact rule normalization remains for human review.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/regalia-gold-credit-card/pdfs/regalia-gold-credit-card-reward-points-t-and-cs.pdf",
+          "value": "high"
+        }
+      ]
+    },
+    "0ee5b685-703c-5079-9dec-cae4214a96da": {
+      "benefit_id": "0ee5b685-703c-5079-9dec-cae4214a96da",
+      "rescued_benefit_id": "0ee5b685-703c-5079-9dec-cae4214a96da",
+      "title": "HDFC Millennia accelerated CashPoints earn",
+      "offering_id": "16f59859-681b-5934-8709-037f5fb1fdb0",
+      "review_tier": "standard",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/millennia-credit-card/pdf/millennia-tnc-20th-jul26.pdf",
+          "value": "low"
+        },
+        {
+          "source_url": "https://www.hdfc.bank.in/credit-cards/millennia-credit-card",
+          "value": "low"
+        }
+      ]
+    },
+    "10344771-b107-5b3c-8687-e805d1dfc536": {
+      "benefit_id": "10344771-b107-5b3c-8687-e805d1dfc536",
+      "rescued_benefit_id": "10344771-b107-5b3c-8687-e805d1dfc536",
+      "title": "DBS EMT debit insurance matrix",
+      "offering_id": "784d30a2-d144-53dd-bfa1-88549e975d39",
+      "review_tier": "high_impact",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch. Variant/BIN applicability remains unresolved in the report.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.dbs.bank.in/digibank/in/debit-card-terms-and-conditions.page",
+          "value": "low"
+        }
+      ]
+    },
+    "1289ebd8-9f78-5439-ad92-078566ecccf5": {
+      "benefit_id": "1289ebd8-9f78-5439-ad92-078566ecccf5",
+      "rescued_benefit_id": "1289ebd8-9f78-5439-ad92-078566ecccf5",
+      "title": "ICICI Sapphiro Mastercard BookMyShow complimentary ticket",
+      "offering_id": "06bf6986-a99a-5bfd-99c1-68188a7242df",
+      "review_tier": "ambiguous",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch. This candidate is Mastercard-specific; no quota is inherited by Amex or RuPay variants.",
+      "official_reference": "https://in.bookmyshow.com/offers/icici-bank-complimentary-offer/ICICCOM426",
+      "confidence": [
+        {
+          "source_url": "https://in.bookmyshow.com/offers/icici-bank-complimentary-offer/ICICCOM426",
+          "value": "low"
+        }
+      ]
+    },
+    "15ca34e9-d173-5689-a8db-aed9a5821c96": {
+      "benefit_id": "15ca34e9-d173-5689-a8db-aed9a5821c96",
+      "rescued_benefit_id": "15ca34e9-d173-5689-a8db-aed9a5821c96",
+      "title": "ICICI Coral debit BookMyShow discount",
+      "offering_id": "c0ad0101-b317-503e-97a9-f2735bfde109",
+      "review_tier": "ambiguous",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch. Subtype-dependent caps are retained as a bounded unresolved mapping rather than guessed into one value.",
+      "official_reference": "https://in.bookmyshow.com/offers/icici-debit-card-offer/ICICOR0813",
+      "confidence": [
+        {
+          "source_url": "https://in.bookmyshow.com/offers/icici-debit-card-offer/ICICOR0813",
+          "value": "low"
+        }
+      ]
+    },
+    "1611b180-0317-5ddb-9779-9220a97bafef": {
+      "benefit_id": "1611b180-0317-5ddb-9779-9220a97bafef",
+      "rescued_benefit_id": "1611b180-0317-5ddb-9779-9220a97bafef",
+      "title": "DBS Aspire debit insurance matrix",
+      "offering_id": "77204ea2-801f-55c2-b8a7-2eb87f743ced",
+      "review_tier": "high_impact",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch. Variant/BIN applicability remains unresolved in the report.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.dbs.bank.in/digibank/in/debit-card-terms-and-conditions.page",
+          "value": "low"
+        }
+      ]
+    },
+    "16f362ff-1735-573d-ad5b-1e70090a76f8": {
+      "benefit_id": "16f362ff-1735-573d-ad5b-1e70090a76f8",
+      "rescued_benefit_id": "16f362ff-1735-573d-ad5b-1e70090a76f8",
+      "title": "Regalia Gold reward-point travel and cashback redemption limits",
+      "offering_id": "83a6036e-bd88-5cb8-aa8f-676521050f68",
+      "review_tier": "enhanced",
+      "review_note": "The candidate intentionally records caps only; it does not select between conflicting issuer-page statement-balance point values.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/regalia-gold-credit-card/pdfs/regalia-gold-credit-card-reward-points-t-and-cs.pdf",
+          "value": "high"
+        },
+        {
+          "source_url": "https://www.hdfc.bank.in/credit-cards/regalia-gold-credit-card",
+          "value": "high"
+        }
+      ]
+    },
+    "17a04923-f6f0-54c3-a195-46389389cb98": {
+      "benefit_id": "17a04923-f6f0-54c3-a195-46389389cb98",
+      "rescued_benefit_id": "17a04923-f6f0-54c3-a195-46389389cb98",
+      "title": "IndusInd Nexxt BookMyShow BOGO",
+      "offering_id": "566f2db5-bc06-57d7-be94-086bb6f8c488",
+      "review_tier": "ambiguous",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch. The report notes issuer corroboration for two monthly tickets, but that issuer body is not captured locally.",
+      "official_reference": "https://in.bookmyshow.com/offers/indusind-bank-credit-cards-buy-1-get-1-free-movie-ticket-offer-%28legend%2C-nexxt%2C-duo%2C-signature%2C-iconia%2C-intermiles%29/INDBOGO424",
+      "confidence": [
+        {
+          "source_url": "https://in.bookmyshow.com/offers/indusind-bank-credit-cards-buy-1-get-1-free-movie-ticket-offer-%28legend%2C-nexxt%2C-duo%2C-signature%2C-iconia%2C-intermiles%29/INDBOGO424",
+          "value": "low"
+        }
+      ]
+    },
+    "19578ab2-55c2-5224-80b5-bc5b28444a13": {
+      "benefit_id": "19578ab2-55c2-5224-80b5-bc5b28444a13",
+      "rescued_benefit_id": "19578ab2-55c2-5224-80b5-bc5b28444a13",
+      "title": "Regalia Gold stated interest-free period and post-purchase EMI availability",
+      "offering_id": "83a6036e-bd88-5cb8-aa8f-676521050f68",
+      "review_tier": "standard",
+      "review_note": "The issuer page makes both product statements; finance charges, qualifying transactions and conversion terms require the governing fee and EMI terms before any user-facing eligibility decision.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/credit-cards/regalia-gold-credit-card",
+          "value": "high"
+        }
+      ]
+    },
+    "19d0a8fe-a988-50a1-ac7a-c7a5e76d76d5": {
+      "benefit_id": "19d0a8fe-a988-50a1-ac7a-c7a5e76d76d5",
+      "rescued_benefit_id": "19d0a8fe-a988-50a1-ac7a-c7a5e76d76d5",
+      "title": "ICICI Coral Visa Platinum BookMyShow discount",
+      "offering_id": "78985841-c398-5e6e-8321-47f84442d1d5",
+      "review_tier": "ambiguous",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch.",
+      "official_reference": "https://in.bookmyshow.com/offers/icici-bank-25-discount-offer/ICICICC520",
+      "confidence": [
+        {
+          "source_url": "https://in.bookmyshow.com/offers/icici-bank-25-discount-offer/ICICICC520",
+          "value": "low"
+        }
+      ]
+    },
+    "292f1356-253a-5288-aebc-319a00d15fd6": {
+      "benefit_id": "292f1356-253a-5288-aebc-319a00d15fd6",
+      "rescued_benefit_id": "292f1356-253a-5288-aebc-319a00d15fd6",
+      "title": "Regalia Gold stated redemption, balance-transfer and foreign-currency charges",
+      "offering_id": "83a6036e-bd88-5cb8-aa8f-676521050f68",
+      "review_tier": "standard",
+      "review_note": "The dynamic and static conversion markup in the reward terms has a stated effective date; taxes and all fee applicability remain subject to issuer terms.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/credit-cards/regalia-gold-credit-card",
+          "value": "high"
+        },
+        {
+          "source_url": "https://www.hdfc.bank.in/credit-cards/regalia-gold-credit-card/fees-and-charges",
+          "value": "high"
+        },
+        {
+          "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/regalia-gold-credit-card/pdfs/regalia-gold-credit-card-reward-points-t-and-cs.pdf",
+          "value": "high"
+        }
+      ]
+    },
+    "32ea63fe-401f-582c-8c02-2a49aa07b0b0": {
+      "benefit_id": "32ea63fe-401f-582c-8c02-2a49aa07b0b0",
+      "rescued_benefit_id": "32ea63fe-401f-582c-8c02-2a49aa07b0b0",
+      "title": "Regalia Gold annual-fee waiver spend threshold",
+      "offering_id": "83a6036e-bd88-5cb8-aa8f-676521050f68",
+      "review_tier": "standard",
+      "review_note": null,
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/credit-cards/regalia-gold-credit-card",
+          "value": "high"
+        }
+      ]
+    },
+    "38956581-d8ea-5b14-bccd-97cdf0d9dbf5": {
+      "benefit_id": "38956581-d8ea-5b14-bccd-97cdf0d9dbf5",
+      "rescued_benefit_id": "38956581-d8ea-5b14-bccd-97cdf0d9dbf5",
+      "title": "DBS Growth Max debit insurance matrix",
+      "offering_id": "d39894b1-88a7-5791-abdc-72324176e30f",
+      "review_tier": "high_impact",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch. Variant/BIN applicability remains unresolved in the report.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.dbs.bank.in/digibank/in/debit-card-terms-and-conditions.page",
+          "value": "low"
+        }
+      ]
+    },
+    "3c2b9f7f-ef53-59a1-8ed4-ef1f28a834ff": {
+      "benefit_id": "3c2b9f7f-ef53-59a1-8ed4-ef1f28a834ff",
+      "rescued_benefit_id": "3c2b9f7f-ef53-59a1-8ed4-ef1f28a834ff",
+      "title": "ICICI Coral credit BookMyShow discount",
+      "offering_id": "3e503b8a-4e95-5924-aed0-0807291b327c",
+      "review_tier": "ambiguous",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch. The quarterly spend gate begins 1 April 2026; daily quota and eligibility remain report-derived pending body review.",
+      "official_reference": "https://in.bookmyshow.com/offers/icici-bank-25-discount-offer/ICICICC520",
+      "confidence": [
+        {
+          "source_url": "https://in.bookmyshow.com/offers/icici-bank-25-discount-offer/ICICICC520",
+          "value": "low"
+        }
+      ]
+    },
+    "3c570f3f-92ae-5f24-8ac5-9af2aaff8d62": {
+      "benefit_id": "3c570f3f-92ae-5f24-8ac5-9af2aaff8d62",
+      "rescued_benefit_id": "3c570f3f-92ae-5f24-8ac5-9af2aaff8d62",
+      "title": "Regalia Gold Good Food Trail dining discount",
+      "offering_id": "83a6036e-bd88-5cb8-aa8f-676521050f68",
+      "review_tier": "standard",
+      "review_note": "The issuer page supplies the card linkage; merchant availability, exclusions and offer terms require a current merchant-terms review.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/credit-cards/regalia-gold-credit-card",
+          "value": "high"
+        }
+      ]
+    },
+    "44fd686d-676d-5861-b526-44be9d0fac1b": {
+      "benefit_id": "44fd686d-676d-5861-b526-44be9d0fac1b",
+      "rescued_benefit_id": "44fd686d-676d-5861-b526-44be9d0fac1b",
+      "title": "DBS EMT Visa Signature debit lounge access",
+      "offering_id": "784d30a2-d144-53dd-bfa1-88549e975d39",
+      "review_tier": "high_impact",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.dbs.bank.in/in/iwov-resources/pdf/debit-card/dbs-bank-lounge-access-tnc.pdf",
+          "value": "low"
+        }
+      ]
+    },
+    "4e37f860-398f-56ab-8a25-6e81355cd8fe": {
+      "benefit_id": "4e37f860-398f-56ab-8a25-6e81355cd8fe",
+      "rescued_benefit_id": "4e37f860-398f-56ab-8a25-6e81355cd8fe",
+      "title": "Visa APAC airport dining for DBS Aspire Visa Signature",
+      "offering_id": "77204ea2-801f-55c2-b8a7-2eb87f743ced",
+      "review_tier": "ambiguous",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.visa.co.in/en_in/visa-offers-and-perks/visa-airport-dining/177766",
+          "value": "low"
+        }
+      ]
+    },
+    "4f176875-4fea-50fa-8151-d4d678f5e39a": {
+      "benefit_id": "4f176875-4fea-50fa-8151-d4d678f5e39a",
+      "rescued_benefit_id": "4f176875-4fea-50fa-8151-d4d678f5e39a",
+      "title": "HDFC Millennia CashPoints statement-credit redemption",
+      "offering_id": "16f59859-681b-5934-8709-037f5fb1fdb0",
+      "review_tier": "standard",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/millennia-credit-card/pdf/millennia-tnc-20th-jul26.pdf",
+          "value": "low"
+        }
+      ]
+    },
+    "53af48e3-6ba8-5c90-a2ad-2d982452e703": {
+      "benefit_id": "53af48e3-6ba8-5c90-a2ad-2d982452e703",
+      "rescued_benefit_id": "53af48e3-6ba8-5c90-a2ad-2d982452e703",
+      "title": "DBS Treasures Visa Infinite zero foreign-exchange markup",
+      "offering_id": "c2a6190e-7462-5b76-97ce-3b994c26d351",
+      "review_tier": "standard",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.dbs.bank.in/in/treasures/deposits/your-cards/infinite-debit-card",
+          "value": "low"
+        }
+      ]
+    },
+    "546b532a-52aa-558a-a9ce-50387d42c5df": {
+      "benefit_id": "546b532a-52aa-558a-a9ce-50387d42c5df",
+      "rescued_benefit_id": "546b532a-52aa-558a-a9ce-50387d42c5df",
+      "title": "DBS Aspire Visa Signature debit lounge access",
+      "offering_id": "77204ea2-801f-55c2-b8a7-2eb87f743ced",
+      "review_tier": "high_impact",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.dbs.bank.in/in/iwov-resources/pdf/debit-card/dbs-bank-lounge-access-tnc.pdf",
+          "value": "low"
+        }
+      ]
+    },
+    "5d4d3403-fdb4-5b79-8919-7c7131d762dd": {
+      "benefit_id": "5d4d3403-fdb4-5b79-8919-7c7131d762dd",
+      "rescued_benefit_id": "5d4d3403-fdb4-5b79-8919-7c7131d762dd",
+      "title": "HPCL ICICI Coral Platinum Visa BookMyShow discount",
+      "offering_id": "5fef4f94-026c-5e52-ad73-f0bba6ff612b",
+      "review_tier": "ambiguous",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch.",
+      "official_reference": "https://in.bookmyshow.com/offers/icici-bank-25-discount-offer/ICICICC520",
+      "confidence": [
+        {
+          "source_url": "https://in.bookmyshow.com/offers/icici-bank-25-discount-offer/ICICICC520",
+          "value": "low"
+        }
+      ]
+    },
+    "5ea448b3-7a44-57f0-a3a9-d62f852b3675": {
+      "benefit_id": "5ea448b3-7a44-57f0-a3a9-d62f852b3675",
+      "rescued_benefit_id": "5ea448b3-7a44-57f0-a3a9-d62f852b3675",
+      "title": "Axis NEO BookMyShow discount",
+      "offering_id": "ccc0bef8-14d9-523e-ad39-817060cddd3e",
+      "review_tier": "standard",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch.",
+      "official_reference": "https://in.bookmyshow.com/offers/axis-bank-neo-and-indian-oil-credit-card-offer/AXSIN0324",
+      "confidence": [
+        {
+          "source_url": "https://in.bookmyshow.com/offers/axis-bank-neo-and-indian-oil-credit-card-offer/AXSIN0324",
+          "value": "low"
+        }
+      ]
+    },
+    "6680ff3f-db49-5f39-bfd9-b6f8f628b56b": {
+      "benefit_id": "6680ff3f-db49-5f39-bfd9-b6f8f628b56b",
+      "rescued_benefit_id": "6680ff3f-db49-5f39-bfd9-b6f8f628b56b",
+      "title": "DBS Aspire wellness programme condition",
+      "offering_id": "77204ea2-801f-55c2-b8a7-2eb87f743ced",
+      "review_tier": "ambiguous",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.dbs.bank.in/in/iwov-resources/pdf/aspire-variant-most-important-terms-conditions.pdf",
+          "value": "low"
+        }
+      ]
+    },
+    "6e7645ae-3962-5691-ad5d-3b6f34757f4d": {
+      "benefit_id": "6e7645ae-3962-5691-ad5d-3b6f34757f4d",
+      "rescued_benefit_id": "6e7645ae-3962-5691-ad5d-3b6f34757f4d",
+      "title": "EazyDiner IndusInd Platinum BookMyShow BOGO",
+      "offering_id": "a9b5c869-7ce2-50e4-b498-c52568c554c6",
+      "review_tier": "standard",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch.",
+      "official_reference": "https://in.bookmyshow.com/offers/indusind-bank-credit-cards-buy-1-get-1-free-movie-ticket-offer-%28legend%2C-nexxt%2C-duo%2C-signature%2C-iconia%2C-intermiles%29/INDBOGO424",
+      "confidence": [
+        {
+          "source_url": "https://in.bookmyshow.com/offers/indusind-bank-credit-cards-buy-1-get-1-free-movie-ticket-offer-%28legend%2C-nexxt%2C-duo%2C-signature%2C-iconia%2C-intermiles%29/INDBOGO424",
+          "value": "low"
+        }
+      ]
+    },
+    "6ef81791-6ada-501d-8297-518fe15a99aa": {
+      "benefit_id": "6ef81791-6ada-501d-8297-518fe15a99aa",
+      "rescued_benefit_id": "6ef81791-6ada-501d-8297-518fe15a99aa",
+      "title": "DBS Growth Max Visa Platinum debit lounge access",
+      "offering_id": "d39894b1-88a7-5791-abdc-72324176e30f",
+      "review_tier": "high_impact",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.dbs.bank.in/in/iwov-resources/pdf/debit-card/dbs-bank-lounge-access-tnc.pdf",
+          "value": "low"
+        }
+      ]
+    },
+    "732a376c-1844-5aa7-a587-985c490d25c0": {
+      "benefit_id": "732a376c-1844-5aa7-a587-985c490d25c0",
+      "rescued_benefit_id": "732a376c-1844-5aa7-a587-985c490d25c0",
+      "title": "Regalia Gold SmartBuy accelerated-reward program",
+      "offering_id": "83a6036e-bd88-5cb8-aa8f-676521050f68",
+      "review_tier": "ambiguous",
+      "review_note": "The issuer page provides only high-level variable multipliers. The linked SmartBuy accelerated-earn page did not provide current card-specific terms in this research pass.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/credit-cards/regalia-gold-credit-card",
+          "value": "high"
+        }
+      ]
+    },
+    "7966f897-8b0b-5048-8482-c3b3d98510df": {
+      "benefit_id": "7966f897-8b0b-5048-8482-c3b3d98510df",
+      "rescued_benefit_id": "7966f897-8b0b-5048-8482-c3b3d98510df",
+      "title": "Regalia Gold quarterly milestone voucher",
+      "offering_id": "83a6036e-bd88-5cb8-aa8f-676521050f68",
+      "review_tier": "standard",
+      "review_note": "Issuer terms describe a single brand-selected voucher after qualifying quarterly net retail spend; merchant-specific redemption remains subject to the linked terms.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/regalia-gold-credit-card/general-terms-and-conditions.pdf",
+          "value": "high"
+        }
+      ]
+    },
+    "79c26cac-9268-59a1-a865-ed6ba47c3286": {
+      "benefit_id": "79c26cac-9268-59a1-a865-ed6ba47c3286",
+      "rescued_benefit_id": "79c26cac-9268-59a1-a865-ed6ba47c3286",
+      "title": "DBS Aspire zero foreign-exchange markup",
+      "offering_id": "77204ea2-801f-55c2-b8a7-2eb87f743ced",
+      "review_tier": "standard",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.dbs.bank.in/digibank/in/banking/account/dbs-aspire",
+          "value": "low"
+        }
+      ]
+    },
+    "82d0ae12-700d-517f-851b-4d0fb82812eb": {
+      "benefit_id": "82d0ae12-700d-517f-851b-4d0fb82812eb",
+      "rescued_benefit_id": "82d0ae12-700d-517f-851b-4d0fb82812eb",
+      "title": "Visa APAC airport dining for DBS EMT Visa Signature",
+      "offering_id": "784d30a2-d144-53dd-bfa1-88549e975d39",
+      "review_tier": "ambiguous",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.visa.co.in/en_in/visa-offers-and-perks/visa-airport-dining/177766",
+          "value": "low"
+        }
+      ]
+    },
+    "842c3a62-4f26-5af1-b848-dfebbc8ecc38": {
+      "benefit_id": "842c3a62-4f26-5af1-b848-dfebbc8ecc38",
+      "rescued_benefit_id": "842c3a62-4f26-5af1-b848-dfebbc8ecc38",
+      "title": "Regalia Gold PayZapp cashback statement",
+      "offering_id": "83a6036e-bd88-5cb8-aa8f-676521050f68",
+      "review_tier": "standard",
+      "review_note": "The issuer landing page states the amount and broad availability, but no card-specific merchant, period, payment or exclusion terms were identified in this pass.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/credit-cards/regalia-gold-credit-card",
+          "value": "high"
+        }
+      ]
+    },
+    "863b87bc-ecfa-5754-8f1d-bd05849ddadf": {
+      "benefit_id": "863b87bc-ecfa-5754-8f1d-bd05849ddadf",
+      "rescued_benefit_id": "863b87bc-ecfa-5754-8f1d-bd05849ddadf",
+      "title": "RBL Play welcome BookMyShow offer",
+      "offering_id": "8f4fc7eb-f070-59c0-926c-029897a8093c",
+      "review_tier": "ambiguous",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch. The 60-day issuer and 90-day BookMyShow windows are both retained; no window is resolved.",
+      "official_reference": "https://in.bookmyshow.com/offers/rbl-play-credit-card-%E2%80%93-welcome-offer/RBLPLWL222",
+      "confidence": [
+        {
+          "source_url": "https://in.bookmyshow.com/offers/rbl-play-credit-card-%E2%80%93-welcome-offer/RBLPLWL222",
+          "value": "low"
+        }
+      ]
+    },
+    "89ad0f4e-fd4c-5262-ab4e-1f775e63ca86": {
+      "benefit_id": "89ad0f4e-fd4c-5262-ab4e-1f775e63ca86",
+      "rescued_benefit_id": "89ad0f4e-fd4c-5262-ab4e-1f775e63ca86",
+      "title": "Regalia Gold stated insurance cover limits",
+      "offering_id": "83a6036e-bd88-5cb8-aa8f-676521050f68",
+      "review_tier": "high_impact",
+      "review_note": "Issuer landing page names the cover limits, but exact policy eligibility, exclusions, claims procedure and insurer-policy mapping require human review.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/credit-cards/regalia-gold-credit-card",
+          "value": "high"
+        }
+      ]
+    },
+    "9b55f4a0-83f5-52dc-a9d1-9b337dad16fc": {
+      "benefit_id": "9b55f4a0-83f5-52dc-a9d1-9b337dad16fc",
+      "rescued_benefit_id": "9b55f4a0-83f5-52dc-a9d1-9b337dad16fc",
+      "title": "HDFC Millennia joining-fee welcome CashPoints",
+      "offering_id": "16f59859-681b-5934-8709-037f5fb1fdb0",
+      "review_tier": "standard",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/millennia-credit-card/pdf/millennia-tnc-20th-jul26.pdf",
+          "value": "low"
+        }
+      ]
+    },
+    "9c4edfce-a150-50ba-9ba8-872a9a6b9f95": {
+      "benefit_id": "9c4edfce-a150-50ba-9ba8-872a9a6b9f95",
+      "rescued_benefit_id": "9c4edfce-a150-50ba-9ba8-872a9a6b9f95",
+      "title": "IndusInd Legend Visa BookMyShow BOGO",
+      "offering_id": "bb3a1ec1-01eb-5294-826f-c1978058a0b1",
+      "review_tier": "ambiguous",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch. The report preserves a historical issuer-page quota conflict; one monthly use is not approved as final truth.",
+      "official_reference": "https://in.bookmyshow.com/offers/indusind-bank-credit-cards-buy-1-get-1-free-movie-ticket-offer-%28legend%2C-nexxt%2C-duo%2C-signature%2C-iconia%2C-intermiles%29/INDBOGO424",
+      "confidence": [
+        {
+          "source_url": "https://in.bookmyshow.com/offers/indusind-bank-credit-cards-buy-1-get-1-free-movie-ticket-offer-%28legend%2C-nexxt%2C-duo%2C-signature%2C-iconia%2C-intermiles%29/INDBOGO424",
+          "value": "low"
+        }
+      ]
+    },
+    "b1000001-0000-4000-8000-000000000002": {
+      "benefit_id": "b1000001-0000-4000-8000-000000000002",
+      "rescued_benefit_id": "b1000001-0000-4000-8000-000000000002",
+      "title": "Tata Neu Infinity domestic lounge access",
+      "offering_id": "3eeb4094-d452-5a33-9061-0e8999cd6c89",
+      "review_tier": "high_impact",
+      "review_note": null,
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/tata-neu-infinity-credit-card/pdf/complimentary-domestic-airport-lounge-access-tata-neu-infinity.pdf",
+          "value": "high"
+        }
+      ]
+    },
+    "b1000001-0000-4000-8000-000000000004": {
+      "benefit_id": "b1000001-0000-4000-8000-000000000004",
+      "rescued_benefit_id": "b3000001-0000-4000-8000-000000000007",
+      "title": "Tata Neu Infinity RuPay Select international lounge access",
+      "offering_id": "3eeb4094-d452-5a33-9061-0e8999cd6c89",
+      "review_tier": "high_impact",
+      "review_note": null,
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfcbank.com/personal/pay/cards/credit-cards/tata-neu-infinity-hdfc-bank-credit-card",
+          "value": "high"
+        }
+      ]
+    },
+    "b2000001-0000-4000-8000-000000000002": {
+      "benefit_id": "b2000001-0000-4000-8000-000000000002",
+      "rescued_benefit_id": "b2000001-0000-4000-8000-000000000002",
+      "title": "Regalia Gold domestic lounge access",
+      "offering_id": "83a6036e-bd88-5cb8-aa8f-676521050f68",
+      "review_tier": "high_impact",
+      "review_note": null,
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/regalia-gold-credit-card/pdfs/lounge-t-and-cs-and-list-Regalia-Gold.pdf",
+          "value": "high"
+        }
+      ]
+    },
+    "b2000001-0000-4000-8000-000000000003": {
+      "benefit_id": "b2000001-0000-4000-8000-000000000003",
+      "rescued_benefit_id": "b2000001-0000-4000-8000-000000000003",
+      "title": "Regalia Gold international lounge access via Priority Pass",
+      "offering_id": "83a6036e-bd88-5cb8-aa8f-676521050f68",
+      "review_tier": "high_impact",
+      "review_note": null,
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/regalia-gold-credit-card/Priority_Pass_Regalia.pdf",
+          "value": "high"
+        }
+      ]
+    },
+    "b29c3be1-6d6d-5955-94f6-31f20761d8a4": {
+      "benefit_id": "b29c3be1-6d6d-5955-94f6-31f20761d8a4",
+      "rescued_benefit_id": "b29c3be1-6d6d-5955-94f6-31f20761d8a4",
+      "title": "Regalia Gold airmiles conversion route",
+      "offering_id": "83a6036e-bd88-5cb8-aa8f-676521050f68",
+      "review_tier": "ambiguous",
+      "review_note": "Issuer landing page advertises a maximum conversion value but does not provide a complete partner, minimum, increment or fee schedule.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/credit-cards/regalia-gold-credit-card",
+          "value": "high"
+        }
+      ]
+    },
+    "b3000001-0000-4000-8000-000000000001": {
+      "benefit_id": "b3000001-0000-4000-8000-000000000001",
+      "rescued_benefit_id": "b3000001-0000-4000-8000-000000000001",
+      "title": "Tata Neu Infinity base NeuCoins earn",
+      "offering_id": "3eeb4094-d452-5a33-9061-0e8999cd6c89",
+      "review_tier": "standard",
+      "review_note": null,
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/tata-neu-infinity-credit-card/pdf/tata_neu_infinity_card_tnc.pdf",
+          "value": "high"
+        }
+      ]
+    },
+    "b3000001-0000-4000-8000-000000000002": {
+      "benefit_id": "b3000001-0000-4000-8000-000000000002",
+      "rescued_benefit_id": "b3000001-0000-4000-8000-000000000002",
+      "title": "Tata Neu Infinity RuPay UPI NeuCoins",
+      "offering_id": "3eeb4094-d452-5a33-9061-0e8999cd6c89",
+      "review_tier": "standard",
+      "review_note": "Issuer timing and reversal path are review material; this candidate does not infer UPI eligibility for Visa.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/tata-neu-infinity-credit-card/pdf/additional-upi-neucoins-infinity.pdf",
+          "value": "high"
+        }
+      ]
+    },
+    "b3000001-0000-4000-8000-000000000003": {
+      "benefit_id": "b3000001-0000-4000-8000-000000000003",
+      "rescued_benefit_id": "b3000001-0000-4000-8000-000000000003",
+      "title": "Tata Neu Infinity reward exclusions and category caps",
+      "offering_id": "3eeb4094-d452-5a33-9061-0e8999cd6c89",
+      "review_tier": "standard",
+      "review_note": "Education-through-third-party-app and merchant-ID qualification details need human review against the issuer terms.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/tata-neu-infinity-credit-card/pdf/tata_neu_infinity_card_tnc.pdf",
+          "value": "high"
+        },
+        {
+          "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/tata-neu-infinity-credit-card/pdf/tata_neu_infinity_card_faq.pdf",
+          "value": "high"
+        }
+      ]
+    },
+    "b3000001-0000-4000-8000-000000000004": {
+      "benefit_id": "b3000001-0000-4000-8000-000000000004",
+      "rescued_benefit_id": "b3000001-0000-4000-8000-000000000004",
+      "title": "Tata Neu Infinity NeuCoins transfer and redemption",
+      "offering_id": "3eeb4094-d452-5a33-9061-0e8999cd6c89",
+      "review_tier": "standard",
+      "review_note": "Redemption remains subject to brand-level eligible transactions; programme sources give differing generalized validity wording, so no universal expiry rule is activated.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/credit-cards/tata-neu-infinity-hdfc-bank-credit-card",
+          "value": "high"
+        },
+        {
+          "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/tata-neu-infinity-credit-card/pdf/tata_neu_infinity_card_faq.pdf",
+          "value": "high"
+        }
+      ]
+    },
+    "b3000001-0000-4000-8000-000000000005": {
+      "benefit_id": "b3000001-0000-4000-8000-000000000005",
+      "rescued_benefit_id": "b3000001-0000-4000-8000-000000000005",
+      "title": "Tata Neu Infinity welcome NeuCoins",
+      "offering_id": "3eeb4094-d452-5a33-9061-0e8999cd6c89",
+      "review_tier": "standard",
+      "review_note": "Lifetime-free and first-year-free cards are excluded. The two stated claim windows require human confirmation of their sequencing.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/credit-cards/tata-neu-infinity-hdfc-bank-credit-card",
+          "value": "high"
+        },
+        {
+          "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/tata-neu-infinity-credit-card/pdf/tata_neu_infinity_card_faq.pdf",
+          "value": "high"
+        }
+      ]
+    },
+    "b3000001-0000-4000-8000-000000000006": {
+      "benefit_id": "b3000001-0000-4000-8000-000000000006",
+      "rescued_benefit_id": "b3000001-0000-4000-8000-000000000006",
+      "title": "Tata Neu Infinity domestic lounge voucher milestone",
+      "offering_id": "3eeb4094-d452-5a33-9061-0e8999cd6c89",
+      "review_tier": "high_impact",
+      "review_note": "Qualification is based on posted net spend and the issuer routes the claim through SMS/email to the claim portal. Voucher validity is unknown until an exact official period is mapped.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/tata-neu-infinity-credit-card/pdf/milestone_lounge_tataneu-cc.pdf",
+          "value": "high"
+        }
+      ]
+    },
+    "b3000001-0000-4000-8000-000000000007": {
+      "benefit_id": "b3000001-0000-4000-8000-000000000007",
+      "rescued_benefit_id": "b3000001-0000-4000-8000-000000000007",
+      "title": "Tata Neu Infinity RuPay Select international lounge access",
+      "offering_id": "3eeb4094-d452-5a33-9061-0e8999cd6c89",
+      "review_tier": "high_impact",
+      "review_note": "The issuer states excess visits are discretionary and chargeable; no RuPay programme benefit is stacked without issuer linkage.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/credit-cards/tata-neu-infinity-hdfc-bank-credit-card",
+          "value": "high"
+        }
+      ]
+    },
+    "bad1a70c-330f-5321-b997-c9fc8e930463": {
+      "benefit_id": "bad1a70c-330f-5321-b997-c9fc8e930463",
+      "rescued_benefit_id": "bad1a70c-330f-5321-b997-c9fc8e930463",
+      "title": "Visa APAC airport dining for DBS Treasures Visa Infinite",
+      "offering_id": "c2a6190e-7462-5b76-97ce-3b994c26d351",
+      "review_tier": "ambiguous",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.visa.co.in/en_in/visa-offers-and-perks/visa-airport-dining/177766",
+          "value": "low"
+        }
+      ]
+    },
+    "bd4321e5-9e0a-5e81-a7ef-32d163569a0f": {
+      "benefit_id": "bd4321e5-9e0a-5e81-a7ef-32d163569a0f",
+      "rescued_benefit_id": "bd4321e5-9e0a-5e81-a7ef-32d163569a0f",
+      "title": "Regalia Gold welcome memberships after qualifying early spend",
+      "offering_id": "83a6036e-bd88-5cb8-aa8f-676521050f68",
+      "review_tier": "ambiguous",
+      "review_note": "Current issuer landing page and linked issuer terms disagree on the named welcome membership pair; no pair is selected by this candidate.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/credit-cards/regalia-gold-credit-card",
+          "value": "high"
+        },
+        {
+          "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/regalia-gold-credit-card/general-terms-and-conditions.pdf",
+          "value": "high"
+        }
+      ]
+    },
+    "c1750520-295c-5c15-af65-23f9994c668c": {
+      "benefit_id": "c1750520-295c-5c15-af65-23f9994c668c",
+      "rescued_benefit_id": "c1750520-295c-5c15-af65-23f9994c668c",
+      "title": "Regalia Gold accelerated reward points at designated merchants",
+      "offering_id": "83a6036e-bd88-5cb8-aa8f-676521050f68",
+      "review_tier": "ambiguous",
+      "review_note": "Both issuer documents identify the designated merchant program and the monthly incremental cap, but conflict on the minimum eligible transaction threshold.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/regalia-gold-credit-card/pdfs/regalia-gold-credit-card-reward-points-t-and-cs.pdf",
+          "value": "high"
+        },
+        {
+          "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/regalia-gold-credit-card/general-terms-and-conditions.pdf",
+          "value": "high"
+        }
+      ]
+    },
+    "d1e2fb98-f0b8-515b-b423-ea9ef9595e02": {
+      "benefit_id": "d1e2fb98-f0b8-515b-b423-ea9ef9595e02",
+      "rescued_benefit_id": "d1e2fb98-f0b8-515b-b423-ea9ef9595e02",
+      "title": "Regalia Gold joining and renewal membership fee",
+      "offering_id": "83a6036e-bd88-5cb8-aa8f-676521050f68",
+      "review_tier": "standard",
+      "review_note": null,
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/credit-cards/regalia-gold-credit-card",
+          "value": "high"
+        },
+        {
+          "source_url": "https://www.hdfc.bank.in/credit-cards/regalia-gold-credit-card/fees-and-charges",
+          "value": "high"
+        }
+      ]
+    },
+    "d5a55304-65ed-5b65-a558-5e44f6192508": {
+      "benefit_id": "d5a55304-65ed-5b65-a558-5e44f6192508",
+      "rescued_benefit_id": "d5a55304-65ed-5b65-a558-5e44f6192508",
+      "title": "HDFC Millennia renewal-fee waiver",
+      "offering_id": "16f59859-681b-5934-8709-037f5fb1fdb0",
+      "review_tier": "standard",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/credit-cards/millennia-credit-card/fees-and-charges",
+          "value": "low"
+        }
+      ]
+    },
+    "d9084b73-d32f-535a-bc0e-37641d4391a9": {
+      "benefit_id": "d9084b73-d32f-535a-bc0e-37641d4391a9",
+      "rescued_benefit_id": "d9084b73-d32f-535a-bc0e-37641d4391a9",
+      "title": "Regalia Gold zero lost-card-liability statement",
+      "offering_id": "83a6036e-bd88-5cb8-aa8f-676521050f68",
+      "review_tier": "high_impact",
+      "review_note": "Issuer statement is conditional on immediate reporting. The exact fraud, reporting and liability terms are not normalized by this candidate.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/credit-cards/regalia-gold-credit-card",
+          "value": "high"
+        }
+      ]
+    },
+    "e4646640-d01c-5829-aefb-eb3c8d274afb": {
+      "benefit_id": "e4646640-d01c-5829-aefb-eb3c8d274afb",
+      "rescued_benefit_id": "e4646640-d01c-5829-aefb-eb3c8d274afb",
+      "title": "HDFC Millennia quarterly milestone choice",
+      "offering_id": "16f59859-681b-5934-8709-037f5fb1fdb0",
+      "review_tier": "high_impact",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/millennia-credit-card/pdf/quarterly-spends-milestone-program.pdf",
+          "value": "low"
+        }
+      ]
+    },
+    "eb338806-6db5-5971-9c3d-bde11ce154b9": {
+      "benefit_id": "eb338806-6db5-5971-9c3d-bde11ce154b9",
+      "rescued_benefit_id": "eb338806-6db5-5971-9c3d-bde11ce154b9",
+      "title": "HDFC Millennia fuel surcharge waiver",
+      "offering_id": "16f59859-681b-5934-8709-037f5fb1fdb0",
+      "review_tier": "standard",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/millennia-credit-card/pdf/millennia-tnc-20th-jul26.pdf",
+          "value": "low"
+        }
+      ]
+    },
+    "ec82ae81-b8c9-5dbb-8918-c7eaf8a1feaa": {
+      "benefit_id": "ec82ae81-b8c9-5dbb-8918-c7eaf8a1feaa",
+      "rescued_benefit_id": "ec82ae81-b8c9-5dbb-8918-c7eaf8a1feaa",
+      "title": "HDFC Millennia direct education payment earn",
+      "offering_id": "16f59859-681b-5934-8709-037f5fb1fdb0",
+      "review_tier": "ambiguous",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/millennia-credit-card/pdf/millennia-tnc-20th-jul26.pdf",
+          "value": "low"
+        }
+      ]
+    },
+    "f0e86ca3-ebf6-5361-9a4e-9ab75bf87327": {
+      "benefit_id": "f0e86ca3-ebf6-5361-9a4e-9ab75bf87327",
+      "rescued_benefit_id": "f0e86ca3-ebf6-5361-9a4e-9ab75bf87327",
+      "title": "HDFC Millennia base CashPoints earn",
+      "offering_id": "16f59859-681b-5934-8709-037f5fb1fdb0",
+      "review_tier": "standard",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/millennia-credit-card/pdf/millennia-tnc-20th-jul26.pdf",
+          "value": "low"
+        }
+      ]
+    },
+    "f956d541-ad31-5614-849a-4445a8fdefa0": {
+      "benefit_id": "f956d541-ad31-5614-849a-4445a8fdefa0",
+      "rescued_benefit_id": "f956d541-ad31-5614-849a-4445a8fdefa0",
+      "title": "DBS Treasures Visa Infinite debit insurance matrix",
+      "offering_id": "c2a6190e-7462-5b76-97ce-3b994c26d351",
+      "review_tier": "high_impact",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch. Variant/BIN applicability remains unresolved in the report.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.dbs.bank.in/digibank/in/debit-card-terms-and-conditions.page",
+          "value": "low"
+        }
+      ]
+    },
+    "fa6bfa25-0fe2-527d-a0b4-06646e046bc1": {
+      "benefit_id": "fa6bfa25-0fe2-527d-a0b4-06646e046bc1",
+      "rescued_benefit_id": "fa6bfa25-0fe2-527d-a0b4-06646e046bc1",
+      "title": "DBS Treasures Visa Infinite debit lounge access",
+      "offering_id": "c2a6190e-7462-5b76-97ce-3b994c26d351",
+      "review_tier": "high_impact",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch.",
+      "official_reference": null,
+      "confidence": [
+        {
+          "source_url": "https://www.dbs.bank.in/in/iwov-resources/pdf/debit-card/dbs-bank-lounge-access-tnc.pdf",
+          "value": "low"
+        }
+      ]
+    },
+    "fd45a812-32e0-5a9a-9511-182ac4743242": {
+      "benefit_id": "fd45a812-32e0-5a9a-9511-182ac4743242",
+      "rescued_benefit_id": "fd45a812-32e0-5a9a-9511-182ac4743242",
+      "title": "RBL Play monthly BookMyShow movie and food offer",
+      "offering_id": "8f4fc7eb-f070-59c0-926c-029897a8093c",
+      "review_tier": "ambiguous",
+      "review_note": "The linked official body was not captured locally. The evidence digest is a reproducible snapshot-manifest hash, not a source-body hash; the report mapping is a needs_review proposal and requires a later human-checked fetch. BookMyShow and issuer availability windows conflict in the report.",
+      "official_reference": "https://in.bookmyshow.com/offers/rbl-play-credit-card---monthly-offer/RBLPLMN222",
+      "confidence": [
+        {
+          "source_url": "https://in.bookmyshow.com/offers/rbl-play-credit-card---monthly-offer/RBLPLMN222",
+          "value": "low"
+        }
+      ]
+    }
+  },
+  "intentionally_omitted_redundant_fields": [
+    "record_kind",
+    "target_record_id",
+    "base_record",
+    "conflicts_with (empty in every registered payload)",
+    "status (needs_review in every registered payload; the rescued state is canonical)"
+  ]
+}

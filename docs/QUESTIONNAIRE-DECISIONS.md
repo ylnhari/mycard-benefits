@@ -3,14 +3,15 @@
 Date accepted: 2026-08-06
 
 The owner accepted every recommended default in the initial 120-item product
-questionnaire, except where a later instruction revised the integration or
-commercial boundary. This is a compact, durable decision matrix rather than a
-chat transcript. `PRODUCT_REQUIREMENTS.md`, `DECISIONS.md`, and `SECURITY.md`
-remain normative when wording differs.
+questionnaire, except where a later instruction revised a product or commercial
+boundary. This is a compact, durable decision matrix rather than a chat
+transcript. `PRODUCT_REQUIREMENTS.md`, `DECISIONS.md`, and `SECURITY.md` remain
+normative when wording differs.
 
 An accepted decision is product intent, not a claim that the feature is already
 implemented. `PROJECT_STATUS.md` and `ROADMAP.md` are authoritative for delivery
-state.
+state. Question numbers are stable identifiers; withdrawn decisions are not
+renumbered.
 
 ## Product and release
 
@@ -84,11 +85,6 @@ state.
 36. Defend against casual household access, lost-device disk inspection,
     accidental logging, malicious catalog data, and network leakage. A fully
     compromised OS is outside the threat model.
-37. A future Family Finance migration follows preview, encrypted backup,
-    import, field comparison, approval, and a separate cleanup approval.
-38. Revised later: the apps remain independent. A future one-time encrypted
-    import creates no continuous synchronization or implicit data bridge.
-
 ## Benefit intelligence
 
 39. Cover rewards, conversions, movies, hotels, dining, cashback, vouchers,
@@ -195,7 +191,7 @@ state.
     owns intent, security, integration, and verification; workers never approve
     their own catalog changes.
 
-## Dashboard and Family Finance integration
+## Dashboard and local use
 
 88. Navigate among My Cards, Benefits, Compare, Expiring Soon, Updates, Sources,
     Research Queue, and Settings, with an overview landing page.
@@ -211,14 +207,6 @@ state.
     action links.
 94. Never submit applications or redemptions; open the official destination and
     provide instructions only.
-95. Revised later: Family Finance shares no aggregates today. Any future safe
-    count bridge is a separately reviewed feature.
-96. Revised later: do not embed or replace the Cards experience. Add an optional
-    separate-launch companion control and setup guide.
-97. If unavailable, open setup/start diagnostics while Family Finance remains
-    fully usable.
-98. Theme preferences are independent today; any future theme contract must be
-    explicit and must never share vault state.
 99. Support an empty clone with useful empty/demo states and no required key or
     network service.
 100. Target encrypted full backup, redacted JSON, public catalog JSON, and CSV
@@ -253,8 +241,6 @@ state.
      update, rollback, and last-known-good fallback.
 113. Add no telemetry; diagnostics are explicit, redacted, and manually
      exportable.
-114. Create the eventual public repository under the same GitHub account as
-     Family Finance only after the publication gate.
 115. Target protected `main`, reviewed pull requests, automated checks, and no
      force pushes.
 116. Stop before remote creation or push; audit history and obtain explicit
@@ -265,9 +251,17 @@ state.
      Priority Pass children, expired/conflicting offers, spend-gated lounges,
      boarding-pass benefits, and unknown networks.
 119. Deliver independently usable milestones: foundation/security, inventory,
-     catalog/evidence, benefit engine, agents/Q&A, Family integration,
-     live-source pilots, then public-release audit.
+     catalog/evidence, benefit engine, agents/Q&A, live-source pilots, then
+     public-release audit.
 120. Later additions include complete purchase-route optimization, affiliate
      stacking with explicit uncertainty, network-inherited offers, and unusual
      boarding-pass-triggered benefits. They are captured in the requirements and
      idea log; none is an approved live catalog claim yet.
+
+## Later owner revision: catalog review rule — 2026-08-10
+
+The owner changed item 67's activation rule: one dated human approval is
+sufficient at every review tier. A second independent human reviewer remains a
+recommended risk-control for enhanced, ambiguous, or high-impact claims, not a
+mandatory gate. Agents cannot approve candidates, and authors cannot approve
+their own work.

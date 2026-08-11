@@ -5,13 +5,15 @@ from __future__ import annotations
 import argparse
 import contextlib
 import getpass
+import json
 import secrets
 import sys
 from pathlib import Path
 
+from . import data_location
 from .config import Settings
-from .vault import VaultError, VaultStore
-from .vault.importer import load_manifest
+from .vault import AuditLog, VaultError, VaultStore
+from .vault.importer import load_manifest, load_reconciliation_manifest
 from .vault.keyring_store import (
     Keyring,
     get_keyring_password,
@@ -36,31 +38,47 @@ def build_parser() -> argparse.ArgumentParser:
     import_parser.add_argument("--manifest", type=Path, required=True)
     import_parser.add_argument("--create", action="store_true")
 
+    reconcile_parser = subparsers.add_parser(
+        "reconcile", help="reconcile an encrypted private source manifest"
+    )
+    reconcile_parser.add_argument("--manifest", type=Path, required=True)
+    reconcile_parser.add_argument("--create", action="store_true")
+
     subparsers.add_parser("verify", help="verify the vault and report only its record count")
     return parser
 
 
 def main() -> None:
     try:
-        count = run(build_parser().parse_args())
+        args = build_parser().parse_args()
+        result = run(args)
     except VaultError as exc:
         print(str(exc), file=sys.stderr)
         raise SystemExit(1) from None
     except Exception:
         print("Vault operation failed.", file=sys.stderr)
         raise SystemExit(1) from None
-    print(f"Vault operation completed. Card count: {count}.")
+    if isinstance(result, dict):
+        print(json.dumps(result, sort_keys=True, separators=(",", ":")))
+    else:
+        print(f"Vault operation completed. Card count: {result}.")
 
 
 def run(args: argparse.Namespace) -> int:
     data_dir = Settings.from_environment(explicit_data_dir=args.data_dir).data_dir
-    vault_path = (data_dir / "private" / "vault.json").resolve()
-    store = VaultStore(vault_path)
+    vault_path = data_location.vault_path_for_data_dir(data_dir)
+    audit_log = AuditLog(vault_path.with_name("audit.jsonl"))
+    store = _store_with_audit(vault_path, audit_log)
     creating = bool(getattr(args, "create", False))
     if creating == vault_path.exists():
         expected = "not exist" if creating else "exist"
         raise VaultError(f"vault must {expected} for this operation")
     manifest = load_manifest(args.manifest.resolve()) if args.command == "import" else None
+    reconciliation_manifest = (
+        load_reconciliation_manifest(args.manifest.resolve())
+        if args.command == "reconcile"
+        else None
+    )
 
     keyring: Keyring | None = _load_keyring() if args.keyring else None
     account = _keyring_account(vault_path)
@@ -91,9 +109,24 @@ def run(args: argparse.Namespace) -> int:
                 (card.offering_id, card.secret_fields, card.lifecycle)
                 for card in manifest.cards
             )
+        if reconciliation_manifest is not None:
+            result = session.reconcile_cards(reconciliation_manifest.cards)
+            return result.imported + result.bound_existing + result.unchanged
         return len(session.list_cards())
     finally:
         session.lock()
+
+
+def _store_with_audit(vault_path: Path, audit_log: AuditLog) -> VaultStore:
+    """Keep the supported one-argument injected store seam usable."""
+    try:
+        return VaultStore(vault_path, audit_log=audit_log)
+    except TypeError as exc:
+        if "unexpected keyword argument 'audit_log'" not in str(exc):
+            raise
+        # Test and embedding callers may inject the pre-audit Store(path)
+        # boundary.  The real VaultStore above remains audit-enabled.
+        return VaultStore(vault_path)
 
 
 def _prompt_passphrase(*, confirm: bool) -> str:

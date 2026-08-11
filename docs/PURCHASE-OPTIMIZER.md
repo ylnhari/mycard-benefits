@@ -34,6 +34,33 @@ treated as stackable.
 The UI shows these totals separately. It must not headline a sum of guaranteed,
 conditional, and estimated value as one “return.”
 
+The engine and API keep the three totals strictly separate, with no combined or
+summed field: `net_guaranteed` is always guaranteed value minus fees and never
+includes conditional or estimated value, conditional and estimated values are
+reported only as their own ranges, every ranked route carries
+`value_class_totals_are_non_additive: true`, and ranking uses only
+`net_guaranteed` (plus policy tie-breakers). Deterministic tests pin this
+contract at the engine, API (exact response key set), and UI rendering levels.
+
+## Caps and allowances
+
+Cap and allowance arithmetic is deterministic and fail-closed:
+
+- Each component's value is clamped to the scenario amount, its
+  `per_transaction_cap`, and its `remaining_allowance` (the period allowance
+  the user recorded), whichever is smaller. A zero cap or zero remaining
+  allowance yields a zero contribution; a cap larger than the purchase amount
+  can never inflate a contribution above the amount.
+- The clamp happens before minor-unit quantization (half-even rounding), so a
+  cap such as `33.335` INR contributes `33.34` INR and the class total stays
+  the exact sum of quantized contributions.
+- Within one value class, components share that class's budget of the scenario
+  amount in route order, so values are never double counted.
+- Members of a repeated `cap_group` must declare the same per-transaction cap.
+  That declared group budget is allocated once across members in route order;
+  missing or mismatched declarations fail closed. A repeated canonical
+  `benefit_rule_id` is likewise rejected.
+
 ## Ranking
 
 1. Remove inactive, expired, stale, unreviewed, incompatible, or ineligible
@@ -48,8 +75,27 @@ conditional, and estimated value as one “return.”
 7. Show at least one fallback route and explain why every rejected card/path
    lost or could not be verified.
 
-No affiliate compensation enters the score. Equal-value ties prefer the
-non-affiliate path unless the user explicitly chooses otherwise.
+## Caps, allowances, and rounding
+
+- A component's contribution is clamped to the minimum of the planned amount,
+  its per-transaction cap, and its remaining (period) allowance, then to what
+  is left of its value class's budget for this scenario. A cap or allowance of
+  zero yields a zero contribution (fail closed); a cap larger than the planned
+  amount cannot inflate a value beyond the purchase.
+- Two components that draw on the same shared cap group consume its one equal
+  declared budget in route order, so the cap is never double-counted. If any
+  member omits the declaration or declares a different amount, the route is
+  rejected rather than guessed or averaged. A repeated canonical benefit rule
+  is likewise rejected.
+- Contributions are quantized to the currency's minor units with half-even
+  rounding before being summed, so per-component and class totals stay exact
+  and a clamped range (`40–70` under a `50` cap becomes `40–50`) cannot exceed
+  the shared budget.
+
+
+Affiliate status never enters the score or any tie-breaker. Equal policy
+factors fall through to the stable route identifier; affiliate disclosure and
+the user's link-class filter affect visibility only.
 
 ## Portal example: CashKaro to Amazon
 
@@ -96,11 +142,13 @@ The reviewed engine is reachable locally through one narrowly scoped endpoint:
   over the network, and responses carry `Cache-Control: no-store`.
 - The request must be at most 128 KiB and holds at most 20 routes, 8
   components per route, 5 scenario fees, 5 route fees, 8 source references,
-  and 8 approved origins. Money is accepted as decimal strings or integers;
+  and 8 admitted action origins. Money is accepted as decimal strings or integers;
   JSON numbers are rejected so values stay exact.
-- All evidence, expiry, review, stacking, currency, and origin rules are the
-  engine's. The adapter adds only the structural bounds above and never
-  reimplements ranking.
+- Every action reference is an anonymous HTTPS URL from the caller-admitted
+  origin set and has an explicit `approved` human action-link state. `data:`,
+  `javascript:`, unknown, unreviewed, stale, expired, and otherwise ineligible
+  inputs are rejected rather than ranked. The adapter adds only structural
+  bounds and never reimplements ranking.
 - The response mirrors the engine exactly: ranked routes with net guaranteed
   value after fees, separate conditional and estimated ranges, per-component
   provenance (source references, evidence tier, verification and expiry
@@ -113,3 +161,49 @@ The reviewed engine is reachable locally through one narrowly scoped endpoint:
   request (`422`, or `413` when the body exceeds the size limit).
 - The endpoint never opens a link, never reads the vault or private card
   inventory, and cannot trigger a purchase.
+
+## Planner UI adapter
+
+The dashboard Planner is the only UI caller of the loopback API. It submits a
+general, synthetic planned-purchase scenario built entirely from user-entered
+assumptions. The adapter mapping below is the documented, bounded
+translation; the engine's ranking and rejection semantics are never changed
+or bypassed.
+
+- **Input surface** — merchant or site label, category, amount, date,
+  currency (INR/USD/EUR/GBP/JPY), allowed channels (official, third-party,
+  affiliate), and up to 8 cards, each with a card label, one routing
+  assumption, a value class, and a percentage of the planned amount
+  (guaranteed: single value; conditional/estimated: minimum and maximum),
+  an optional condition, and a channel.
+- **Percent-to-money mapping** — each percentage is converted with exact
+  BigInt decimal arithmetic (no floating point) to
+  `percent / 100 × amount`, quantized to six decimal places with half-even
+  rounding. The engine itself quantizes totals to the currency's minor
+  units.
+- **Synthetic provenance** — user-entered assumptions have no source, so
+  the adapter supplies reserved `.invalid` provenance that can never
+  resolve: `benefit_rule_id` is a fresh canonical UUID v4,
+  `source_refs`/`official_reference` point at
+  `https://planner-user-entered.invalid`, `evidence_tier` is `low`,
+  `verified_on` equals the scenario date, and `approved_official_origins`
+  contains only that origin. The UI renders provenance as non-navigating
+  text, never as links.
+- **Honest review markers** — every user-entered component is submitted as
+  `reviewed: false` and `freshness: "unknown"`. The engine therefore rejects
+  every planner route with the verbatim reasons "source is not human
+  reviewed" and "source freshness is unknown", and the result is always
+  `no_verified_route` while the reviewed catalog has no verified benefits
+  for these cards. The UI labels every rendered layer "User-entered
+  assumption" and never claims verified information; rejection reasons are
+  displayed verbatim so the verified-vs-user-entered distinction comes from
+  the engine itself. The planner cannot and must not mark user data as
+  reviewed.
+- **Ephemerality** — the form stores nothing (no `localStorage`, no
+  history), the request is sent with `Cache-Control: no-store`, results
+  replace the previous result in the page, and the flow never navigates,
+  opens a link, fetches a live source, or triggers a purchase.
+- **Error mapping** — client validation messages name the exact field and
+  focus it; server `422` shows the API's value-free detail message, `413`
+  explains the size limit, and network failures tell the user the local app
+  did not answer. Form values are preserved on every error path.

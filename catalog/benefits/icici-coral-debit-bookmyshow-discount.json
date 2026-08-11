@@ -1,0 +1,53 @@
+{
+  "id": "15ca34e9-d173-5689-a8db-aed9a5821c96",
+  "offering_id": "c0ad0101-b317-503e-97a9-f2735bfde109",
+  "title": "ICICI Coral debit BookMyShow discount",
+  "benefit_type": "movie",
+  "category": "movie",
+  "allowance": {
+    "discount_percent": 25,
+    "cap_inr_by_subtype": {
+      "unknown": 0
+    },
+    "uses_per_month": 1,
+    "daily_inventory_blocks": 6
+  },
+  "eligibility": [
+    {
+      "field": "movie_ticket_count",
+      "operator": "gte",
+      "value": 2
+    }
+  ],
+  "conditions": [],
+  "exclusions": [
+    "No automated redemption authorization is implied.",
+    "Unknown stacking remains unapproved unless the terms explicitly support it."
+  ],
+  "redemption_steps": [
+    "Select the named offer at BookMyShow checkout.",
+    "Use the eligible card variant and complete payment.",
+    "Pay applicable processing or internet fees where required."
+  ],
+  "provider": "BookMyShow",
+  "effective_from": null,
+  "effective_to": "2027-03-31",
+  "end_date_known": true,
+  "source_url": "https://in.bookmyshow.com/offers/icici-debit-card-offer/ICICOR0813",
+  "source_policy_class": "administering_terms",
+  "content_sha256": "522fc8393ff6bb4101bffe8ca8397ee71eda75e5a814b06d2997b05e6c3322ce",
+  "retrieved_at": "2026-08-10T00:00:00Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://in.bookmyshow.com/offers/icici-debit-card-offer/ICICOR0813",
+      "source_policy_class": "administering_terms",
+      "content_sha256": "522fc8393ff6bb4101bffe8ca8397ee71eda75e5a814b06d2997b05e6c3322ce",
+      "retrieved_at": "2026-08-10T00:00:00Z",
+      "id": "a88c5d38-0112-5f8f-9fda-3e872025d55f",
+      "source_observation_id": "657b59a7-1933-5458-9e29-7130fb5882d6",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "low"
+    }
+  ]
+}

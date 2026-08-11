@@ -1,0 +1,67 @@
+{
+  "id": "b3000001-0000-4000-8000-000000000003",
+  "offering_id": "3eeb4094-d452-5a33-9061-0e8999cd6c89",
+  "title": "Tata Neu Infinity reward exclusions and category caps",
+  "benefit_type": "reward_points",
+  "category": "reward_points",
+  "allowance": {
+    "grocery_monthly_cap_neucoins": 2000,
+    "insurance_monthly_cap_neucoins": 2000,
+    "utility_monthly_cap_neucoins": 2000,
+    "telecom_cable_monthly_cap_neucoins": 2000
+  },
+  "eligibility": [
+    {
+      "field": "transaction.category",
+      "operator": "not_in",
+      "value": [
+        "fuel",
+        "wallet_load",
+        "gift_or_prepaid_load",
+        "voucher_purchase",
+        "cash_advance",
+        "card_payment",
+        "card_fee",
+        "smart_emi",
+        "dial_an_emi",
+        "rental",
+        "government",
+        "online_skill_gaming"
+      ]
+    }
+  ],
+  "conditions": [],
+  "exclusions": [],
+  "redemption_steps": [],
+  "provider": null,
+  "effective_from": "2026-01-03",
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/tata-neu-infinity-credit-card/pdf/tata_neu_infinity_card_faq.pdf",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "a73fb7151b84ad90793a203e4e8c4aa34d003f64b04e0e1632e9aa87d519abbb",
+  "retrieved_at": "2026-08-09T18:36:39Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/tata-neu-infinity-credit-card/pdf/tata_neu_infinity_card_tnc.pdf",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "cc667649571b5bc439d9a24c64f2fd3681f5ad24ce50ec0b2a846d215b2f773b",
+      "retrieved_at": "2026-08-09T18:36:39Z",
+      "id": "dabd77f9-c314-572b-8f04-f3c188251b99",
+      "source_observation_id": "45870617-0027-5174-ab48-50eadc05f88c",
+      "confidence": "high",
+      "effective_from": "2026-01-03"
+    },
+    {
+      "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/tata-neu-infinity-credit-card/pdf/tata_neu_infinity_card_faq.pdf",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "a73fb7151b84ad90793a203e4e8c4aa34d003f64b04e0e1632e9aa87d519abbb",
+      "retrieved_at": "2026-08-09T18:36:39Z",
+      "id": "8ab6acb8-6eeb-549b-a181-cbc8fe70772c",
+      "source_observation_id": "54e360bf-3e2d-5682-8dd8-77584da916c7",
+      "confidence": "high",
+      "effective_from": "2025-07-15"
+    }
+  ]
+}

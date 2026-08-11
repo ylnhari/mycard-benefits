@@ -1,0 +1,22 @@
+name: PR contribution disclosure
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-disclosure:
+    runs-on: ubuntu-latest
+    env:
+      PR_BODY: ${{ github.event.pull_request.body }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen --all-groups
+      # PR_BODY is passed as an env var, never interpolated into the shell
+      # command itself, so untrusted PR description content cannot inject
+      # commands here (see scripts/validate_pr_disclosure.py for the parser).
+      - run: printf '%s' "$PR_BODY" | uv run --no-sync python scripts/validate_pr_disclosure.py

@@ -1,0 +1,45 @@
+{
+  "id": "44fd686d-676d-5861-b526-44be9d0fac1b",
+  "offering_id": "784d30a2-d144-53dd-bfa1-88549e975d39",
+  "title": "DBS EMT Visa Signature debit lounge access",
+  "benefit_type": "lounge",
+  "category": "lounge",
+  "allowance": {
+    "visits": 1,
+    "period": "quarter",
+    "validation_swipe_inr": 2,
+    "india_only": true
+  },
+  "eligibility": [
+    {
+      "field": "preceding_three_calendar_months_dbs_spend_inr",
+      "operator": "gte",
+      "value": 5000
+    }
+  ],
+  "conditions": [],
+  "exclusions": [],
+  "redemption_steps": [],
+  "provider": null,
+  "effective_from": "2026-04-01",
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.dbs.bank.in/in/iwov-resources/pdf/debit-card/dbs-bank-lounge-access-tnc.pdf",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "58269d16d39afcd4a0220048de52d1a0fe03db2851afe0b93711cfe656fadd87",
+  "retrieved_at": "2026-08-10T00:00:00Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.dbs.bank.in/in/iwov-resources/pdf/debit-card/dbs-bank-lounge-access-tnc.pdf",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "58269d16d39afcd4a0220048de52d1a0fe03db2851afe0b93711cfe656fadd87",
+      "retrieved_at": "2026-08-10T00:00:00Z",
+      "id": "26aa69dd-36c7-5aeb-a8c5-eddf1f445b7a",
+      "source_observation_id": "be04cf92-68f3-5552-8ccd-923b5e53f855",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "low",
+      "effective_from": "2026-04-01"
+    }
+  ]
+}

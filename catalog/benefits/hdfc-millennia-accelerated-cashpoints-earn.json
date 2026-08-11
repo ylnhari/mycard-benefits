@@ -1,0 +1,52 @@
+{
+  "id": "0ee5b685-703c-5079-9dec-cae4214a96da",
+  "offering_id": "16f59859-681b-5934-8709-037f5fb1fdb0",
+  "title": "HDFC Millennia accelerated CashPoints earn",
+  "benefit_type": "reward_points",
+  "category": "reward_points",
+  "allowance": {
+    "cashpoints_percent": 5,
+    "calendar_month_cap": 1000
+  },
+  "eligibility": [
+    {
+      "field": "transaction.kind",
+      "operator": "equals",
+      "value": "eligible_merchant_non_emi"
+    }
+  ],
+  "conditions": [],
+  "exclusions": [],
+  "redemption_steps": [],
+  "provider": null,
+  "effective_from": null,
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.hdfc.bank.in/credit-cards/millennia-credit-card",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "48519055ebbe3e11c281517e11b1412c890d7e5a749ec7364483699f2eae5442",
+  "retrieved_at": "2026-08-10T00:00:00Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/millennia-credit-card/pdf/millennia-tnc-20th-jul26.pdf",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "e5dc77addbfba8169d8ed6f99aa7b188a24022247567f5d1c1b6a9f7b54ed5a5",
+      "retrieved_at": "2026-08-10T00:00:00Z",
+      "id": "03130e13-bb66-5128-8d99-021e04506e08",
+      "source_observation_id": "ad77aaa7-2dc5-503d-9d0c-150b58692eac",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "low"
+    },
+    {
+      "source_url": "https://www.hdfc.bank.in/credit-cards/millennia-credit-card",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "48519055ebbe3e11c281517e11b1412c890d7e5a749ec7364483699f2eae5442",
+      "retrieved_at": "2026-08-10T00:00:00Z",
+      "id": "37ff497f-a653-552e-a902-109cf4a8027d",
+      "source_observation_id": "01fd6ce9-5a41-5cde-ac72-4c3326f60205",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "low"
+    }
+  ]
+}

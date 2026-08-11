@@ -9,7 +9,7 @@ import pytest
 
 from mycard_benefits import vault_cli
 from mycard_benefits.vault import CardLifecycle, VaultError, VaultStore
-from mycard_benefits.vault.importer import load_manifest
+from mycard_benefits.vault.importer import load_manifest, load_reconciliation_manifest
 
 
 class _FakeKeyring:
@@ -43,6 +43,51 @@ def test_load_manifest_is_strict_and_value_safe(tmp_path: Path) -> None:
     with pytest.raises(VaultError, match="card manifest is invalid") as failure:
         load_manifest(path)
     assert "secret-marker" not in str(failure.value)
+
+
+def test_reconciliation_manifest_is_strict_and_pan_value_safe(tmp_path: Path) -> None:
+    path = tmp_path / "reconcile.json"
+    path.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "cards": [
+                    {
+                        "source_identity": "a" * 32,
+                        "offering_id": None,
+                        "lifecycle": "active",
+                        "secret_fields": {
+                            "pan": "SYNTHETIC-ONLY-PAN-000000000001",
+                            "nickname": "SYNTHETIC-ONLY-card",
+                        },
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    manifest = load_reconciliation_manifest(path)
+    assert len(manifest.cards) == 1
+    assert manifest.cards[0].source_identity == "a" * 32
+
+    path.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "cards": [
+                    {
+                        "source_identity": "not-an-identity",
+                        "offering_id": None,
+                        "lifecycle": "active",
+                        "secret_fields": {"pan": "SYNTHETIC-ONLY-PAN-000000000001"},
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(VaultError, match="reconciliation manifest is invalid"):
+        load_reconciliation_manifest(path)
 
 
 def test_batch_add_is_atomic_when_later_card_is_invalid(tmp_path: Path) -> None:
@@ -139,6 +184,42 @@ def test_existing_vault_accepts_an_additional_atomic_import(
     assert vault_cli.run(_args(tmp_path, second, create=False)) == 2
 
 
+def test_keyring_reconcile_is_count_only_and_idempotent(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    first = tmp_path / "first.json"
+    _write_manifest(first, [_card("synthetic-one")])
+    reconcile = tmp_path / "reconcile.json"
+    reconcile.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "cards": [
+                    {
+                        "source_identity": "a" * 32,
+                        "offering_id": None,
+                        "lifecycle": "active",
+                        "secret_fields": {"pan": "SYNTHETIC-ONLY-PAN-000000000001"},
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    fake_keyring = _FakeKeyring()
+    monkeypatch.setattr(vault_cli, "_load_keyring", lambda: fake_keyring)
+    assert vault_cli.run(_args(tmp_path, first, create=True)) == 1
+    args = argparse.Namespace(
+        data_dir=tmp_path,
+        keyring=True,
+        command="reconcile",
+        manifest=reconcile,
+        create=False,
+    )
+    assert vault_cli.run(args) == 1
+    assert vault_cli.run(args) == 1
+
+
 def test_concurrent_keyring_create_keeps_the_winning_passphrase(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -233,6 +314,7 @@ def test_core_rejects_plaintext_in_offering_id(tmp_path: Path) -> None:
         session.add_card(
             "SYNTHETIC owner name",
             {"nickname": "SYNTHETIC-ONLY-card"},
+            passphrase="synthetic passphrase",
         )
 
 
