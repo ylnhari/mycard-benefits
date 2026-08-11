@@ -284,6 +284,9 @@ const benefitCategoryLabels = Object.freeze({
   lounge: "Airport lounge", conversion: "Conversion", food: "Food and dining",
   insurance: "Insurance", hotel: "Hotels", travel: "Travel", fuel: "Fuel",
   shopping: "Shopping", voucher: "Vouchers", other: "Other benefits",
+  foreign_exchange: "Foreign exchange", wellness: "Wellness", education: "Education",
+  joining: "Joining benefits", milestone: "Milestone benefits", annual_fee: "Annual fee",
+  priority_pass: "Priority Pass",
 });
 const benefitCategoryChipLabels = Object.freeze({
   lounge: "Lounge", movie: "Movie", reward_points: "Rewards", food: "Dining",
@@ -292,7 +295,12 @@ const benefitCategoryChipLabels = Object.freeze({
 const featuredBenefitCategories = Object.freeze(["lounge", "movie", "reward_points", "food", "cashback", "voucher"]);
 function humanBenefitCategory(value) {
   const key = String(value || "other").toLocaleLowerCase();
-  return benefitCategoryLabels[key] || null;
+  // Never return null. A null label removed the benefit from the Benefits list
+  // outright, which silently hid nine of the sixty catalog benefits: every
+  // category the map did not name simply vanished from the screen. Falling back
+  // to the neutral bucket keeps an unlabelled benefit visible without surfacing
+  // a raw machine term, which is why this does not humanise the key instead.
+  return benefitCategoryLabels[key] || benefitCategoryLabels.other;
 }
 function benefitCategoryChipLabel(value) {
   const key = String(value || "other").toLocaleLowerCase();

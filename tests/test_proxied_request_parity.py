@@ -22,7 +22,6 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
-
 from test_protected_flow_routes import _setup
 
 PORT = 8777
