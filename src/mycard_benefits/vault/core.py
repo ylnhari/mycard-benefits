@@ -669,10 +669,14 @@ class VaultSession:
             self._require_unlocked()
             if self._detail_credential is not None:
                 raise VaultConflictError("card-details code already exists")
-            record = self._get_record(card_id)
-            values = self._decrypt_record(record)
-            if not _has_revealable_card_details(values):
-                raise VaultAccessError("card details are unavailable")
+            # The card must exist, but its contents do not gate this. The code
+            # created here is one vault-wide credential, so refusing to create it
+            # because the card the owner happened to click has no expiry stored
+            # locked them out of every other card too: each incomplete card
+            # rejected the setup, and the setup is what the complete ones need.
+            # Whether a particular card has anything to show is decided when it
+            # is revealed, in reveal_detail_values, where it belongs.
+            self._get_record(card_id)
             _validate_detail_credential(credential_type, credential)
             detail_kdf = _KdfParameters(
                 salt=secrets.token_bytes(16),
@@ -734,14 +738,18 @@ class VaultSession:
             if not self._detail_authorization_matches(authorization_token):
                 raise VaultAccessError("card details are unavailable")
             values = self._decrypt_record(self._get_record(card_id))
-            if not _has_revealable_card_details(values):
+            # A stored number is what makes a card revealable. Requiring an
+            # expiry as well withheld the number the owner had actually saved,
+            # on the grounds that they had not saved something else.
+            if not _has_revealable_card_number(values):
                 raise VaultAccessError("card details are unavailable")
-            expiry_month = values["expiry_month"]
-            expiry_year = values["expiry_year"]
+            expiry_month = values.get("expiry_month") or ""
+            expiry_year = values.get("expiry_year") or ""
             display_year = expiry_year[-2:] if len(expiry_year) == 4 else expiry_year
+            expiry = f"{expiry_month} / {display_year}" if expiry_month and display_year else None
             return {
                 "card_number": values["pan"],
-                "expiry": f"{expiry_month} / {display_year}",
+                "expiry": expiry,
                 "cvv": values.get("cvv"),
             }
 
@@ -2442,6 +2450,11 @@ def _has_revealable_card_details(values: dict[str, str]) -> bool:
         isinstance(values.get(key), str) and bool(values[key])
         for key in ("pan", "expiry_month", "expiry_year")
     )
+
+
+def _has_revealable_card_number(values: dict[str, str]) -> bool:
+    """Whether there is a stored number to show, regardless of what else is set."""
+    return isinstance(values.get("pan"), str) and bool(values["pan"])
 
 
 def _validate_detail_credential_envelope(raw: object) -> dict[str, Any]:

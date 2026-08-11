@@ -75,7 +75,9 @@ export function createRevealController({ protectedJson }) {
     document.querySelector("#revealShownState").hidden = false;
     document.querySelector("#revealProductName").textContent = offering?.display_name || "Card details";
     document.querySelector("#revealCardNumber").textContent = result.card_number;
-    document.querySelector("#revealExpiry").textContent = result.expiry;
+    // A card can have a number stored without an expiry. Say it is not stored
+    // rather than printing an empty slot the owner cannot tell from a bug.
+    document.querySelector("#revealExpiry").textContent = result.expiry || "Not stored";
     document.querySelector("#revealCvv").textContent = "•••";
     const cvvButton = document.querySelector("#revealCvvButton");
     cvvButton.disabled = !result.cvv;
@@ -100,6 +102,7 @@ export function createRevealController({ protectedJson }) {
   function revealErrorText(error) {
     const messages = {
       credential_invalid: "That code could not be accepted.",
+      credential_not_created: "That code could not be set up. Nothing was changed.",
       credential_exists: "A card-details code already exists in this vault.",
       credential_locked: "Card details are temporarily unavailable. Try again later.",
       detail_session_required: "Card details are unavailable in this browser session. The rest of MyCard keeps working.",

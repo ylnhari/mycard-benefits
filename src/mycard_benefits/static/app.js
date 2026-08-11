@@ -1180,6 +1180,11 @@ function renderBenefitDetail({ focus = false } = {}) {
 }
 function selectBenefit(benefitId) {
   state.selectedBenefitId = benefitId;
+  // A benefit selected from the public catalog must remain visible when the
+  // view changes to Search. The default Search scope is personal, and an
+  // empty vault would otherwise clear this public selection during its
+  // rerender before the detail panel can display it.
+  state.searchScope = "all";
   navigateTo("search");
   renderBenefitDetail({ focus: true });
 }

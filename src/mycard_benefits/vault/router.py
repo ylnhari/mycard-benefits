@@ -376,7 +376,10 @@ class ProtectedResult(_PrivateModel):
 
 class RevealResult(_PrivateModel):
     card_number: StrictStr
-    expiry: StrictStr
+    # Optional: a card may have a number stored without an expiry. When this was
+    # required, such a card produced a validation error rather than a reveal,
+    # and the browser saw a failure carrying no code to explain itself.
+    expiry: StrictStr | None = None
     cvv: StrictStr | None = None
 
 
@@ -1515,10 +1518,24 @@ def create_private_cards_router(
                     },
                     headers=_NO_STORE_HEADERS,
                 )
+            # Creating the code and reading a card are separate failures and are
+            # reported separately. Catching both together told an owner setting
+            # up their PIN that card details were unavailable, which described
+            # neither what they did nor what went wrong.
             try:
                 authorization_token = session.create_detail_credential(
                     card_id, request.credential_type, request.credential
                 )
+            except VaultError:
+                raise HTTPException(
+                    status_code=400,
+                    detail={
+                        "code": "credential_not_created",
+                        "message": "That code could not be set up. Nothing was changed.",
+                    },
+                    headers=_NO_STORE_HEADERS,
+                ) from None
+            try:
                 values = session.reveal_detail_values(
                     card_id, authorization_token=authorization_token
                 )

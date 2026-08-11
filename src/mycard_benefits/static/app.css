@@ -255,15 +255,15 @@ main { width:min(1220px,100%); margin:0 auto; padding:clamp(1.4rem,4vw,4rem); } 
 #benefits .benefit-masthead { align-items:flex-end; border-bottom:2px solid var(--mc-ink); padding-bottom:18px; margin-bottom:18px; gap:20px; }
 #benefits .benefit-masthead h1, #benefits .benefit-detail-card h3 { font-family:var(--serif); font-size:clamp(30px,4vw,46px); letter-spacing:-.015em; line-height:1.05; }
 #benefits h1, #benefits h2 { font-family:var(--serif); }
-#benefits .benefit-masthead .eyebrow { color:var(--mc-slate-2); font-family:ui-monospace,Consolas,monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; }
-#benefits .benefit-summary { color:var(--mc-slate-2); font-family:ui-monospace,Consolas,monospace; font-size:11px; letter-spacing:.04em; line-height:1.8; max-width:34rem; text-align:right; }
+#benefits .benefit-masthead .eyebrow { color:var(--mc-slate); font-family:ui-monospace,Consolas,monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; }
+#benefits .benefit-summary { color:var(--mc-slate); font-family:ui-monospace,Consolas,monospace; font-size:11px; letter-spacing:.04em; line-height:1.8; max-width:34rem; text-align:right; }
 #benefits .catalog-preview { display:none; }
 #benefits .benefit-scope, #benefits .benefit-category-chips { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 12px; }
 #benefits .scope-button, #benefits .category-chip { background:var(--mc-surface); border:1px solid var(--mc-rule); border-radius:99px; color:var(--mc-slate); cursor:pointer; font-size:12.5px; min-height:40px; padding:6px 11px; }
 #benefits .scope-button.selected, #benefits .category-chip.selected { background:var(--mc-ink); border-color:var(--mc-ink); color:var(--mc-paper); font-weight:650; }
 #benefits .benefit-category-chips { overflow-x:auto; padding-bottom:2px; }
 #benefits .discovery-form { margin:0 0 24px; padding:0 0 18px; border:0; border-bottom:1px solid var(--mc-rule); background:transparent; box-shadow:none; }
-#benefits .discovery-form > label { color:var(--mc-slate-2); font-family:ui-monospace,Consolas,monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; }
+#benefits .discovery-form > label { color:var(--mc-slate); font-family:ui-monospace,Consolas,monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; }
 #benefits .discovery-search-row { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:8px; margin-top:7px; }
 #benefits .discovery-search-row input,
 #benefits .discovery-filters input,
@@ -271,13 +271,13 @@ main { width:min(1220px,100%); margin:0 auto; padding:clamp(1.4rem,4vw,4rem); } 
 #benefits .discovery-filters { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:14px; }
 #benefits .discovery-filters label { color:var(--mc-slate); font-size:12px; }
 #benefits .discovery-filters .check-filter { display:flex; align-items:center; gap:8px; min-height:44px; }
-#benefits #benefitSearchStatus { color:var(--mc-slate-2); font-family:ui-monospace,Consolas,monospace; font-size:11px; margin:14px 0 2px; }
+#benefits #benefitSearchStatus { color:var(--mc-slate); font-family:ui-monospace,Consolas,monospace; font-size:11px; margin:14px 0 2px; }
 #benefits #benefitList { display:block; margin:0; }
 #benefits .catbar { display:flex; align-items:baseline; gap:10px; margin:22px 0 10px; padding-bottom:7px; border-bottom:1px solid var(--mc-rule); }
 #benefits .catbar h4 { color:var(--mc-ink); font-family:var(--serif); font-size:17px; margin:0; }
-#benefits .catbar .n { color:var(--mc-slate-2); font-family:ui-monospace,Consolas,monospace; font-size:11px; letter-spacing:.08em; }
+#benefits .catbar .n { color:var(--mc-slate); font-family:ui-monospace,Consolas,monospace; font-size:11px; letter-spacing:.08em; }
 #benefits .brow { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:18px; padding:14px 0; border-bottom:1px solid var(--mc-rule); align-items:start; background:transparent; border-radius:0; box-shadow:none; }
-#benefits .b-card { color:var(--mc-slate-2); font-family:ui-monospace,Consolas,monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase; margin:0; }
+#benefits .b-card { color:var(--mc-slate); font-family:ui-monospace,Consolas,monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase; margin:0; }
 #benefits .b-title { color:var(--mc-ink); font-size:15px; font-weight:650; margin:3px 0 0; }
 #benefits .b-val { color:var(--mc-ink); font-family:ui-monospace,Consolas,monospace; font-size:13.5px; font-variant-numeric:tabular-nums; margin:5px 0 0; }
 #benefits .b-cond { color:var(--mc-slate); font-size:13px; margin:3px 0 0; }
@@ -371,7 +371,34 @@ summary { display:flex; align-items:center; min-height:44px; cursor:pointer; }
 .protected-action-form { min-width:0; }
 .protected-action-form input, .protected-action-form select, .protected-action-form textarea { width:100%; border:1px solid var(--line); border-radius:8px; padding:.65rem .75rem; background:var(--panel-2); color:var(--text); }
 .protected-action-form label { display:grid; gap:5px; color:var(--muted); }
-.reveal-panel { max-width: 38rem; margin-top: 1rem; border-color: color-mix(in srgb, var(--accent) 58%, var(--line)); }
+/* The reveal prompt already declares role="dialog" aria-modal="true", but it was
+   laid out inline, so it appeared wherever it happened to sit in the document —
+   below the whole card list. With twenty or thirty cards the owner had to scroll
+   to the bottom to type the PIN they had just been asked for. It is positioned
+   over the viewport so it opens where the eye already is, which is what the
+   markup claimed all along. */
+.reveal-panel {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(38rem, calc(100vw - 2rem));
+  max-width: 38rem;
+  max-height: min(85vh, 44rem);
+  overflow-y: auto;
+  z-index: 60;
+  box-shadow: 0 1.5rem 3rem rgb(0 0 0 / 0.32);
+  border-color: color-mix(in srgb, var(--accent) 58%, var(--line));
+}
+/* Dim the page behind it. Sits behind the panel's own opaque background, so it
+   is only visible outside the panel's bounds. */
+.reveal-panel::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgb(0 0 0 / 0.45);
+  z-index: -1;
+}
+.reveal-panel[hidden] { display: none; }
 .reveal-state { display:grid; gap:.8rem; }
 .reveal-state h3 { margin:0; color:var(--text); }
 .reveal-state > p { margin:0; }
@@ -402,9 +429,9 @@ summary { display:flex; align-items:center; min-height:44px; cursor:pointer; }
 #search { --mc-ink:var(--ink); --mc-paper:var(--paper); --mc-surface:var(--surface); --mc-surface-2:var(--surface-2); --mc-slate:var(--slate); --mc-slate-2:var(--slate-2); --mc-rule:var(--rule); --mc-accent:var(--accent); --mc-accent-soft:var(--accent-soft); --mc-ok:var(--ok); --mc-ok-bg:var(--ok-bg); --mc-warn:var(--warn); --mc-warn-bg:var(--warn-bg); --mc-bad:var(--bad); --mc-bad-bg:var(--bad-bg); color:var(--mc-ink); background:var(--mc-paper); font-family:var(--sans); font-size:15px; line-height:1.55; }
 #search .search-masthead { align-items:flex-end; border-bottom:2px solid var(--mc-ink); gap:20px; margin-bottom:18px; padding-bottom:18px; }
 #search .search-masthead h1 { font-family:var(--serif); font-size:clamp(30px,4vw,46px); letter-spacing:-.015em; line-height:1.05; }
-#search .benefit-summary { max-width:34rem; color:var(--mc-slate-2); font-family:var(--mono); font-size:11px; letter-spacing:.04em; line-height:1.8; text-align:right; }
+#search .benefit-summary { max-width:34rem; color:var(--mc-slate); font-family:var(--mono); font-size:11px; letter-spacing:.04em; line-height:1.8; text-align:right; }
 #search .discovery-form { margin:0; padding:0 0 18px; border:0; border-bottom:1px solid var(--mc-rule); background:transparent; box-shadow:none; }
-#search .discovery-form > label { color:var(--mc-slate-2); font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; }
+#search .discovery-form > label { color:var(--mc-slate); font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; }
 #search .discovery-search-row { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:8px; margin-top:7px; }
 #search .discovery-search-row input, #search .discovery-filters input, #search .discovery-filters select { width:100%; min-height:44px; border:1px solid var(--mc-rule); border-radius:8px; background:var(--mc-surface-2); color:var(--mc-ink); }
 #search .search-scope { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
@@ -412,9 +439,9 @@ summary { display:flex; align-items:center; min-height:44px; cursor:pointer; }
 #search .discovery-filters label { display:grid; gap:5px; color:var(--mc-slate); font-size:12px; }
 #search .scope-button { min-height:44px; padding:6px 11px; border:1px solid var(--mc-rule); border-radius:99px; background:var(--mc-surface); color:var(--mc-slate); cursor:pointer; font-size:12.5px; }
 #search .scope-button.selected, #benefits .scope-button.selected { border-color:var(--mc-ink); background:var(--mc-ink); color:var(--mc-paper); font-weight:650; }
-#search #searchStatus { margin:14px 0 2px; color:var(--mc-slate-2); font-family:var(--mono); font-size:11px; }
+#search #searchStatus { margin:14px 0 2px; color:var(--mc-slate); font-family:var(--mono); font-size:11px; }
 #search .brow { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:18px; padding:14px 0; border-bottom:1px solid var(--mc-rule); align-items:start; background:transparent; }
-#search .b-card { margin:0; color:var(--mc-slate-2); font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; }
+#search .b-card { margin:0; color:var(--mc-slate); font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; }
 #search .b-title { margin:3px 0 0; color:var(--mc-ink); font-size:15px; font-weight:650; }
 #search .b-val { margin:5px 0 0; color:var(--mc-ink); font-family:var(--mono); font-size:13.5px; font-variant-numeric:tabular-nums; }
 #search .b-cond { margin:3px 0 0; color:var(--mc-slate); font-size:13px; }
@@ -439,7 +466,7 @@ summary { display:flex; align-items:center; min-height:44px; cursor:pointer; }
 #benefits .category-chip, #benefits .scope-button { min-height:44px; }
 #benefits .benefit-masthead { margin-bottom:18px; }
 #benefits .brow { min-width:0; }
-#benefits #benefitCatalogStatus { color:var(--mc-slate-2); font-family:var(--mono); font-size:11px; }
+#benefits #benefitCatalogStatus { color:var(--mc-slate); font-family:var(--mono); font-size:11px; }
 
 @media (max-width:850px) {
   nav { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); overflow:visible; }
@@ -467,10 +494,10 @@ summary { display:flex; align-items:center; min-height:44px; cursor:pointer; }
 .public-catalog-browser > .section-head { margin:0; align-items:flex-end; }
 .public-catalog-browser h2 { margin:0 0 6px; color:var(--mc-ink); font-family:var(--serif); font-size:clamp(24px,3vw,34px); letter-spacing:-.02em; }
 .public-catalog-browser .quiet-copy { margin:0; }
-.catalog-count { display:flex; flex-direction:column; align-items:flex-end; gap:2px; margin:0; color:var(--mc-slate-2); font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; }
+.catalog-count { display:flex; flex-direction:column; align-items:flex-end; gap:2px; margin:0; color:var(--mc-slate); font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; }
 .catalog-count strong { color:var(--mc-ink); font-family:var(--serif); font-size:30px; letter-spacing:-.03em; line-height:1; }
 .public-catalog-filters { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; min-width:0; }
-.public-catalog-filters label { display:grid; gap:5px; min-width:0; color:var(--mc-slate-2); font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; }
+.public-catalog-filters label { display:grid; gap:5px; min-width:0; color:var(--mc-slate); font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; }
 .public-catalog-filters input, .public-catalog-filters select { width:100%; min-width:0; border:1px solid var(--mc-rule); border-radius:8px; padding:9px 10px; background:var(--mc-surface-2); color:var(--mc-ink); font-family:var(--sans); font-size:14px; letter-spacing:normal; text-transform:none; }
 .public-card-grid { grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:16px; }
 .public-cardface { width:100%; text-align:left; }
