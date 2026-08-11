@@ -343,6 +343,12 @@ function benefitSearchText(benefit) {
   const values = [
     benefit.title,
     humanBenefitCategory(benefit.category || benefit.benefit_type),
+    // The raw category as well as its label. Matching compares whole tokens, so
+    // the label alone makes the screen's own promise that search spans
+    // categories false for every category whose label is not the word a person
+    // would type: "movie" does not match "Movies and entertainment", and
+    // "forex" does not match "Foreign exchange".
+    benefit.category || benefit.benefit_type,
     offering?.display_name,
     offering?.issuer_id,
     networkLabel(offering?.network_id),
