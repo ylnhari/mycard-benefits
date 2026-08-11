@@ -106,26 +106,12 @@ export function createRevealController({ protectedJson }) {
       card_details_unavailable: "Full card details are not stored for this card.",
     };
     if (messages[error?.code]) return messages[error.code];
-    // A protected action is refused unless it comes from the machine running
-    // MyCard. Reaching the app through a proxy or another device is fine for
-    // everything else, but revealing a full number, CVV or PIN is not — so say
-    // that plainly rather than implying a temporary fault the user could retry.
-    // Only claim a remote connection when the page genuinely is not loopback.
-    // A 403 on loopback means something else refused — a CSRF failure, say —
-    // and telling that user "you're connected from another device" is simply
-    // false, which is the exact failure this whole message was written to fix.
-    if (!revealIsLocalOrigin()) {
-      return (
-        "Full card details can only be shown on the computer running MyCard. " +
-        "You're connected from another device, so this stays locked. " +
-        "Everything else keeps working."
-      );
-    }
+    // No message here blames the connection. Reveal is not refused for reaching
+    // MyCard through the gateway: the server answers a proxied request exactly
+    // as a direct one, so telling someone on their phone that their card
+    // details are locked to another computer states something untrue about a
+    // request that would have succeeded.
     return "Card details are unavailable right now. The rest of MyCard keeps working.";
-  }
-
-  function revealIsLocalOrigin() {
-    return ["127.0.0.1", "localhost"].includes(window.location.hostname);
   }
 
   async function openCardReveal(card, offering) {

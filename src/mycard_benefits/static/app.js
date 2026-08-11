@@ -1480,13 +1480,12 @@ function referenceCardRow(card) {
   item.append(face);
   const actions = node("div", undefined, "private-card-actions");
   const revealButton = node("button", "Show full details", "secondary reveal-trigger");
-  // Protected reveal is refused off the machine running MyCard. Say so on the
-  // control rather than letting someone type a PIN and be turned away after.
-  if (!["127.0.0.1", "localhost"].includes(window.location.hostname)) {
-    revealButton.disabled = true;
-    revealButton.title = "Full card details open only on the computer running MyCard.";
-    revealButton.textContent = "Details open on that computer only";
-  }
+  // The control is not disabled by hostname. It is the same person whether they
+  // opened MyCard on the machine it runs on or reached it through the gateway
+  // that starts these programs and puts them behind one authenticated URL, and
+  // the server answers a request from either identically. Disabling the button
+  // off loopback split the behaviour by device and told the owner their own
+  // card details were unavailable on their own phone, which was never true.
   revealButton.type = "button";
   revealButton.setAttribute("aria-label", `Show full details for ${offering?.display_name || "this card"}`);
   revealButton.addEventListener("click", () => revealController.open(card, offering));
