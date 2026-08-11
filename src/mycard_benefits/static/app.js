@@ -136,11 +136,6 @@ function consumerFieldLabel(value) {
   };
   return labels[normalized] || null;
 }
-function benefitIsConditional(benefit) {
-  return benefit?.value_class === "conditional"
-    || (Array.isArray(benefit?.conditions) && benefit.conditions.length > 0)
-    || (Array.isArray(benefit?.eligibility) && benefit.eligibility.length > 0);
-}
 function consumerCatalogState(benefit) {
   return ["verified", "sources_differ", "check_before_use"].includes(benefit?.state)
     ? benefit.state
@@ -774,12 +769,6 @@ function evidenceLine(evidence) {
   const href = safeHref(evidence.source_url);
   if (href) { const link = node("a", "Open source"); link.href = href; link.target = "_blank"; link.rel = "noopener noreferrer"; line.append(" ", link); }
   return line;
-}
-function benefitLocalMatchNote(benefit) {
-  if (!state.privateCardsAvailable) return null;
-  const matchCount = state.privateCards.filter(card => offeringForCard(card)?.id === benefit.offering_id).length;
-  if (!matchCount) return node("p", "No local card record matches this benefit's product.", "quiet-copy benefit-first-note");
-  return node("p", `${matchCount} local card record${matchCount === 1 ? "" : "s"} match this benefit's product — check the conditions below before relying on it.`, "benefit-first-note");
 }
 function benefitCard(benefit) {
   const offering = benefitOffering(benefit);

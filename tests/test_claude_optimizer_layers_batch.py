@@ -17,7 +17,6 @@ from __future__ import annotations
 
 from datetime import date, timedelta
 from decimal import Decimal
-from pathlib import Path
 
 import pytest
 
@@ -34,8 +33,6 @@ from mycard_benefits.optimizer import (
 )
 from mycard_benefits.optimizer.model import RouteLayer
 
-ROOT = Path(__file__).parents[1]
-APP_JS = (ROOT / "src" / "mycard_benefits" / "static" / "app.js").read_text(encoding="utf-8")
 AS_OF = date(2026, 8, 6)
 ORIGIN = "https://example.invalid"
 

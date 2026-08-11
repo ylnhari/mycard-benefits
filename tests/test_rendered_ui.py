@@ -25,6 +25,7 @@ from mycard_benefits.config import Settings
 
 ROOT = Path(__file__).parents[1]
 RUN_RENDERED_UI = os.environ.get("MYCARD_RENDERED_UI") == "1"
+CONSUMER_STATE_LABELS = {"Verified", "Check before use", "Sources differ"}
 PLAYWRIGHT_AVAILABLE = False
 PLAYWRIGHT_SKIP_REASON = (
     "Set MYCARD_RENDERED_UI=1 in an already-provisioned environment with Python Playwright "
@@ -97,6 +98,24 @@ def _attach_synthetic_private_route(page: Page) -> None:
     page.route("**/api/v1/private/cards", _synthetic_private_unavailable)
 
 
+def _attach_synthetic_not_claimed_benefit_route(page: Page) -> None:
+    def respond(route: Route) -> None:
+        response = route.fetch()
+        benefits = response.json()
+        assert benefits
+        benefits[0]["not_claimed"] = ["SYNTHETIC-ONLY-unconditional terms"]
+        benefits[0]["state"] = "verified"
+        for index, state in enumerate(("check_before_use", "sources_differ"), start=1):
+            clone = dict(benefits[0])
+            clone["id"] = f"SYNTHETIC-ONLY-state-{index}"
+            clone["title"] = f"SYNTHETIC-ONLY {state} illustration"
+            clone["state"] = state
+            benefits.append(clone)
+        route.fulfill(response=response, json=benefits)
+
+    page.route("**/api/v1/catalog/benefits", respond)
+
+
 SYNTHETIC_ACTIVE_CARD = {
     "card_id": "SYNTHETIC-ONLY-active-card",
     "offering_id": "22222222-2222-4222-8222-222222222222",
@@ -149,7 +168,6 @@ def test_mc212_loopback_request_contract_and_focusable_status(
             return response.read().decode("utf-8"), dict(response.headers.items())
 
     page, _ = get("/")
-    script, _ = get("/static/app.js")
     style, _ = get("/static/app.css")
     assert 'id="benefitList"' in page
     assert 'id="benefitCatalogEmpty"' in page
@@ -160,17 +178,10 @@ def test_mc212_loopback_request_contract_and_focusable_status(
         assert f'id="{removed_id}"' not in page
     assert "Checking access" not in page
     assert 'id="searchStatus"' in page and 'tabindex="-1"' in page
-    assert "const MANUAL_UNLOCK_DIAGNOSTICS" not in script
-    assert "function unlockVault" not in script
-    assert "setProtectedActionAvailability(true)" in script
-    assert 'getCatalog("benefits")' in script
-    assert "function renderSearchResults" in script
     assert "@media (max-width:850px)" in style
 
-    requests = ["/api/v1/catalog/benefits"]
-    benefits, _ = get(requests[0])
+    benefits, _ = get("/api/v1/catalog/benefits")
     assert len(json.loads(benefits)) == 1
-    assert all("private/cards" not in request for request in requests)
 
 
 @pytest.mark.rendered_ui
@@ -199,11 +210,18 @@ def test_public_benefit_and_private_card_surfaces_render_in_headless_browser(
         page = desktop.new_page()
         requests: list[str] = []
         page.on("request", lambda request: requests.append(urlparse(request.url).path))
+        _attach_synthetic_not_claimed_benefit_route(page)
         page.goto(f"{synthetic_loopback_app}/#benefits", wait_until="networkidle")
         assert "/api/v1/private/cards" not in requests
         _attach_synthetic_private_route(page)
 
         expect(page.locator("#benefits")).to_be_visible()
+        benefit_state_labels = page.locator("#benefitList .state").all_text_contents()
+        assert benefit_state_labels
+        assert set(benefit_state_labels) == CONSUMER_STATE_LABELS
+        assert all(label in CONSUMER_STATE_LABELS for label in benefit_state_labels)
+        expect(page.locator("#benefitList")).not_to_contain_text("visits left")
+        expect(page.locator("#benefitList")).not_to_contain_text("visits remaining")
         expect(page.get_by_role("button", name="Use light theme")).to_be_visible()
         page.get_by_role("button", name="Use light theme").click()
         expect(page.locator("html")).to_have_attribute("data-theme", "light")
@@ -219,7 +237,10 @@ def test_public_benefit_and_private_card_surfaces_render_in_headless_browser(
         page.get_by_role("link", name="Benefits", exact=True).click()
         expect(page.locator("#benefits")).to_be_visible()
         expect(page.locator("#benefits-title")).to_be_focused()
-        page.locator("#benefitList .benefit-detail-toggle").click()
+        not_claimed_row = page.locator("#benefitList .brow").filter(has_text="This is not claimed").first
+        expect(not_claimed_row).to_be_visible()
+        not_claimed_row.click()
+        expect(page.locator("#benefitDetail")).to_contain_text("This is not claimed")
         expect(page.locator("#benefitDetail")).to_contain_text("To qualify")
         expect(page.locator("#benefitDetail")).to_contain_text("Synthetic Issuer · retrieved")
         expect(page.locator("#benefitDetail")).not_to_contain_text("synthetic-issuer")
@@ -252,6 +273,43 @@ def test_public_benefit_and_private_card_surfaces_render_in_headless_browser(
         mobile_page.get_by_role("link", name="Benefits", exact=True).click()
         expect(mobile_page.locator("#benefits-title")).to_be_focused()
         mobile.close()
+        browser.close()
+
+
+@pytest.mark.rendered_ui
+@pytest.mark.skipif(
+    not RUN_RENDERED_UI or not PLAYWRIGHT_AVAILABLE,
+    reason=PLAYWRIGHT_SKIP_REASON,
+)
+def test_normal_card_surfaces_do_not_request_a_credential_until_reveal(
+    synthetic_loopback_app: str,
+) -> None:
+    """A credential prompt appears only after the user asks to reveal details."""
+
+    with sync_playwright() as playwright:
+        browser_path = Path(playwright.chromium.executable_path)
+        if not browser_path.is_file():
+            pytest.skip(
+                "Playwright Chromium driver is unavailable locally; no browser dependency was downloaded."
+            )
+        browser = playwright.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 390, "height": 844})
+        mode = {"value": "healthy"}
+        _attach_synthetic_private_cards_route(page, mode, [SYNTHETIC_ACTIVE_CARD])
+        page.goto(f"{synthetic_loopback_app}/#my-cards", wait_until="networkidle")
+
+        expect(page.locator("#myCardList .cardface")).to_have_count(1)
+        expect(page.locator("#myCardList .cardface")).to_contain_text("In use")
+        expect(page.locator("#revealCreateState")).to_be_hidden()
+        expect(page.locator("#revealShownState")).to_be_hidden()
+        expect(page.locator("#revealCreateButton:visible")).to_have_count(0)
+        expect(page.locator('input[autocomplete="new-password"]:visible')).to_have_count(0)
+
+        reveal = page.locator(".reveal-trigger").first
+        expect(reveal).to_be_visible()
+        reveal.click()
+        expect(page.locator("#revealCreateState")).to_be_visible()
+        expect(page.get_by_label("Your PIN")).to_be_visible()
         browser.close()
 
 
@@ -346,6 +404,8 @@ def test_private_card_failure_empty_and_filtered_states_are_distinct(
         products.first.click()
         expect(submit).to_be_enabled()
         expect(submit).to_have_text("Add 1 card")
+        products.nth(1).click()
+        expect(submit).to_have_text("Add 2 cards")
 
         transition_mode["value"] = "failed"
         submit.click()

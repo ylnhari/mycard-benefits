@@ -117,75 +117,6 @@ def test_private_card_search_covers_product_issuer_network_lifecycle_and_safe_id
     assert "if (filters.type.size && !filters.type.has(cardTypeForOffering(offering))) return false;" in script
 
 
-def test_private_cards_empty_and_unavailable_states_are_explicit_and_actionable(
-    tmp_path: Path,
-) -> None:
-    script = (ROOT / "src" / "mycard_benefits" / "static" / "app.js").read_text(encoding="utf-8")
-    with _client(tmp_path) as client:
-        page = client.get("/").text
-
-    assert "Your wallet is empty" in script
-    assert "Add my first card" in script
-    assert "No cards match the current search and lifecycle filter." in script
-    assert "Your existing cards have not been changed." in script
-    assert "const VAULT_DIAGNOSTICS" in script
-    for code in (
-        "demo",
-        "vault_missing",
-        "passphrase_only",
-        "wrong_data_dir",
-        "locked",
-        "keyring_unavailable",
-        "generic",
-    ):
-        assert f"{code}: {{" in script, code
-    assert 'action: "Try again"' in script
-    assert "function unlockVault" not in script
-    assert "function setupVault" not in script
-    assert "function lockVault" not in script
-    assert "mycard-vault --create" not in script
-    assert "credential manager or keychain" not in script
-    assert 'typeof body.detail === "object"' in script
-    assert "VAULT_DIAGNOSTICS[code] || VAULT_DIAGNOSTICS.generic" in script
-    assert "This card's product identifier has no match in the public catalog." in script
-    assert "secret_fields: secretFieldsFrom" in script
-    assert 'id="myCardList"' in page and 'aria-live="polite"' in page
-    assert "Product, bank, network, or status" in page
-
-
-def test_device_bootstrap_render_contract_has_no_vault_credential_surface() -> None:
-    script = (ROOT / "src" / "mycard_benefits" / "static" / "app.js").read_text(
-        encoding="utf-8"
-    )
-    template = (ROOT / "src" / "mycard_benefits" / "templates" / "index.html").read_text(
-        encoding="utf-8"
-    )
-    for removed_id in (
-        "vaultControl",
-        "cardSetupPanel",
-        "vaultUnlockPanel",
-        "myCardsBadge",
-    ):
-        assert f'id="{removed_id}"' not in template
-        assert f'#{removed_id}' not in script
-    assert "function unlockVault" not in script
-    assert "function setupVault" not in script
-    assert "function lockVault" not in script
-    assert "function setPrivateUnavailable" in script
-    assert "setProtectedActionAvailability(true)" in script
-
-
-def test_private_card_reload_has_no_dangling_vault_controls() -> None:
-    script = (ROOT / "src" / "mycard_benefits" / "static" / "app.js").read_text(encoding="utf-8")
-    for selector in (
-        'document.querySelector("#vaultControl")',
-        'document.querySelector("#cardSetupPanel")',
-        'document.querySelector("#vaultUnlockPanel")',
-        'document.querySelector("#myCardsBadge")',
-    ):
-        assert selector not in script
-
-
 def test_private_cards_keep_protected_boundary_and_browser_cache_policy() -> None:
     script = (ROOT / "src" / "mycard_benefits" / "static" / "app.js").read_text(encoding="utf-8")
     template = (ROOT / "src" / "mycard_benefits" / "templates" / "index.html").read_text(
@@ -216,20 +147,6 @@ def test_private_card_detail_shows_only_allowlisted_public_and_envelope_fields()
     assert 'node("dd", card.card_id)' not in script
     assert 'node("dd", card.replacement_card_id)' not in script
     assert "card.secret" not in script
-
-
-def test_private_card_reveal_control_is_keyboard_reachable_and_protected() -> None:
-    script = (ROOT / "src" / "mycard_benefits" / "static" / "app.js").read_text(encoding="utf-8")
-
-    assert "function referenceCardRow" in script
-    assert 'node("button", "Show full details", "secondary reveal-trigger")' in script
-    assert "revealController.open(card, offering)" in script
-    assert "reveal-trigger" in script
-    assert 'button.type = "button"' in script
-
-
-
-
 
 
 def test_demo_run_shows_persistent_banner_and_switches_off_my_cards(tmp_path: Path) -> None:

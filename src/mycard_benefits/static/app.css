@@ -201,10 +201,6 @@ main { width:min(1220px,100%); margin:0 auto; padding:clamp(1.4rem,4vw,4rem); } 
 .manage-cards-details .protected-action-grid { margin-top:1rem; }
 .advanced-card-fields { gap:.65rem; }
 .advanced-card-fields[open] { display:grid; }
-.family-finance-import { margin-top:1rem; border:1px solid var(--line); border-radius:.75rem; padding:.85rem 1rem; background:var(--panel-2); }
-.family-finance-import > summary { color:var(--text); font-weight:720; cursor:pointer; }
-.family-finance-import > p { margin:.65rem 0; }
-.family-finance-apply { max-width:34rem; margin-top:.8rem; }
 .benefit-rule-detail { margin-top:1rem; }
 .candidate-hints-section { display:grid; gap:8px; margin-top:16px; padding-top:16px; border-top:1px solid var(--line); }
 .candidate-hints-section h4,.candidate-hints-section p { margin:0; }

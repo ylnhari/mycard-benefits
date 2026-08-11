@@ -13,7 +13,6 @@ import csv
 import hashlib
 import io
 import json
-import math
 import os
 import secrets
 import stat
@@ -22,7 +21,6 @@ import zipfile
 from collections.abc import Iterable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
-from datetime import date
 from pathlib import Path
 from typing import Any, cast
 from xml.etree import ElementTree
@@ -63,12 +61,6 @@ _SECRET_FIELDS = frozenset({
 })
 _LIFECYCLES = {item.value for item in CardLifecycle}
 _NETWORKS = {"visa": "visa", "mastercard": "mastercard", "amex": "amex", "rupay": "rupay", "diners": "diners"}
-_FAMILY_FINANCE_NETWORKS = {**_NETWORKS, "master card": "mastercard"}
-_FAMILY_FINANCE_ROOT_FIELDS = frozenset({"schemaVersion", "cards"})
-_FAMILY_FINANCE_CARD_FIELDS = frozenset({
-    "id", "name", "bank", "owner", "type", "variant", "number", "expiry",
-    "variantSubType", "cvv", "pin", "fees", "benefits", "lounge", "loungeCriteria", "status",
-})
 
 
 class ImportRejected(VaultError):
@@ -262,117 +254,6 @@ def _json_records(raw: bytes) -> list[dict[str, str]]:
     return [_normalise(item, structured=True) for item in records]
 
 
-def _family_finance_text(value: Any, *, required: bool = False) -> str | None:
-    """Validate one native Family Finance card field without reflecting it."""
-    if value is None and not required:
-        return None
-    if not isinstance(value, str):
-        raise ImportRejected("Family Finance card field is invalid")
-    result = value.strip()
-    if not result:
-        if required:
-            raise ImportRejected("Family Finance card field is invalid")
-        return None
-    if len(result) > 4096 or any(ord(char) < 32 for char in result):
-        raise ImportRejected("Family Finance card field is invalid")
-    return result
-
-
-def _family_finance_expiry(value: str | None) -> str | None:
-    if value is None:
-        return None
-    # Family Finance stores an ISO calendar date while this vault stores its
-    # expiry at month precision. Do not guess non-ISO layouts.
-    if len(value) != 10 or value[4] != "-" or value[7] != "-" or not value.replace("-", "").isdigit():
-        raise ImportRejected("Family Finance expiry is invalid")
-    try:
-        parsed = date.fromisoformat(value)
-    except ValueError:
-        raise ImportRejected("Family Finance expiry is invalid") from None
-    return f"{parsed.year:04d}-{parsed.month:02d}"
-
-
-def _family_finance_records(raw: bytes) -> list[dict[str, str]]:
-    """Adapt the narrowly supported native Family Finance card-only export.
-
-    The adapter intentionally refuses a whole Family Finance document.  In
-    particular, ledgers and transactions are not a card-import source and
-    must never be silently read, summarized, or converted into card metadata.
-    """
-    try:
-        value: Any = json.loads(_text(raw), object_pairs_hook=_json_object)
-    except (ImportRejected, json.JSONDecodeError):
-        raise ImportRejected("Family Finance source is invalid") from None
-    if not isinstance(value, dict) or set(value) != _FAMILY_FINANCE_ROOT_FIELDS:
-        raise ImportRejected("Family Finance source must be a card-only export")
-    version = value.get("schemaVersion")
-    cards = value.get("cards")
-    if isinstance(version, bool) or not isinstance(version, int) or not 1 <= version <= 10_000:
-        raise ImportRejected("Family Finance source version is invalid")
-    if not isinstance(cards, list) or not cards or len(cards) > MAX_ROWS:
-        raise ImportRejected("Family Finance cards are invalid")
-
-    result: list[dict[str, str]] = []
-    seen_ids: set[str] = set()
-    for card in cards:
-        if not isinstance(card, dict) or set(card) - _FAMILY_FINANCE_CARD_FIELDS:
-            raise ImportRejected("Family Finance card shape is invalid")
-        required = {"id", "name", "number"}
-        if not required <= set(card):
-            raise ImportRejected("Family Finance card is incomplete")
-        # Validate every admitted native field, including fields this narrow
-        # adapter deliberately does not retain.  This prevents a malformed
-        # whole-document payload from becoming an implicit generic importer.
-        for key, field_value in card.items():
-            if key == "fees":
-                if (
-                    isinstance(field_value, bool)
-                    or not isinstance(field_value, (int, float))
-                    or not math.isfinite(field_value)
-                ):
-                    raise ImportRejected("Family Finance card field is invalid")
-                continue
-            _family_finance_text(field_value, required=key in required)
-
-        source_record_id = _family_finance_text(card["id"], required=True)
-        assert source_record_id is not None
-        if source_record_id in seen_ids:
-            raise ImportRejected("duplicate Family Finance card")
-        seen_ids.add(source_record_id)
-        name = _family_finance_text(card["name"], required=True)
-        pan = _family_finance_text(card["number"], required=True)
-        assert name is not None and pan is not None
-        status = _family_finance_text(card.get("status")) or ""
-        if status not in {"", "closed"}:
-            raise ImportRejected("Family Finance card status is invalid")
-        native_network = _family_finance_text(card.get("variant"))
-        network = _FAMILY_FINANCE_NETWORKS.get(native_network.casefold()) if native_network is not None else None
-        if native_network is not None and network is None:
-            raise ImportRejected("Family Finance network is invalid")
-
-        normalized: dict[str, str] = {
-            "source_record_id": source_record_id,
-            "product": name,
-            "pan": pan,
-            "lifecycle": "closed" if status == "closed" else "active",
-        }
-        for native_key, target_key in (("bank", "bank"), ("owner", "owner"), ("cvv", "cvv"), ("pin", "pin")):
-            field_value = _family_finance_text(card.get(native_key))
-            if field_value is not None:
-                normalized[target_key] = field_value
-        expiry = _family_finance_expiry(_family_finance_text(card.get("expiry")))
-        if expiry is not None:
-            normalized["expiry"] = expiry
-        if network is not None:
-            normalized["network"] = network
-        variant_subtype = _family_finance_text(card.get("variantSubType"))
-        if variant_subtype is not None:
-            # This is source-provided public product metadata only.  It is not
-            # a canonical offering match and must not be inferred as a card
-            # network from a subtype label.
-            normalized["variant"] = variant_subtype
-        result.append(_normalise(normalized, structured=True))
-    return result
 
 
 def _csv_records(raw: bytes) -> list[dict[str, str]]:
@@ -527,21 +408,8 @@ def _document_files(root: Path) -> list[Path]:
     return sorted(found, key=lambda path: str(path).casefold())
 
 
-def _parse_payload(kind: str, path: Path, raw: bytes) -> list[dict[str, str]]:
+def _parse_payload(path: Path, raw: bytes) -> list[dict[str, str]]:
     suffix = path.suffix.casefold()
-    if kind == "family_finance":
-        if suffix != ".json":
-            raise ImportRejected("family source must be JSON")
-        # The legacy normalized-manifest form remains available for existing
-        # explicit imports.  Native Family Finance uses its distinct camelCase
-        # root marker and is adapted only by the strict card-only parser.
-        try:
-            root: Any = json.loads(_text(raw), object_pairs_hook=_json_object)
-        except (ImportRejected, json.JSONDecodeError):
-            raise ImportRejected("JSON source is invalid") from None
-        if isinstance(root, dict) and "schemaVersion" in root:
-            return _family_finance_records(raw)
-        return _json_records(raw)
     if suffix == ".csv":
         return _csv_records(raw)
     if suffix == ".xlsx":
@@ -561,7 +429,7 @@ def _parse_sources(inputs: Iterable[SourceInput]) -> _ParsedSources:
     sources: list[dict[str, str]] = []
     aliases: set[str] = set()
     for ordinal, source in enumerate(selected):
-        if source.kind not in {"family_finance", "workbook", "documents"}:
+        if source.kind not in {"workbook", "documents"}:
             raise ImportRejected("source kind is invalid")
         path = _safe_path(source.path, directory=source.kind == "documents")
         alias = os.path.normcase(os.path.abspath(path))
@@ -582,7 +450,7 @@ def _parse_sources(inputs: Iterable[SourceInput]) -> _ParsedSources:
             }
             sources.append(source_descriptor)
             try:
-                parsed = _parse_payload(source.kind, file, raw)
+                parsed = _parse_payload(file, raw)
             except ImportRejected:
                 if source.kind == "documents" and file.suffix.casefold() not in {".json", ".csv", ".xlsx"}:
                     counts.needs_local_review += 1

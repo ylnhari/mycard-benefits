@@ -419,26 +419,7 @@ def test_evidence_summary_never_carries_raw_content_only_a_pointer_and_hash() ->
             assert len(evidence["content_sha256"]) == 64
 
 
-def test_benefit_detail_rendering_shows_dates_and_last_verification_never_raw_evidence() -> None:
-    script = (ROOT / "src" / "mycard_benefits" / "static" / "app.js").read_text(encoding="utf-8")
-    assert "evidence.retrieved_at" in script
-    assert "evidence.content" not in script
-    assert "evidence.raw" not in script
-    assert "benefitDates(benefit)" in script
-    assert "benefit.effective_from" in script
-    assert "end_date_known" in script
-
-
 # ---- Task 20: explicit unverified/unknown catalog-state rendering --------
-
-
-def test_rescued_benefits_render_distinct_safe_state_badges() -> None:
-    script = (ROOT / "src" / "mycard_benefits" / "static" / "app.js").read_text(encoding="utf-8")
-    assert "function consumerCatalogState(benefit)" in script
-    assert "const catalogState = consumerCatalogState(benefit);" in script
-    assert 'catalogState === "sources_differ"' in script
-    assert 'catalogState === "verified"' in script
-    assert 'label: "Check before use"' in script
 
 
 def test_no_end_date_renders_as_explicitly_unknown_not_ongoing_or_blank() -> None:

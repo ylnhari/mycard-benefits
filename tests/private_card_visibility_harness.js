@@ -41,9 +41,6 @@ const elements = new Map([
   ["#cardAddPin", domElement({ value: "" })],
   ["#cardAddNickname", domElement({ value: "" })],
   ["#cardAddLastFour", domElement({ value: "" })],
-  ["#familyFinanceApplyForm", domElement({ reset() { this.resetCalled = true; } })],
-  ["#familyFinancePreview", domElement()],
-  ["#familyFinanceImportStatus", domElement()],
 ]);
 
 class SyntheticOption {

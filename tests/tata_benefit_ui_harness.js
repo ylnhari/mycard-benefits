@@ -24,7 +24,7 @@ const rendererSource = [
   sourceBetween("function allowanceCount", "function benefitHowToUse"),
   sourceBetween("function benefitHowToUse", "function viewFromHash"),
   sourceBetween("function provenanceChip", "function evidenceLine"),
-  sourceBetween("function evidenceLine", "function benefitLocalMatchNote"),
+  sourceBetween("function evidenceLine", "function benefitCard"),
   sourceBetween("function benefitDates", "function formatEligibility"),
   sourceBetween("function formatEligibility", "function detailList"),
   sourceBetween("function detailList", "function localBenefitMatch"),
