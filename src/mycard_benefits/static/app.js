@@ -1457,8 +1457,13 @@ function renderCardChips() {
   const presentLifecycles = new Set(
     state.privateCards.map(card => card.lifecycle).filter(Boolean),
   );
+  // In use and Archived are always offered so the row has a stable shape a
+  // person can learn, and because selecting one that matches nothing is a
+  // legitimate way to ask "have I archived anything?" and get a straight no.
+  // The other twelve appear only when a card is in that state.
+  const alwaysOffered = new Set(["active", "archived"]);
   const lifecycleChoices = lifecycleOrder
-    .filter(value => presentLifecycles.has(value))
+    .filter(value => alwaysOffered.has(value) || presentLifecycles.has(value))
     .map(value => [humanLifecycleLabel(value), "lifecycle", value]);
   const offerings = state.privateCards.map(card => offeringForCard(card)).filter(Boolean);
   const issuerChoices = [...new Set(offerings.map(offering => offering.issuer_id).filter(Boolean))]

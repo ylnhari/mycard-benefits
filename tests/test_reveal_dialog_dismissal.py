@@ -118,9 +118,16 @@ def test_the_dialog_can_always_be_dismissed(wallet_app: str, how: str) -> None:
         else:
             # Outside the panel: the dimmed page behind it.
             page.mouse.click(5, 5)
-        page.wait_for_timeout(400)
 
-        dismissed = page.locator("#cardRevealPrompt").is_hidden()
+        # Wait for the state rather than for a duration. A fixed pause passed
+        # alone and failed inside the full rendered run, which is a flaky test
+        # reporting a working feature as broken — the most expensive kind,
+        # because it teaches you to distrust a red suite.
+        try:
+            page.wait_for_selector("#cardRevealPrompt", state="hidden", timeout=5000)
+            dismissed = True
+        except Exception:
+            dismissed = False
         # Focus must land somewhere usable, or a keyboard user is stranded with
         # the caret nowhere after the dialog vanishes.
         focus_class = page.evaluate(

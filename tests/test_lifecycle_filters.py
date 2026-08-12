@@ -146,7 +146,12 @@ def test_a_closed_or_expired_card_can_be_filtered_for(mixed_wallet_app: str) -> 
 @pytest.mark.rendered_ui
 @pytest.mark.skipif(not RUN_RENDERED_UI or not PLAYWRIGHT_AVAILABLE, reason=SKIP_REASON)
 def test_absent_lifecycles_get_no_chip(mixed_wallet_app: str) -> None:
-    """A row of fourteen chips matching nothing would be worse than two."""
+    """A row of fourteen chips matching nothing would be worse than two.
+
+    In use and Archived are excluded from this check on purpose: they are always
+    offered so the row keeps a stable shape, and selecting Archived on a wallet
+    with nothing archived is a fair question that deserves a straight answer.
+    """
     with sync_playwright() as play:
         browser = play.chromium.launch()
         page = browser.new_page(viewport={"width": 1280, "height": 900})
@@ -155,5 +160,5 @@ def test_absent_lifecycles_get_no_chip(mixed_wallet_app: str) -> None:
         labels = _chip_labels(page)
         browser.close()
 
-    for absent in ("Lost", "Stolen", "Frozen", "Applied", "Pending", "Archived"):
+    for absent in ("Lost", "Stolen", "Frozen", "Applied", "Pending"):
         assert absent not in labels, f"chip for {absent} appeared with no such card"
