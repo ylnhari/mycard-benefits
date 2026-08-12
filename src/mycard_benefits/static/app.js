@@ -1517,7 +1517,19 @@ function renderPrivateCards() {
   const inUse = state.privateCards.filter(card => card.lifecycle === "active").length;
   const archived = state.privateCards.filter(card => card.lifecycle === "archived").length;
   const withBenefits = state.privateCards.filter(card => benefitCountForCard(card, offeringForCard(card)) > 0).length;
-  setText("#myCardSummary", `${inUse} in use · ${archived} archived · ${withBenefits} with benefits recorded`);
+  const totals = `${inUse} in use · ${archived} archived · ${withBenefits} with benefits recorded`;
+  // Say when a filter is narrowing the list. This line was computed from every
+  // saved card and so never moved, while the grid below it did: on a phone the
+  // grid is past the fold, so tapping a filter changed nothing a person could
+  // see and the filters read as broken. The line carries role="status", so
+  // saying it here also announces it rather than leaving the change silent.
+  const narrowed = cards.length !== state.privateCards.length;
+  setText(
+    "#myCardSummary",
+    narrowed
+      ? `Showing ${cards.length} of ${state.privateCards.length} cards · ${totals}`
+      : totals,
+  );
   setText("#myCardStatus", "");
   if (!state.privateCards.length) {
     const empty = node("div", undefined, "empty-state");
