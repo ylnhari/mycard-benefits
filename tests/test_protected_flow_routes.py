@@ -137,17 +137,46 @@ def test_protected_route_rejects_duplicate_security_headers(
 
 
 @pytest.mark.parametrize("forwarded_name", ["Forwarded", "X-Forwarded-Host", "X-Forwarded-Proto"])
-def test_protected_route_rejects_forwarded_header_spoofing(
+def test_a_forwarded_header_cannot_change_a_protected_outcome(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, forwarded_name: str
 ) -> None:
+    """A spoofed forwarded header decides nothing here, either way.
+
+    This once asserted that the presence of such a header was itself fatal.
+    That could not stay: the owner's gateway annotates every request it
+    forwards with X-Forwarded-Host and X-Forwarded-Proto, so the rule refused
+    every protected action from their phone. What matters is not that these
+    headers are absent but that they are never consulted, so the check is that
+    a hostile value changes nothing about the result.
+    """
+    client, _ = _setup(tmp_path, monkeypatch)
+    body = {"passphrase": PASS, "offering_id": CARD}
+
+    without = client.post("/api/v1/private/cards/add", headers=_protected_headers(client), json=body)
+    hostile = _protected_headers(client)
+    hostile[forwarded_name] = "evil.invalid"
+    with_header = client.post("/api/v1/private/cards/add", headers=hostile, json=body)
+
+    assert with_header.status_code == without.status_code
+    assert with_header.headers["cache-control"] == "no-store"
+
+
+@pytest.mark.parametrize("forwarded_name", ["Forwarded", "X-Forwarded-Host", "X-Forwarded-Proto"])
+def test_a_forwarded_header_cannot_rescue_a_rejected_host(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, forwarded_name: str
+) -> None:
+    """Ignoring these headers must not shade into trusting them."""
     client, _ = _setup(tmp_path, monkeypatch)
     headers = _protected_headers(client)
-    headers[forwarded_name] = "evil.invalid"
+    headers["Host"] = "evil.invalid:8777"
+    headers[forwarded_name] = f"127.0.0.1:{8777}"
+
     response = client.post(
         "/api/v1/private/cards/add",
         headers=headers,
         json={"passphrase": PASS, "offering_id": CARD},
     )
+
     assert response.status_code == 403
     assert response.headers["cache-control"] == "no-store"
 

@@ -518,20 +518,30 @@ def _child_record(**overrides: object) -> dict[str, object]:
         "parent_card_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0001",
         "kind": "priority_pass",
         "lifecycle": "active",
-        "created_at": "2026-08-07T00:00:00Z",
-        "updated_at": "2026-08-07T00:00:00Z",
+        # Far in the past for the same reason as the envelope timestamps below:
+        # a date near today collides with the relative expiry dates one test
+        # builds, and turns a leak assertion into a calendar-dependent failure.
+        "created_at": "2000-01-01T00:00:00Z",
+        "updated_at": "2000-01-01T00:00:00Z",
     }
     base.update(overrides)
     return base
 
 
 def _card_with_children(*children: dict[str, object]) -> dict[str, object]:
+    # The envelope timestamps are deliberately far in the past. A test here
+    # asserts that no child's exact expiry date appears anywhere in the
+    # response, and it builds those dates relative to today. With a timestamp
+    # near the present, one of them eventually lands on the same day and the
+    # assertion fails against these timestamps rather than any leaked value —
+    # a failure that appears on one calendar day and cannot be reproduced on
+    # any other. A date no relative offset can reach removes the collision.
     return {
         "card_id": "018f47f2-0f86-7b0a-bc7d-f00ba47c0001",
         "offering_id": "hdfc-regalia-gold-credit",
         "lifecycle": "active",
-        "created_at": "2026-08-07T00:00:00Z",
-        "updated_at": "2026-08-07T00:00:00Z",
+        "created_at": "2000-01-01T00:00:00Z",
+        "updated_at": "2000-01-01T00:00:00Z",
         "child_records": list(children),
     }
 

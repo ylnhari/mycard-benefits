@@ -105,6 +105,7 @@ export function createRevealController({ protectedJson }) {
       credential_not_created: "That code could not be set up. Nothing was changed.",
       credential_exists: "A card-details code already exists in this vault.",
       credential_locked: "Card details are temporarily unavailable. Try again later.",
+      vault_session_required: "This browser session ended. Reload MyCard to continue.",
       detail_session_required: "Card details are unavailable in this browser session. The rest of MyCard keeps working.",
       card_details_unavailable: "Full card details are not stored for this card.",
     };

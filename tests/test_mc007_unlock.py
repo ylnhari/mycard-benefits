@@ -211,7 +211,6 @@ def test_no_origin_same_origin_unlock_bootstrap_authorizes_one_post_and_replay_i
         ("Sec-Fetch-Site", "none"),
         ("Sec-Fetch-Mode", None),
         ("Sec-Fetch-Mode", "no-cors"),
-        ("X-Forwarded-Host", "attacker.invalid"),
     ],
 )
 def test_unlock_bootstrap_rejects_hostile_or_malformed_browser_metadata_without_private_state_change(
@@ -239,6 +238,63 @@ def test_unlock_bootstrap_rejects_hostile_or_malformed_browser_metadata_without_
             "/api/v1/private/unlock", headers=_headers(client, token), json={"passphrase": PASS, "remember": False}
         )
         assert unlocked.status_code == 200
+
+
+@pytest.mark.parametrize("forwarded_name", ["Forwarded", "X-Forwarded-Host", "X-Forwarded-Proto"])
+def test_unlock_ignores_forwarded_annotations_but_never_trusts_them(
+    tmp_path: Path, forwarded_name: str
+) -> None:
+    """Proxy annotations are inert, not an alternate Host or Origin.
+
+    The old contract rejected the mere presence of a forwarded header. Rover
+    adds those headers to every request it forwards, so that mechanism made an
+    otherwise valid phone request impossible. The security property is that
+    their values cannot change a valid decision or rescue an invalid real
+    Host/Origin value.
+    """
+    with _setup(tmp_path / "baseline") as baseline:
+        token = baseline.get(
+            "/api/v1/private/unlock/bootstrap", headers=_no_origin_headers()
+        ).json()["csrf_token"]
+        plain = baseline.post(
+            "/api/v1/private/unlock",
+            headers=_headers(baseline, token),
+            json={"passphrase": PASS, "remember": False},
+        )
+        assert plain.status_code == 200
+
+    with _setup(tmp_path / "forwarded") as client:
+        annotation = {forwarded_name: "attacker.invalid"}
+        bootstrap = client.get(
+            "/api/v1/private/unlock/bootstrap",
+            headers=_no_origin_headers(**annotation),
+        )
+        assert bootstrap.status_code == 200
+        token = bootstrap.json()["csrf_token"]
+        annotated = client.post(
+            "/api/v1/private/unlock",
+            headers=_headers(client, token, **annotation),
+            json={"passphrase": PASS, "remember": False},
+        )
+        assert annotated.status_code == plain.status_code
+
+        fake_host = client.get(
+            "/api/v1/private/unlock/bootstrap",
+            headers=_no_origin_headers(
+                Host="attacker.invalid:8777", **{forwarded_name: "127.0.0.1:8777"}
+            ),
+        )
+        assert fake_host.status_code == 403
+        fake_origin = client.get(
+            "/api/v1/private/unlock/bootstrap",
+            headers=_headers(
+                client,
+                "unused",
+                Origin="http://attacker.invalid:8777",
+                **{forwarded_name: "127.0.0.1:8777"},
+            ),
+        )
+        assert fake_origin.status_code == 403
 
 
 @pytest.mark.parametrize("duplicate", ["origin", "host"])
@@ -348,11 +404,16 @@ def test_manual_unlock_fallback_opens_present_vault_without_keyring_and_lock_res
         assert "SYNTHETIC-ONLY-PAN" not in after_lock.text
 
 
-def test_unlock_rejects_origin_proxy_media_and_oversized_body_before_open(tmp_path: Path) -> None:
+def test_unlock_ignores_forwarded_annotation_but_rejects_bad_media_and_oversized_body(
+    tmp_path: Path,
+) -> None:
+    """Changing the proxy annotation does not weaken body framing checks."""
     with _setup(tmp_path) as client:
         token = client.get("/api/v1/private/unlock/bootstrap", headers=_headers(client, "unused")).json()["csrf_token"]
         hostile = _headers(client, token, **{"X-Forwarded-Host": "evil.invalid"})
-        assert client.post("/api/v1/private/unlock", headers=hostile, json={"passphrase": PASS, "remember": False}).status_code == 403
+        accepted = client.post("/api/v1/private/unlock", headers=hostile, json={"passphrase": PASS, "remember": False})
+        assert accepted.status_code == 200
+        assert PASS not in accepted.text
         token = client.get("/api/v1/private/unlock/bootstrap", headers=_headers(client, "unused")).json()["csrf_token"]
         bad_media = _headers(client, token, **{"Content-Type": "application/json; charset=utf-8"})
         assert client.post("/api/v1/private/unlock", headers=bad_media, content=b'{"passphrase":"SYNTHETIC-ONLY-SECRET"}').status_code == 415

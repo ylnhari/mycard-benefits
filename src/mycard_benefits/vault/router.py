@@ -473,7 +473,27 @@ _RAW_BROWSER_HEADER_NAMES = (
     "content-length",
     "transfer-encoding",
 )
-_FORWARDED_HEADER_NAMES = {"forwarded", "x-forwarded-host", "x-forwarded-proto"}
+# Headers a reverse proxy adds to describe the hop it performed. They are
+# ignored here, deliberately and by name, rather than rejected.
+#
+# Rejecting them broke every protected action reached through the owner's
+# gateway. That gateway presents a genuine loopback request to this process and
+# then annotates it with X-Forwarded-Host and X-Forwarded-Proto so a backend can
+# still learn the external origin the standard way. Refusing the request because
+# it carried that annotation meant the owner could browse their cards from their
+# phone but could never open one, and the refusal surfaced as a bare string with
+# no error code, so the screen could only say something had gone wrong.
+#
+# Ignoring them is safe because no decision in this module reads them. Host,
+# Origin, the Fetch Metadata pair and the CSRF token are what admit a request,
+# and all four are checked against the configured loopback listener. A page on
+# another origin cannot reach these routes by adding one of these headers: doing
+# so from script forces a CORS preflight this application does not answer, and
+# its Sec-Fetch-Site would not be same-origin regardless. The rule that matters
+# is not that these headers are absent, but that they are never consulted —
+# which tests/test_protected_flow_routes.py and
+# tests/test_gateway_protected_actions.py pin.
+_FORWARDED_HEADER_NAMES: set[str] = set()
 
 
 def _raw_browser_header_values(request: Request) -> dict[str, list[str]]:
@@ -499,17 +519,42 @@ def _raw_browser_header_values(request: Request) -> dict[str, list[str]]:
 
 
 def _check_browser_headers(
-    *, request: Request, port: int, require_origin: bool = True
+    *,
+    request: Request,
+    port: int,
+    require_origin: bool = True,
+    require_fetch_metadata: bool = True,
 ) -> dict[str, list[str]]:
-    """Reject gateway/proxy/header spoofing before any protected action."""
+    """Validate browser headers before any protected action."""
     expected_hosts = {f"127.0.0.1:{port}", f"localhost:{port}"}
     values = _raw_browser_header_values(request)
-    required = ("host", "sec-fetch-mode", "sec-fetch-site")
-    if any(len(values[name]) != 1 for name in required) or len(values["origin"]) != (
-        1 if require_origin else min(1, len(values["origin"]))
-    ):
+    # Fetch Metadata is always verified when sent, and demanded only where the
+    # caller can be relied on to send it. Browsers attach Sec-Fetch-* solely to
+    # potentially trustworthy origins, which over plain HTTP means loopback and
+    # nothing else. Reaching MyCard through the owner's gateway puts the page on
+    # the machine's network address instead, so no Sec-Fetch header arrives at
+    # all, and demanding one refused every protected action from their phone
+    # while the same action worked on the machine itself.
+    #
+    # Callers that only ever run on loopback keep the stricter rule; the unlock
+    # routes do, because the browser reaches them before any gateway hop and
+    # they are the ones that open the vault. A duplicate is refused either way:
+    # what must never happen is two conflicting values letting a caller pick
+    # which one is read.
+    fetch_metadata_counts = [len(values[name]) for name in ("sec-fetch-mode", "sec-fetch-site")]
+    if len(values["host"]) != 1 or any(count > 1 for count in fetch_metadata_counts):
         raise HTTPException(status_code=403, detail="protected browser action rejected")
-    if values["host"][0] not in expected_hosts or values["sec-fetch-site"][0] != "same-origin" or values["sec-fetch-mode"][0] != "cors":
+    if require_fetch_metadata and any(count != 1 for count in fetch_metadata_counts):
+        raise HTTPException(status_code=403, detail="protected browser action rejected")
+    if len(values["origin"]) != (1 if require_origin else min(1, len(values["origin"]))):
+        raise HTTPException(status_code=403, detail="protected browser action rejected")
+    if values["host"][0] not in expected_hosts:
+        raise HTTPException(status_code=403, detail="protected browser action rejected")
+    # When the browser did send them, they must still say same-origin. This is
+    # what stops a cross-site request that happens to guess the rest.
+    if values["sec-fetch-site"] and values["sec-fetch-site"][0] != "same-origin":
+        raise HTTPException(status_code=403, detail="protected browser action rejected")
+    if values["sec-fetch-mode"] and values["sec-fetch-mode"][0] != "cors":
         raise HTTPException(status_code=403, detail="protected browser action rejected")
     origin = values["origin"][0] if values["origin"] else None
     if origin is not None:
@@ -577,21 +622,30 @@ def _check_request_security(
 ) -> None:
     """Enforce the configured loopback origin on every protected mutation.
 
-    Browsers normally send Origin. For clients which legitimately omit it,
-    the synchronizer token is required together with the exact configured Host
-    and a same-origin Fetch Metadata value. No arbitrary missing-origin client
-    is accepted.
+    Browsers normally send Origin, and Fetch Metadata alongside it when the page
+    is on a trustworthy origin. Either may legitimately be absent — reaching the
+    app through the owner's gateway puts the page on a plain-HTTP network
+    address, where a browser sends neither. What is never optional is the
+    synchronizer token together with the exact configured loopback Host, and
+    when Origin or Fetch Metadata is present it must agree with them.
     """
-    values = _check_browser_headers(request=request, port=port, require_origin=False)
+    values = _check_browser_headers(
+        request=request, port=port, require_origin=False, require_fetch_metadata=False
+    )
     _reject_ambiguous_optional_media(values)
     expected_hosts = {f"127.0.0.1:{port}", f"localhost:{port}"}
     host = values["host"][0]
     origin = values["origin"][0] if values["origin"] else None
-    sec_fetch_mode = values["sec-fetch-mode"][0]
-    sec_fetch_site = values["sec-fetch-site"][0]
+    sec_fetch_mode = values["sec-fetch-mode"][0] if values["sec-fetch-mode"] else None
+    sec_fetch_site = values["sec-fetch-site"][0] if values["sec-fetch-site"] else None
     csrf_token = _single_csrf_token(values)
 
-    if host not in expected_hosts or sec_fetch_site != "same-origin" or sec_fetch_mode != "cors":
+    # Absent Fetch Metadata is accepted; contradictory Fetch Metadata is not.
+    if (
+        host not in expected_hosts
+        or (sec_fetch_site is not None and sec_fetch_site != "same-origin")
+        or (sec_fetch_mode is not None and sec_fetch_mode != "cors")
+    ):
         raise HTTPException(status_code=403, detail="protected browser action rejected")
 
     if origin:
@@ -771,7 +825,14 @@ def create_private_cards_router(
         if session is None:
             raise HTTPException(
                 status_code=401,
-                detail="protected vault session required",
+                # Carries a code so the interface can name what happened. As a
+                # bare string this arrived at the browser with nothing to match
+                # on and became "unavailable right now", which describes every
+                # possible failure and therefore none of them.
+                detail={
+                    "code": "vault_session_required",
+                    "message": "This browser session ended. Reload MyCard to continue.",
+                },
                 headers=_NO_STORE_HEADERS,
             )
         return session
