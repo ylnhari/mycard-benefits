@@ -1437,18 +1437,34 @@ function renderCardChips() {
   const filters = state.cardFilters;
   clear(target);
   const definitions = [
-    ["In use", "lifecycle", "active"],
-    ["Archived", "lifecycle", "archived"],
     ["Credit", "type", "credit"],
     ["Debit", "type", "debit"],
     ["Has lounge", "benefit", "lounge"],
     ["Has movie", "benefit", "movie"],
   ];
+  // Lifecycle chips are built from the states the wallet actually holds rather
+  // than from a fixed pair. The vault records fourteen — a closed card and an
+  // expired one are different facts, and a replaced card points at what
+  // replaced it — but only "In use" and "Archived" were offered, so a closed,
+  // expired, lost or replaced card could not be found at all. Listing only the
+  // states present keeps the row short and honest instead of showing twelve
+  // chips that match nothing.
+  const lifecycleOrder = [
+    "active", "frozen", "expired", "renewed", "replaced", "upgraded",
+    "downgraded", "lost", "stolen", "closed", "retired", "archived",
+    "applied", "pending",
+  ];
+  const presentLifecycles = new Set(
+    state.privateCards.map(card => card.lifecycle).filter(Boolean),
+  );
+  const lifecycleChoices = lifecycleOrder
+    .filter(value => presentLifecycles.has(value))
+    .map(value => [humanLifecycleLabel(value), "lifecycle", value]);
   const offerings = state.privateCards.map(card => offeringForCard(card)).filter(Boolean);
   const issuerChoices = [...new Set(offerings.map(offering => offering.issuer_id).filter(Boolean))]
     .sort((a, b) => humanIssuerLabel(a).localeCompare(humanIssuerLabel(b)))
     .map(issuerId => [humanIssuerLabel(issuerId), "issuer", issuerId]);
-  for (const [label, group, value] of [...definitions, ...issuerChoices]) {
+  for (const [label, group, value] of [...lifecycleChoices, ...definitions, ...issuerChoices]) {
     const chip = node("button", label, "chip");
     chip.type = "button";
     const selected = filters[group].has(value);
