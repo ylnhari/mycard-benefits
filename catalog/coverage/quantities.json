@@ -1,12 +1,12 @@
 {
   "report_version": "1",
   "source": "catalog/benefits/*.json",
-  "benefit_count": 64,
-  "benefits_with_quantities": 47,
-  "quantity_count": 76,
-  "distinct_allowance_keys": 104,
+  "benefit_count": 67,
+  "benefits_with_quantities": 48,
+  "quantity_count": 77,
+  "distinct_allowance_keys": 105,
   "mapped_key_count": 49,
-  "unmapped_key_count": 57,
+  "unmapped_key_count": 58,
   "keys_with_mapped_and_unmapped_observations": 2,
   "mapped_keys": [
     "accident_inr",
@@ -183,7 +183,7 @@
     {
       "key": "maximum_transaction_inr",
       "reason": "no unambiguous projection exists in the current closed vocabulary",
-      "count": 1
+      "count": 2
     },
     {
       "key": "merchant_emi_percent",
@@ -193,7 +193,7 @@
     {
       "key": "minimum_transaction_inr",
       "reason": "no unambiguous projection exists in the current closed vocabulary",
-      "count": 3
+      "count": 4
     },
     {
       "key": "monthly_cap_neucoins",
@@ -223,7 +223,7 @@
     {
       "key": "not_claimed",
       "reason": "an evidence gap is not a numeric quantity",
-      "count": 1
+      "count": 2
     },
     {
       "key": "other_non_emi_percent",
@@ -273,6 +273,11 @@
     {
       "key": "selected_brand_multiplier",
       "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 1
+    },
+    {
+      "key": "spend_threshold_inr",
+      "reason": "no unambiguous projection exists in the current closed vocabulary",
       "count": 1
     },
     {

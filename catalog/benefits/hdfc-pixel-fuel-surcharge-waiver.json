@@ -1,0 +1,65 @@
+{
+  "id": "7cd8786a-ac80-5bf0-ab8b-f0da8d4d33a1",
+  "offering_id": "ee8c8bf5-263f-5ae2-a18f-2f1d2c460d51",
+  "title": "HDFC Pixel fuel surcharge waiver",
+  "benefit_type": "fuel",
+  "category": "fuel",
+  "allowance": {
+    "surcharge_percent": 1,
+    "statement_cycle_cap_inr": 250,
+    "minimum_transaction_inr": 400,
+    "maximum_transaction_inr": 5000
+  },
+  "quantities": [
+    {
+      "metric": "fee_percent",
+      "value": 1,
+      "unit": "percent",
+      "basis": "transaction",
+      "scope": "fuel",
+      "period": "statement_cycle",
+      "cap": {
+        "value": 250,
+        "unit": "inr",
+        "period": "statement_cycle"
+      }
+    }
+  ],
+  "eligibility": [],
+  "conditions": [
+    {
+      "type": "mcc",
+      "operator": "equals",
+      "value": "fuel stations across India"
+    }
+  ],
+  "exclusions": [
+    "The waiver applies to transactions between INR 400 and INR 5,000.",
+    "No automated redemption authorization is implied."
+  ],
+  "redemption_steps": [
+    "Pay for fuel with the card within the stated transaction range.",
+    "The surcharge is waived up to INR 250 in a statement cycle."
+  ],
+  "provider": "HDFC Bank",
+  "effective_from": null,
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.hdfcbank.com/personal/pay/cards/credit-cards/pixel-play-credit-card",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "f24d1cb9d3b72ac3ffed32169933ee0f910104a42fbd20431ef0929356507c0f",
+  "retrieved_at": "2026-08-12T18:13:22Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.hdfcbank.com/personal/pay/cards/credit-cards/pixel-play-credit-card",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "f24d1cb9d3b72ac3ffed32169933ee0f910104a42fbd20431ef0929356507c0f",
+      "retrieved_at": "2026-08-12T18:13:22Z",
+      "id": "8b4149db-da22-5676-b616-356894e63d2d",
+      "source_observation_id": "9792fac0-677d-5bd0-89a1-507a68db4fe4",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "medium"
+    }
+  ]
+}

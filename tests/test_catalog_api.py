@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from datetime import date
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -45,7 +46,21 @@ def test_consumer_catalog_api_surfaces_rescued_states_and_divergence() -> None:
     # Derived from the catalog, not frozen: the guarantee is that the API
     # publishes every benefit in exactly one of the three consumer states, so a
     # legitimately added benefit should not read as a regression here.
-    published = len(list((CATALOG_ROOT / "benefits").glob("*.json")))
+    # Benefits whose stated end date has passed are deliberately not published
+    # as available — a discontinued benefit is recorded so a card does not
+    # appear to still carry it, and surfacing it would defeat that. Subtracted
+    # rather than loosening the total, so any other disappearance still fails.
+    today = date.today().isoformat()
+    files = list((CATALOG_ROOT / "benefits").glob("*.json"))
+    ended = sum(
+        1
+        for path in files
+        if isinstance(
+            (record := json.loads(path.read_text(encoding="utf-8"))).get("effective_to"), str
+        )
+        and record["effective_to"] < today
+    )
+    published = len(files) - ended
     assert len(benefits) == published
     counts = {
         state: sum(item["state"] == state for item in benefits)

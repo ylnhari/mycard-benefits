@@ -1,0 +1,54 @@
+{
+  "id": "aa0dede2-5304-56c8-b767-fdf4a8bb5685",
+  "offering_id": "2b2f6091-8b9f-5fe2-a6df-48958f37ccfe",
+  "title": "Axis Privilege annual fee waiver on anniversary-year spend",
+  "benefit_type": "annual_fee",
+  "category": "annual_fee",
+  "allowance": {
+    "spend_threshold_inr": 500000
+  },
+  "quantities": [],
+  "eligibility": [],
+  "conditions": [
+    {
+      "type": "spend_triggered",
+      "operator": "gte",
+      "value": "INR 5,00,000 of qualifying spend in a card anniversary year"
+    },
+    {
+      "type": "time_window",
+      "operator": "equals",
+      "value": "card anniversary year"
+    }
+  ],
+  "exclusions": [
+    "The stated spend threshold excludes utility and telecom, rent, wallet, government services, insurance, gold and jewellery, fuel, and educational services.",
+    "The quantity records the spend a cardholder must reach, not a sum they receive; the benefit is the fee not being charged.",
+    "No automated redemption authorization is implied."
+  ],
+  "redemption_steps": [
+    "Reach the stated spend in a card anniversary year, counting only qualifying categories.",
+    "The annual fee is waived rather than refunded."
+  ],
+  "provider": "Axis Bank",
+  "effective_from": null,
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.axisbank.com/retail/cards/credit-card/privilege-credit-card",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "37a94c07b3b4305d642728db610586c3c708967a33debca44e2a2c6c3852e96c",
+  "retrieved_at": "2026-08-12T18:13:22Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.axisbank.com/retail/cards/credit-card/privilege-credit-card",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "37a94c07b3b4305d642728db610586c3c708967a33debca44e2a2c6c3852e96c",
+      "retrieved_at": "2026-08-12T18:13:22Z",
+      "id": "500e7bcf-9a8d-5d9e-bf02-feefb8737935",
+      "source_observation_id": "0406ec1d-f36c-519c-8077-0b4255c85d7f",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "medium"
+    }
+  ]
+}

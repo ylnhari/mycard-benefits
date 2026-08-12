@@ -1,0 +1,40 @@
+{
+  "id": "35c8a305-2544-5dd7-8e8f-821bef3f3ffb",
+  "offering_id": "bb3a1ec1-01eb-5294-826f-c1978058a0b1",
+  "title": "IndusInd Legend lounge access, discontinued",
+  "benefit_type": "lounge",
+  "category": "lounge",
+  "allowance": {
+    "not_claimed": true
+  },
+  "quantities": [],
+  "eligibility": [],
+  "conditions": [],
+  "exclusions": [
+    "The issuer's own page states that the lounge access feature is discontinued from March 2025. This record exists so the card does not silently appear to still carry it.",
+    "The page does not state what, if anything, replaced it, so nothing is asserted about a successor benefit.",
+    "No automated redemption authorization is implied."
+  ],
+  "redemption_steps": [],
+  "provider": "IndusInd Bank",
+  "effective_from": null,
+  "effective_to": "2025-03-31",
+  "end_date_known": true,
+  "source_url": "https://www.indusind.com/in/en/personal/cards/credit-card/legend-credit-card.html",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "9ba759c09e5a638dca77ff73988c7adc540cd8fc238c750d0d9ba44c12ba3e89",
+  "retrieved_at": "2026-08-12T18:13:22Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.indusind.com/in/en/personal/cards/credit-card/legend-credit-card.html",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "9ba759c09e5a638dca77ff73988c7adc540cd8fc238c750d0d9ba44c12ba3e89",
+      "retrieved_at": "2026-08-12T18:13:22Z",
+      "id": "d0154a2e-f6e7-5fab-b467-0a0462d92740",
+      "source_observation_id": "b36cc7f9-b777-534e-8095-3573f186e8f8",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "medium"
+    }
+  ]
+}

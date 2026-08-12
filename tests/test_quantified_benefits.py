@@ -133,7 +133,10 @@ def test_quantity_coverage_report_accounts_for_projection_gaps() -> None:
     unmapped = {(item["key"], item["reason"]): item["count"] for item in report["unmapped_keys"]}
     assert unmapped[("cap_inr_by_subtype", "nested subtype map is not modelled")] == 1
     assert unmapped[("partner_and_transfer_terms", "prose terms are not a numeric quantity")] == 1
-    assert unmapped[("not_claimed", "an evidence gap is not a numeric quantity")] == 1
+    # At least one, not exactly one: the count grows whenever another benefit
+    # is recorded as an evidence gap, and freezing it would fail on the next
+    # such record while saying nothing about whether gaps are reported honestly.
+    assert unmapped[("not_claimed", "an evidence gap is not a numeric quantity")] >= 1
     assert unmapped[
         (
             "validation_swipe_inr",

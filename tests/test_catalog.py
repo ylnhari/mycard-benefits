@@ -154,7 +154,21 @@ def test_consumer_visible_catalog_keeps_rescued_states_separate_from_activation(
     # the three consumer states — not that the catalog never grows. A frozen
     # number turns adding a sourced benefit into a test failure and says
     # nothing about whether any of them reached the reader.
-    published = len(list((CATALOG_ROOT / "benefits").glob("*.json")))
+    # A benefit whose stated end date has passed is deliberately not shown as
+    # available — the catalog records that IndusInd discontinued Legend lounge
+    # access so the card does not silently appear to still carry it, and
+    # surfacing it would defeat the point of recording it. Those are subtracted
+    # rather than the total loosened, so a benefit disappearing for any other
+    # reason still fails here.
+    today = date.today().isoformat()
+    files = list((CATALOG_ROOT / "benefits").glob("*.json"))
+    ended = 0
+    for path in files:
+        record = json.loads(path.read_text(encoding="utf-8"))
+        effective_to = record.get("effective_to")
+        if isinstance(effective_to, str) and effective_to < today:
+            ended += 1
+    published = len(files) - ended
     assert len(visible) == published
     counts = {
         state: sum(rule.state == state for rule in visible)
