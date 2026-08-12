@@ -105,12 +105,9 @@ def test_card_onboarding_is_multi_select_with_a_post_add_last_four_followup() ->
         assert marker in cards
 
 
-def test_owned_benefit_matching_and_which_card_never_choose_an_unrelated_fallback() -> None:
-    assert "function activeLocalOfferingReferences()" in SCRIPT
-    assert "function benefitMatchesActiveLocalCard(benefit)" in SCRIPT
-    assert "function isOwnedBenefit(benefit)" in SCRIPT
-    assert "return discoveryMatch || benefitMatchesActiveLocalCard(benefit);" in SCRIPT
-    search = SCRIPT[SCRIPT.index("function renderSearchResults") : SCRIPT.index('document.querySelector("#benefitSearchForm")')]
-    assert "const ownedMatches = globalMatches.filter(isOwnedBenefit);" in search
-    assert 'const matches = state.searchScope === "owned" ? ownedMatches' in search
-    assert "state.benefits[0]" not in search
+# The owned-scope guarantee used to be asserted here by searching app.js for
+# the text of the functions implementing it. That passed whether or not they
+# worked, broke on rename, and would have kept passing if the scope had fallen
+# back to an unrelated benefit — the exact failure its name promised to catch.
+# It is now checked by running the search and comparing results to the wallet,
+# in tests/test_owned_scope_behaviour.py.
