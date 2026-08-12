@@ -1,0 +1,59 @@
+{
+  "id": "73470acf-67c0-56a1-8b27-7329d2748dad",
+  "offering_id": "5b5c5443-ed62-54ac-8f08-45851c094119",
+  "title": "Amazon Pay ICICI Amazon.in cashback",
+  "benefit_type": "cashback",
+  "category": "cashback",
+  "allowance": {
+    "cashback_percent": 5,
+    "period": "statement_cycle"
+  },
+  "eligibility": [
+    {
+      "field": "checkout.channel",
+      "operator": "in",
+      "value": [
+        "web",
+        "app"
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "type": "channel",
+      "operator": "equals",
+      "value": "amazon.in"
+    }
+  ],
+  "exclusions": [
+    "The 5% rate is stated for an active Amazon Prime membership; the published rate without one is 3%.",
+    "EMI transactions, fuel and gold purchases are excluded by the published terms.",
+    "No automated redemption authorization is implied.",
+    "Unknown stacking remains unapproved unless the terms explicitly support it."
+  ],
+  "redemption_steps": [
+    "Pay on Amazon.in with this card.",
+    "The earning is credited as Amazon Pay balance after the billing cycle closes, not at purchase."
+  ],
+  "provider": "Amazon Pay",
+  "effective_from": null,
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.icicibank.com/personal-banking/cards/credit-card/amazon-pay-credit-card/benefits-features",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "a1f17f6130e4ca25e6cc84329e041c30a93c907ea5ace98202a58b8ce94d02cc",
+  "retrieved_at": "2026-08-12T07:15:30Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.icicibank.com/personal-banking/cards/credit-card/amazon-pay-credit-card/benefits-features",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "a1f17f6130e4ca25e6cc84329e041c30a93c907ea5ace98202a58b8ce94d02cc",
+      "retrieved_at": "2026-08-12T07:15:30Z",
+      "id": "9c4e2a9e-9898-52de-acba-6ff2787c38f8",
+      "source_observation_id": "03464d23-12af-591f-a6b0-1e302b970f64",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "medium"
+    }
+  ]
+}
