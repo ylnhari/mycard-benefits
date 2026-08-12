@@ -4,7 +4,10 @@
   "display_name": "super.money RuPay Platinum Axis Bank Credit Card",
   "issuer_id": "axis-bank",
   "product_variant_id": "supermoney-platinum-credit",
-  "network_id": "rupay-platinum",
+  "network": "rupay",
+  "tier": "platinum",
+  "acceptance_marks": [],
+  "lounge_programme": null,
   "market": "IN",
   "aliases": [],
   "co_brand_id": "supermoney"

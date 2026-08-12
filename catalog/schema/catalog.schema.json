@@ -156,7 +156,7 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "id", "slug", "display_name", "issuer_id", "product_variant_id", "network_id", "market", "aliases"
+        "id", "slug", "display_name", "issuer_id", "product_variant_id", "network", "acceptance_marks", "lounge_programme", "market", "aliases"
       ],
       "properties": {
         "id": {"$ref": "#/$defs/uuid"},
@@ -164,7 +164,10 @@
         "display_name": {"type": "string", "minLength": 1},
         "issuer_id": {"type": "string", "minLength": 1},
         "product_variant_id": {"type": "string", "minLength": 1},
-        "network_id": {"type": "string", "minLength": 1},
+        "network": {"enum": ["visa", "mastercard", "rupay", "amex", "diners", "discover", "unknown", null]},
+        "tier": {"enum": ["platinum", "select", "signature", "infinite", "classic", "prime", null]},
+        "acceptance_marks": {"type": "array", "uniqueItems": true, "items": {"enum": ["discover", "diners-club-international", "pulse"]}},
+        "lounge_programme": {"enum": ["priority-pass", "dreamfolks", null]},
         "market": {"type": "string", "pattern": "^[A-Z]{2}$"},
         "co_brand_id": {"type": "string", "minLength": 1},
         "cohort_id": {"type": "string", "minLength": 1},

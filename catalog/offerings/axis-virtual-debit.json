@@ -4,7 +4,10 @@
   "display_name": "Axis Bank Virtual Debit Card",
   "issuer_id": "axis-bank",
   "product_variant_id": "virtual-debit",
-  "network_id": "unknown",
+  "network": "unknown",
+  "tier": null,
+  "acceptance_marks": [],
+  "lounge_programme": null,
   "market": "IN",
   "aliases": []
 }

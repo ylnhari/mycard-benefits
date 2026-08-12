@@ -4,7 +4,10 @@
   "display_name": "Tata Neu Infinity HDFC Bank RuPay Select Credit Card",
   "issuer_id": "hdfc-bank",
   "product_variant_id": "tata-neu-infinity-credit",
-  "network_id": "rupay-select",
+  "network": "rupay",
+  "tier": "select",
+  "acceptance_marks": [],
+  "lounge_programme": null,
   "market": "IN",
   "aliases": [],
   "co_brand_id": "tata-neu"

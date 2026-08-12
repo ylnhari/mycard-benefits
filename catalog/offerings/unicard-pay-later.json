@@ -4,7 +4,10 @@
   "display_name": "Uni Pay Later Card",
   "issuer_id": "unicard",
   "product_variant_id": "pay-later",
-  "network_id": "unknown",
+  "network": "unknown",
+  "tier": null,
+  "acceptance_marks": [],
+  "lounge_programme": null,
   "market": "IN",
   "aliases": []
 }

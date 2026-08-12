@@ -4,7 +4,10 @@
   "display_name": "HSBC Visa Debit Card",
   "issuer_id": "hsbc-india",
   "product_variant_id": "visa-debit",
-  "network_id": "visa",
+  "network": "visa",
+  "tier": null,
+  "acceptance_marks": [],
+  "lounge_programme": null,
   "market": "IN",
   "aliases": []
 }

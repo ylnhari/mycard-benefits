@@ -128,10 +128,10 @@ def test_a_closed_or_expired_card_can_be_filtered_for(mixed_wallet_app: str) -> 
         for wanted in ("Closed", "Expired", "Replaced"):
             chip = page.locator("#myCardChips button", has_text=wanted).first
             chip.click()
-            page.wait_for_timeout(300)
+            page.wait_for_timeout(700)
             counts[wanted] = page.locator("#myCardList .cardface").count()
             chip.click()
-            page.wait_for_timeout(200)
+            page.wait_for_timeout(700)
         browser.close()
 
     for wanted in ("In use", "Closed", "Expired", "Replaced"):

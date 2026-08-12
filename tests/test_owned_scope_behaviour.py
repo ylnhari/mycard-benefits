@@ -125,7 +125,14 @@ def test_owned_scope_returns_only_benefits_of_cards_in_the_wallet(
     with sync_playwright() as play:
         browser = play.chromium.launch()
         page = browser.new_page(viewport={"width": 1280, "height": 900})
-        page.goto(base + "/#search", wait_until="networkidle")
+        # Wait for the wallet before searching it. The owned scope legitimately
+        # has nothing to match until the private cards have loaded, and the app
+        # says so — "Your cards are not loaded yet" rather than claiming no
+        # matches. Searching too early therefore tests the loading state, not
+        # the scope, which is what made this flake.
+        page.goto(base + "/#my-cards", wait_until="networkidle")
+        page.wait_for_selector("#myCardList .cardface", timeout=15000)
+        page.click('#primaryNav a[data-view="search"]')
         page.wait_for_selector("#benefitSearch")
 
         page.click('button[data-search-scope="owned"]')
@@ -168,7 +175,11 @@ def test_owned_scope_says_so_rather_than_showing_someone_elses_benefits(
     with sync_playwright() as play:
         browser = play.chromium.launch()
         page = browser.new_page(viewport={"width": 1280, "height": 900})
-        page.goto(base + "/#search", wait_until="networkidle")
+        # Same reason as above: an unloaded wallet returns nothing for its own
+        # reason, which would let this pass without testing anything.
+        page.goto(base + "/#my-cards", wait_until="networkidle")
+        page.wait_for_selector("#myCardList .cardface", timeout=15000)
+        page.click('#primaryNav a[data-view="search"]')
         page.wait_for_selector("#benefitSearch")
         page.click('button[data-search-scope="owned"]')
         page.fill("#benefitSearch", "zzzznotarealbenefitterm")

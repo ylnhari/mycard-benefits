@@ -90,7 +90,7 @@ def test_private_cards_rows_join_public_catalog_metadata_without_secret_fallback
     assert "candidate.slug === card.offering_id" in script
     assert "function referenceCardRow" in script
     assert "cardFaceData(card, offering)" in script
-    assert "offering.issuer_id" in script and "networkLabel(offering?.network_id)" in script
+    assert "offering.issuer_id" in script and "offeringNetworkLabel(offering)" in script
     assert "offering.display_name" in script
     assert "UNMATCHED_CARD_LABEL" in script
     assert '"Unmatched variant"' in script
@@ -105,7 +105,8 @@ def test_private_card_search_covers_product_issuer_network_lifecycle_and_safe_id
     for field in (
         "offering?.display_name",
         "offering?.issuer_id",
-        "offering?.network_id",
+        "offering?.network",
+        "offering?.tier",
         "offering?.slug",
         "card.lifecycle",
         "card.offering_id",

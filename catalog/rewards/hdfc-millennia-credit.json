@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0.0",
+  "offering_id": "16f59859-681b-5934-8709-037f5fb1fdb0",
+  "offering_slug": "hdfc-millennia-credit",
+  "currency": {
+    "code": "cashpoints",
+    "display_name": "CashPoints"
+  },
+  "base_earn": {
+    "points_per_inr": null,
+    "note": "The terms state percentage rates by category rather than a single base rate per rupee, so no base rate is asserted."
+  },
+  "category_earn": [
+    {
+      "scope": "selected_online_merchants",
+      "percent_back": 5,
+      "cap": {
+        "value": 1000,
+        "unit": "points",
+        "period": "calendar_month"
+      },
+      "conditions": [
+        "Stated for ten named online merchants.",
+        "Spend beyond the cap is stated as not posting CashPoints at all, rather than earning at a lower rate."
+      ]
+    },
+    {
+      "scope": "other_spends",
+      "percent_back": 1,
+      "cap": {
+        "value": 1000,
+        "unit": "points",
+        "period": "calendar_month"
+      },
+      "conditions": [
+        "Stated as the product feature rate for spends outside the accelerated categories."
+      ]
+    }
+  ],
+  "exclusions": [
+    "Fuel spends and rent payments are stated as not eligible for CashPoints.",
+    "Renewal membership fee payments are stated as posting no CashPoints.",
+    "The document states both that a cardholder is eligible and that a cardholder is not eligible for 1% CashPoints on prepaid card, gift card and voucher purchases, in different sections. The contradiction is recorded rather than resolved, because choosing one reading would present a guess as the issuer's terms.",
+    "No automated redemption authorization is implied."
+  ],
+  "welcome": {
+    "points": 1000,
+    "condition": "Stated as given when the joining membership fee is paid."
+  },
+  "expiry": {
+    "months": null,
+    "from": null,
+    "note": "This document does not state a CashPoints expiry; absence here is not evidence that none applies."
+  },
+  "valuation": {
+    "inr_per_point": 1.0,
+    "basis": "issuer_stated",
+    "note": "The terms state redemption as CashBack against the statement at 1 CashPoint = INR 1. Stated by the issuer in its own document rather than observed or estimated."
+  },
+  "source_url": "https://www.hdfc.bank.in/content/dam/hdfcbankpws/in/en/personal-banking/discover-products/cards/credit-cards/millennia-credit-card/pdf/millennia-tnc-20th-jul26.pdf",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "ce5f2a1bfb3fb3fda52c214c1c49df243c60b24b1a5c0cdb1db62bde26de4d76",
+  "retrieved_at": "2026-08-12T11:44:33Z",
+  "state": "check_before_use",
+  "review_state": "needs_review"
+}

@@ -241,7 +241,7 @@ def test_loader_rejects_a_one_sided_conflicts_with_edge(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     (tmp_path / "offerings" / "offering.json").write_text(
-        json.dumps({"id": offering_id, "slug": "synthetic-only-offering", "display_name": "SYNTHETIC-ONLY", "issuer_id": "synthetic-only-issuer", "product_variant_id": "synthetic-only-variant", "network_id": "synthetic-only-network", "market": "IN", "aliases": []}),
+        json.dumps({"id": offering_id, "slug": "synthetic-only-offering", "display_name": "SYNTHETIC-ONLY", "issuer_id": "synthetic-only-issuer", "product_variant_id": "synthetic-only-variant", "network": "unknown", "tier": None, "acceptance_marks": [], "lounge_programme": None, "market": "IN", "aliases": []}),
         encoding="utf-8",
     )
     evidence = {
@@ -293,7 +293,7 @@ def test_api_conflict_summary_is_never_hidden_by_the_active_only_benefits_filter
         encoding="utf-8",
     )
     (tmp_path / "offerings" / "offering.json").write_text(
-        json.dumps({"id": offering_id, "slug": "synthetic-only-offering-2", "display_name": "SYNTHETIC-ONLY 2", "issuer_id": "synthetic-only-issuer", "product_variant_id": "synthetic-only-variant", "network_id": "synthetic-only-network", "market": "IN", "aliases": []}),
+        json.dumps({"id": offering_id, "slug": "synthetic-only-offering-2", "display_name": "SYNTHETIC-ONLY 2", "issuer_id": "synthetic-only-issuer", "product_variant_id": "synthetic-only-variant", "network": "unknown", "tier": None, "acceptance_marks": [], "lounge_programme": None, "market": "IN", "aliases": []}),
         encoding="utf-8",
     )
     active_evidence = {
@@ -374,8 +374,9 @@ def test_production_offering_and_benefit_response_shapes_are_locked() -> None:
         relationships = client.get("/api/v1/catalog/relationships").json()
 
     assert offerings and set(offerings[0]) == {
-        "id", "slug", "display_name", "issuer_id", "product_variant_id", "network_id",
-        "market", "co_brand_id", "cohort_id", "aliases", "effective_from", "effective_to",
+        "id", "slug", "display_name", "issuer_id", "product_variant_id", "network", "tier",
+        "acceptance_marks", "lounge_programme", "market", "co_brand_id", "cohort_id", "aliases",
+        "effective_from", "effective_to",
     }
     assert benefits
     _assert_consumer_body_has_no_governance_vocabulary(benefits)

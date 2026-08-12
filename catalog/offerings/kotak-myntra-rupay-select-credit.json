@@ -4,7 +4,10 @@
   "display_name": "Myntra Kotak RuPay Select Credit Card",
   "issuer_id": "kotak-mahindra-bank",
   "product_variant_id": "myntra-credit",
-  "network_id": "rupay-select",
+  "network": "rupay",
+  "tier": "select",
+  "acceptance_marks": [],
+  "lounge_programme": null,
   "market": "IN",
   "aliases": [],
   "co_brand_id": "myntra"

@@ -4,7 +4,10 @@
   "display_name": "HSBC Live+ Credit Card",
   "issuer_id": "hsbc-india",
   "product_variant_id": "live-plus-credit",
-  "network_id": "unknown",
+  "network": "unknown",
+  "tier": null,
+  "acceptance_marks": [],
+  "lounge_programme": null,
   "market": "IN",
   "aliases": []
 }

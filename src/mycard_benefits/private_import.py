@@ -60,7 +60,16 @@ _SECRET_FIELDS = frozenset({
     "notes", "billing_postcode", "reconciliation_id", "reconciliation_metadata",
 })
 _LIFECYCLES = {item.value for item in CardLifecycle}
-_NETWORKS = {"visa": "visa", "mastercard": "mastercard", "amex": "amex", "rupay": "rupay", "diners": "diners"}
+_NETWORKS = {
+    "visa": "visa",
+    "mastercard": "mastercard",
+    "amex": "amex",
+    "american-express": "amex",
+    "rupay": "rupay",
+    "diners": "diners",
+    "discover": "discover",
+    "unknown": "unknown",
+}
 
 
 class ImportRejected(VaultError):

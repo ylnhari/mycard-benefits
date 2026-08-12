@@ -4,7 +4,10 @@
   "display_name": "Axis Bank Burgundy Mastercard Debit Card",
   "issuer_id": "axis-bank",
   "product_variant_id": "burgundy-debit",
-  "network_id": "mastercard",
+  "network": "mastercard",
+  "tier": null,
+  "acceptance_marks": [],
+  "lounge_programme": null,
   "market": "IN",
   "aliases": []
 }

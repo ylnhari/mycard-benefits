@@ -4,7 +4,10 @@
   "display_name": "HDFC Bank Millennia Debit Card",
   "issuer_id": "hdfc-bank",
   "product_variant_id": "millennia-debit",
-  "network_id": "unknown",
+  "network": "unknown",
+  "tier": null,
+  "acceptance_marks": [],
+  "lounge_programme": null,
   "market": "IN",
   "aliases": []
 }

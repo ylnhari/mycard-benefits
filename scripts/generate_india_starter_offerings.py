@@ -14,7 +14,7 @@ ROOT = Path(__file__).parents[1]
 OUTPUT = ROOT / "catalog" / "offerings"
 NAMESPACE = uuid.UUID("b8ab0a43-3ba6-45b4-8ab1-c071415dbb12")
 
-# slug, display name, issuer, product variant, network, optional merchant co-brand
+# slug, display name, issuer, product variant, legacy dimension, optional merchant co-brand
 OFFERINGS = (
     ("au-kosmos-rupay-select-credit", "AU Kosmos RuPay Select Credit Card", "au-small-finance-bank", "kosmos-credit", "rupay-select", None),
     ("au-priority-pass-membership", "AU Priority Pass Membership", "au-small-finance-bank", "priority-pass-membership", "priority-pass", None),
@@ -91,16 +91,39 @@ OFFERINGS = (
 )
 
 
+def _split_dimensions(value: str) -> tuple[str | None, str | None, str | None]:
+    """Split the authoring shorthand without inferring anything from names."""
+    composite = {
+        "visa-signature": ("visa", "signature"),
+        "visa-platinum": ("visa", "platinum"),
+        "visa-infinite": ("visa", "infinite"),
+        "rupay-select": ("rupay", "select"),
+        "rupay-platinum": ("rupay", "platinum"),
+    }
+    if value in composite:
+        network, tier = composite[value]
+        return network, tier, None
+    if value == "american-express":
+        return "amex", None, None
+    if value in {"priority-pass", "dreamfolks"}:
+        return None, None, value
+    return value, None, None
+
+
 def main() -> None:
     OUTPUT.mkdir(parents=True, exist_ok=True)
-    for slug, display_name, issuer_id, product_variant_id, network_id, co_brand_id in OFFERINGS:
+    for slug, display_name, issuer_id, product_variant_id, legacy_dimension, co_brand_id in OFFERINGS:
+        network, tier, lounge_programme = _split_dimensions(legacy_dimension)
         payload: dict[str, object] = {
             "id": str(uuid.uuid5(NAMESPACE, slug)),
             "slug": slug,
             "display_name": display_name,
             "issuer_id": issuer_id,
             "product_variant_id": product_variant_id,
-            "network_id": network_id,
+            "network": network,
+            "tier": tier,
+            "acceptance_marks": [],
+            "lounge_programme": lounge_programme,
             "market": "IN",
             "aliases": [],
         }

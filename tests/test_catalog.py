@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 from dataclasses import replace
 from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
@@ -34,7 +35,8 @@ def test_synthetic_catalog_loads_deterministically() -> None:
     assert first == second
     offering = first.offering_by_slug("synthetic-example-in-visa")
     assert offering is not None
-    assert offering.network_id == "visa"
+    assert offering.network == "visa"
+    assert offering.tier is None
     assert [item.id for item in first.benefits_for(offering.id, date(2026, 8, 6))] == [
         "33333333-3333-4333-8333-333333333333"
     ]
@@ -97,9 +99,50 @@ def test_india_starter_catalog_contains_real_product_variants() -> None:
     regalia = catalog.offering_by_slug("hdfc-regalia-gold-credit")
     assert tata_neu is not None
     assert tata_neu.display_name == "Tata Neu Infinity HDFC Bank RuPay Select Credit Card"
-    assert tata_neu.network_id == "rupay-select"
+    assert tata_neu.network == "rupay"
+    assert tata_neu.tier == "select"
     assert regalia is not None
     assert regalia.display_name == "HDFC Bank Regalia Gold Credit Card"
+
+
+def test_offering_dimension_migration_keeps_unknowns_explicit() -> None:
+    catalog = load_catalog(CATALOG_ROOT)
+
+    assert len(catalog.offerings) == 72
+    assert sum(offering.network == "unknown" for offering in catalog.offerings) == 35
+    assert sum(offering.tier is not None for offering in catalog.offerings) == 18
+    assert sum(offering.lounge_programme is not None for offering in catalog.offerings) == 3
+    assert all(offering.network != "priority-pass" for offering in catalog.offerings)
+    assert all(offering.network != "dreamfolks" for offering in catalog.offerings)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [("network", "pulse"), ("tier", "gold"), ("network", "visa-signature")],
+)
+def test_loader_rejects_unknown_offering_dimension(tmp_path: Path, field: str, value: str) -> None:
+    root = tmp_path / "catalog"
+    shutil.copytree(SYNTHETIC_CATALOG_ROOT, root)
+    path = root / "offerings" / "synthetic-example-in.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload[field] = value
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(CatalogLoadError, match=f"{field} has an unknown value"):
+        load_catalog(root)
+
+
+def test_offering_without_a_tier_still_loads(tmp_path: Path) -> None:
+    root = tmp_path / "catalog"
+    shutil.copytree(SYNTHETIC_CATALOG_ROOT, root)
+    path = root / "offerings" / "synthetic-example-in.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload.pop("tier")
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    offering = load_catalog(root).offering_by_slug("synthetic-example-in-visa")
+    assert offering is not None
+    assert offering.tier is None
 
 
 def test_consumer_visible_catalog_keeps_rescued_states_separate_from_activation() -> None:

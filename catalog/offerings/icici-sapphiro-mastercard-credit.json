@@ -4,7 +4,10 @@
   "display_name": "ICICI Bank Sapphiro Mastercard Credit Card",
   "issuer_id": "icici-bank",
   "product_variant_id": "sapphiro-credit",
-  "network_id": "mastercard",
+  "network": "mastercard",
+  "tier": null,
+  "acceptance_marks": [],
+  "lounge_programme": null,
   "market": "IN",
   "aliases": []
 }

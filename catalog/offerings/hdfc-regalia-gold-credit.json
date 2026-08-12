@@ -4,7 +4,10 @@
   "display_name": "HDFC Bank Regalia Gold Credit Card",
   "issuer_id": "hdfc-bank",
   "product_variant_id": "regalia-gold-credit",
-  "network_id": "visa",
+  "network": "visa",
+  "tier": null,
+  "acceptance_marks": [],
+  "lounge_programme": null,
   "market": "IN",
   "aliases": []
 }

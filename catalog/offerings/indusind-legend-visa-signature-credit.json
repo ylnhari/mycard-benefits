@@ -4,7 +4,10 @@
   "display_name": "IndusInd Bank Legend Visa Signature Credit Card",
   "issuer_id": "indusind-bank",
   "product_variant_id": "legend-credit",
-  "network_id": "visa-signature",
+  "network": "visa",
+  "tier": "signature",
+  "acceptance_marks": [],
+  "lounge_programme": null,
   "market": "IN",
   "aliases": []
 }

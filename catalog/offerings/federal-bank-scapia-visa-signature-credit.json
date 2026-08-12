@@ -4,7 +4,10 @@
   "display_name": "Scapia Federal Bank Visa Signature Credit Card",
   "issuer_id": "federal-bank",
   "product_variant_id": "scapia-credit",
-  "network_id": "visa-signature",
+  "network": "visa",
+  "tier": "signature",
+  "acceptance_marks": [],
+  "lounge_programme": null,
   "market": "IN",
   "aliases": [],
   "co_brand_id": "scapia"

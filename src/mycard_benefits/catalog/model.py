@@ -159,7 +159,10 @@ class Offering:
     display_name: str
     issuer_id: str
     product_variant_id: str
-    network_id: str
+    network: str | None
+    tier: str | None
+    acceptance_marks: tuple[str, ...]
+    lounge_programme: str | None
     market: str
     co_brand_id: str | None
     cohort_id: str | None

@@ -140,13 +140,13 @@ def test_a_filter_that_narrows_the_wallet_says_so_on_screen(filled_wallet_app: s
             label = chip.inner_text().strip()
             before_summary = page.locator("#myCardSummary").inner_text().strip()
             chip.click()
-            page.wait_for_timeout(350)
+            page.wait_for_timeout(700)
             shown = page.locator("#myCardList .cardface").count()
             after_summary = page.locator("#myCardSummary").inner_text().strip()
             if shown != total and before_summary == after_summary:
                 silent.append(f"{label} ({total} -> {shown})")
             chip.click()
-            page.wait_for_timeout(200)
+            page.wait_for_timeout(700)
 
         browser.close()
 

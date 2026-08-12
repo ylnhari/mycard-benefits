@@ -87,6 +87,17 @@ _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _SLUG = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 _QUANTITIES_MISSING = object()
 
+# Offering dimensions are deliberately closed.  ``unknown`` is an explicit
+# catalog value for a network that has not been substantiated; it is not a
+# license to accept arbitrary network strings.  Lounge programmes are not
+# payment networks, so their vocabulary lives in a separate field.
+OFFERING_NETWORKS = frozenset({
+    "visa", "mastercard", "rupay", "amex", "diners", "discover", "unknown",
+})
+OFFERING_TIERS = frozenset({"platinum", "select", "signature", "infinite", "classic", "prime"})
+OFFERING_ACCEPTANCE_MARKS = frozenset({"discover", "diners-club-international", "pulse"})
+LOUNGE_PROGRAMMES = frozenset({"priority-pass", "dreamfolks"})
+
 
 @dataclass(frozen=True)
 class Catalog:
@@ -344,23 +355,40 @@ def _parse_offering(raw: dict[str, Any], path: str) -> Offering:
         "display_name",
         "issuer_id",
         "product_variant_id",
-        "network_id",
+        "network",
+        "acceptance_marks",
+        "lounge_programme",
         "market",
         "aliases",
     }
-    optional = {"co_brand_id", "cohort_id", "effective_from", "effective_to"}
+    optional = {"co_brand_id", "cohort_id", "effective_from", "effective_to", "tier"}
     _require_exact_keys(raw, required, optional, path)
     slug = _nonempty(raw["slug"], path, "slug")
     if not _SLUG.fullmatch(slug):
         raise CatalogLoadError(f"{path}: slug must be lowercase kebab-case")
     effective_from, effective_to = _date_range(raw, path)
+    network = _closed_optional_value(raw["network"], OFFERING_NETWORKS, path, "network")
+    tier = _closed_optional_value(raw.get("tier"), OFFERING_TIERS, path, "tier")
+    acceptance_marks = _closed_string_list(
+        raw["acceptance_marks"], OFFERING_ACCEPTANCE_MARKS, path, "acceptance_marks", allow_empty=True
+    )
+    lounge_programme = _closed_optional_value(
+        raw["lounge_programme"], LOUNGE_PROGRAMMES, path, "lounge_programme"
+    )
+    if lounge_programme is not None and network is not None:
+        raise CatalogLoadError(f"{path}: lounge_programme offerings must not have a network")
+    if lounge_programme is None and network is None:
+        raise CatalogLoadError(f"{path}: network is required unless lounge_programme is set")
     return Offering(
         id=_uuid(raw["id"], path, "id"),
         slug=slug,
         display_name=_nonempty(raw["display_name"], path, "display_name"),
         issuer_id=_nonempty(raw["issuer_id"], path, "issuer_id"),
         product_variant_id=_nonempty(raw["product_variant_id"], path, "product_variant_id"),
-        network_id=_nonempty(raw["network_id"], path, "network_id"),
+        network=network,
+        tier=tier,
+        acceptance_marks=tuple(acceptance_marks),
+        lounge_programme=lounge_programme,
         market=_market(raw["market"], path),
         co_brand_id=_optional_string(raw.get("co_brand_id"), path, "co_brand_id"),
         cohort_id=_optional_string(raw.get("cohort_id"), path, "cohort_id"),
@@ -1432,8 +1460,8 @@ def _validate_cross_records(
                     f"benefit {rule.id}: inheritance offering binding does not match records"
                 )
             if (
-                source_offering.network_id != inheritance.source_network_id
-                or target_offering.network_id != inheritance.target_network_id
+                source_offering.network != inheritance.source_network_id
+                or target_offering.network != inheritance.target_network_id
             ):
                 raise CatalogLoadError(
                     f"benefit {rule.id}: inheritance network binding does not match offerings"
@@ -1713,6 +1741,37 @@ def _string_list(value: Any, path: str, field: str) -> list[str]:
     strings = [_nonempty(item, path, field) for item in value]
     _unique(strings, f"{path} {field}")
     return strings
+
+
+def _closed_optional_value(
+    value: Any, allowed: frozenset[str], path: str, field: str
+) -> str | None:
+    if value is None:
+        return None
+    if not isinstance(value, str) or value not in allowed:
+        raise CatalogLoadError(f"{path}: {field} has an unknown value")
+    return value
+
+
+def _closed_string_list(
+    value: Any,
+    allowed: frozenset[str],
+    path: str,
+    field: str,
+    *,
+    allow_empty: bool = False,
+) -> list[str]:
+    if not isinstance(value, list):
+        raise CatalogLoadError(f"{path}: {field} must be a list")
+    if not value and not allow_empty:
+        raise CatalogLoadError(f"{path}: {field} must contain at least one item")
+    values = []
+    for item in value:
+        if not isinstance(item, str) or item not in allowed:
+            raise CatalogLoadError(f"{path}: {field} has an unknown value")
+        values.append(item)
+    _unique(values, f"{path} {field}")
+    return values
 
 
 def _object_list(value: Any, path: str, field: str) -> list[dict[str, Any]]:

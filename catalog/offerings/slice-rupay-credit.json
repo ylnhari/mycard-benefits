@@ -4,7 +4,10 @@
   "display_name": "Slice RuPay Credit Card",
   "issuer_id": "slice",
   "product_variant_id": "rupay-credit",
-  "network_id": "rupay",
+  "network": "rupay",
+  "tier": null,
+  "acceptance_marks": [],
+  "lounge_programme": null,
   "market": "IN",
   "aliases": []
 }

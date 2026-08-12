@@ -4,7 +4,10 @@
   "display_name": "Synthetic Example India Mastercard",
   "issuer_id": "synthetic-issuer",
   "product_variant_id": "synthetic-tier",
-  "network_id": "mastercard",
+  "network": "mastercard",
+  "tier": null,
+  "acceptance_marks": [],
+  "lounge_programme": null,
   "market": "IN",
   "aliases": ["Synthetic India MC"],
   "effective_from": "2026-01-01"

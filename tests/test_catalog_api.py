@@ -117,7 +117,7 @@ def test_matching_requires_canonical_dimensions_and_filters_exactly(tmp_path: Pa
         params = {
             "issuer_id": "synthetic-issuer",
             "product_variant_id": "synthetic-tier",
-            "network_id": "visa",
+            "network": "visa",
             "market": "in",
             "co_brand_id": "synthetic-cobrand",
             "cohort_id": "synthetic-2026",
@@ -126,7 +126,7 @@ def test_matching_requires_canonical_dimensions_and_filters_exactly(tmp_path: Pa
         assert match.status_code == 200
         assert [item["slug"] for item in match.json()] == [OFFERING_SLUG]
 
-        params["network_id"] = "mastercard"
+        params["network"] = "mastercard"
         assert client.get("/api/v1/catalog/offerings/match", params=params).json() == []
         assert client.get("/api/v1/catalog/offerings/match").status_code == 422
 

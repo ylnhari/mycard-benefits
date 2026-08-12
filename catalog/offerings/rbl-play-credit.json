@@ -4,7 +4,10 @@
   "display_name": "RBL Bank Play Credit Card",
   "issuer_id": "rbl-bank",
   "product_variant_id": "play-credit",
-  "network_id": "unknown",
+  "network": "unknown",
+  "tier": null,
+  "acceptance_marks": [],
+  "lounge_programme": null,
   "market": "IN",
   "aliases": []
 }

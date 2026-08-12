@@ -4,7 +4,10 @@
   "display_name": "CASHBACK SBI Card",
   "issuer_id": "sbi-card",
   "product_variant_id": "cashback-credit",
-  "network_id": "visa",
+  "network": "visa",
+  "tier": null,
+  "acceptance_marks": [],
+  "lounge_programme": null,
   "market": "IN",
   "aliases": []
 }

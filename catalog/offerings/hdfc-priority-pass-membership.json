@@ -4,7 +4,10 @@
   "display_name": "HDFC Bank Priority Pass Membership",
   "issuer_id": "hdfc-bank",
   "product_variant_id": "priority-pass-membership",
-  "network_id": "priority-pass",
+  "network": null,
+  "tier": null,
+  "acceptance_marks": [],
+  "lounge_programme": "priority-pass",
   "market": "IN",
   "aliases": []
 }

@@ -115,7 +115,10 @@ class OfferingSummary(_PublicModel):
     display_name: str
     issuer_id: str
     product_variant_id: str
-    network_id: str
+    network: str | None
+    tier: str | None
+    acceptance_marks: list[str]
+    lounge_programme: str | None
     market: str
     co_brand_id: str | None
     cohort_id: str | None
@@ -338,12 +341,16 @@ def create_catalog_router(
     def match_offerings(
         issuer_id: Annotated[str, Query(min_length=1)],
         product_variant_id: Annotated[str, Query(min_length=1)],
-        network_id: Annotated[str, Query(min_length=1)],
         market: Annotated[str, Query(min_length=2, max_length=2)],
+        network: Annotated[str | None, Query(min_length=1)] = None,
+        network_id: Annotated[str | None, Query(min_length=1, include_in_schema=False)] = None,
         co_brand_id: str | None = None,
         cohort_id: str | None = None,
         as_of: AsOf = None,
     ) -> list[OfferingSummary]:
+        requested_network = network if network is not None else network_id
+        if requested_network is None or (network is not None and network_id is not None and network != network_id):
+            raise HTTPException(status_code=422, detail="network is required")
         catalog = catalog_or_unavailable()
         effective_date = _effective_date(catalog, as_of)
         return [
@@ -352,7 +359,7 @@ def create_catalog_router(
             if _in_range(effective_date, offering.effective_from, offering.effective_to)
             and offering.issuer_id == issuer_id
             and offering.product_variant_id == product_variant_id
-            and offering.network_id == network_id
+            and offering.network == requested_network
             and offering.market == market.upper()
             and (co_brand_id is None or offering.co_brand_id == co_brand_id)
             and (cohort_id is None or offering.cohort_id == cohort_id)
@@ -534,7 +541,7 @@ def create_catalog_router(
                 continue
             if filters["issuer"] and filters["issuer"] not in _fold(offering.issuer_id):
                 continue
-            if filters["network"] and filters["network"] not in _fold(offering.network_id):
+            if filters["network"] and filters["network"] not in _fold(offering.network):
                 continue
             if filters["offering_id"] and rule.offering_id != filters["offering_id"]:
                 continue
@@ -687,7 +694,10 @@ def _offering_summary(offering: Offering) -> OfferingSummary:
         display_name=offering.display_name,
         issuer_id=offering.issuer_id,
         product_variant_id=offering.product_variant_id,
-        network_id=offering.network_id,
+        network=offering.network,
+        tier=offering.tier,
+        acceptance_marks=list(offering.acceptance_marks),
+        lounge_programme=offering.lounge_programme,
         market=offering.market,
         co_brand_id=offering.co_brand_id,
         cohort_id=offering.cohort_id,
@@ -855,7 +865,8 @@ def _tokens(value: str) -> list[str]:
 def _search_text(rule: BenefitRule, offering: Offering) -> str:
     values: list[str] = [
         rule.benefit_type, rule.title, rule.provider or "", offering.display_name,
-        offering.slug, offering.issuer_id, offering.network_id, *offering.aliases,
+        offering.slug, offering.issuer_id, offering.network or "", offering.tier or "",
+        offering.lounge_programme or "", *offering.acceptance_marks, *offering.aliases,
         *rule.redemption_steps, *rule.exclusions,
     ]
     values.extend(json.dumps(item, sort_keys=True) for item in rule.eligibility)

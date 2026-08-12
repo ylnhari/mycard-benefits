@@ -96,14 +96,22 @@ function humanLifecycleLabel(value) {
   const labels = { active: "In use", archived: "Archived", lost: "Lost", stolen: "Stolen", expired: "Expired", closed: "Closed", retired: "Retired", replaced: "Replaced", renewed: "Renewed", applied: "Applied", pending: "Pending", frozen: "Frozen", upgraded: "Upgraded", downgraded: "Downgraded" };
   return labels[value] || "Status not recorded";
 }
-function networkLabel(value) {
-  const labels = {
-    mastercard: "MC", visa: "VISA", rupay: "RUPAY", amex: "AMEX", diners: "DINERS", discover: "DISCOVER", maestro: "MAESTRO",
-    "visa-signature": "VISA Signature", "visa-platinum": "VISA Platinum", "visa-infinite": "VISA Infinite",
-    "rupay-select": "RuPay Select", "rupay-platinum": "RuPay Platinum",
+function networkLabel(network, tier = null, loungeProgramme = null) {
+  const networkLabels = {
+    mastercard: "MC", visa: "VISA", rupay: "RUPAY", amex: "AMEX", diners: "DINERS", discover: "DISCOVER",
   };
-  const key = String(value || "").toLocaleLowerCase().replaceAll("_", "-");
-  return labels[key] || null;
+  const tierLabels = { platinum: "Platinum", select: "Select", signature: "Signature", infinite: "Infinite", classic: "Classic", prime: "Prime" };
+  const loungeLabels = { "priority-pass": "Priority Pass", dreamfolks: "DreamFolks" };
+  const networkKey = String(network || "").toLocaleLowerCase().replaceAll("_", "-");
+  const tierKey = String(tier || "").toLocaleLowerCase().replaceAll("_", "-");
+  const loungeKey = String(loungeProgramme || "").toLocaleLowerCase().replaceAll("_", "-");
+  const base = networkLabels[networkKey] || null;
+  const tierText = tierLabels[tierKey] || null;
+  if (base && tierText) return `${base} ${tierText}`;
+  return base || loungeLabels[loungeKey] || null;
+}
+function offeringNetworkLabel(offering) {
+  return networkLabel(offering?.network, offering?.tier, offering?.lounge_programme);
 }
 function marketLabel(value) {
   const labels = { IN: "India" };
@@ -351,7 +359,7 @@ function benefitSearchText(benefit) {
     benefit.category || benefit.benefit_type,
     offering?.display_name,
     offering?.issuer_id,
-    networkLabel(offering?.network_id),
+    offeringNetworkLabel(offering),
     ...(offering?.aliases || []),
     benefit.provider,
     consumerAllowanceText(benefit),
@@ -493,7 +501,7 @@ function setCatalogState(message, kind) {
 }
 function offeringCard(offering) {
   const benefits = publicBenefitsForOffering(offering);
-  const network = networkLabel(offering.network_id);
+  const network = offeringNetworkLabel(offering);
   const card = cardFace({
     issuer: humanIssuerLabel(offering.issuer_id),
     issuer_id: offering.issuer_id,
@@ -551,7 +559,7 @@ function renderOfferingDetail() {
     renderOfferingDetail();
     document.querySelector(`[data-offering-id="${offering.id}"]`)?.focus();
   });
-  target.append(node("p", [humanIssuerLabel(offering.issuer_id), networkLabel(offering.network_id), marketLabel(offering.market)].filter(Boolean).join(" · "), "quiet-copy"));
+  target.append(node("p", [humanIssuerLabel(offering.issuer_id), offeringNetworkLabel(offering), marketLabel(offering.market)].filter(Boolean).join(" · "), "quiet-copy"));
   const benefits = publicBenefitsForOffering(offering);
   const categories = [...new Set(benefits.map(item => humanBenefitCategory(item.category || item.benefit_type)).filter(Boolean))];
   target.append(node("p", categories.length ? `Recorded benefit categories: ${categories.join(", ")}.` : "No public benefit details are recorded for this card yet.", "allowance"));
@@ -645,7 +653,7 @@ function renderCardOfferingChoices() {
         node("span", selected ? "✓" : "", "onboarding-product-check"),
         node("span", offering.display_name, "onboarding-product-name"),
       );
-      const network = networkLabel(offering.network_id);
+      const network = offeringNetworkLabel(offering);
       if (network) choice.append(node("span", network, "onboarding-product-network"));
       choice.addEventListener("click", () => {
         if (state.cardAddSelection.has(offering.id)) state.cardAddSelection.delete(offering.id);
@@ -731,7 +739,7 @@ function renderOfferings() {
   );
   renderOfferingFilter(
     "#offeringNetwork",
-    [...new Set(state.offerings.map(offering => offering.network_id).filter(value => networkLabel(value)))].sort((a, b) => (networkLabel(a) || "").localeCompare(networkLabel(b) || "")),
+    [...new Set(state.offerings.map(offering => offering.network).filter(value => networkLabel(value)))].sort((a, b) => (networkLabel(a) || "").localeCompare(networkLabel(b) || "")),
     "All networks",
     networkLabel,
   );
@@ -740,8 +748,8 @@ function renderOfferings() {
     clear(preview);
     const filtered = state.offerings.filter(offering =>
       (!issuer || offering.issuer_id === issuer)
-      && (!network || offering.network_id === network)
-      && (!query || [offering.display_name, offering.issuer_id, offering.network_id, offering.slug].some(value => String(value || "").toLocaleLowerCase().includes(query)))
+      && (!network || offering.network === network)
+      && (!query || [offering.display_name, offering.issuer_id, offering.network, offering.tier, offering.lounge_programme, offering.slug, ...(offering.acceptance_marks || [])].some(value => String(value || "").toLocaleLowerCase().includes(query)))
     );
     document.querySelector("#offeringSearchStatus")?.replaceChildren(document.createTextNode(`${filtered.length} public card${filtered.length === 1 ? "" : "s"} shown`));
     if (!filtered.length) preview.append(node("p", "No public card matches those filters.", "empty-state"));
@@ -794,7 +802,7 @@ function benefitCard(benefit) {
   const ownedCard = state.privateCards.find(card => offeringForCard(card)?.id === benefit.offering_id && card.lifecycle === "active") || state.privateCards.find(card => offeringForCard(card)?.id === benefit.offering_id);
   const cardLabel = ownedCard
     ? [offering?.display_name || benefit._offeringName || "Public card", humanLifecycleLabel(ownedCard.lifecycle)].filter(Boolean).join(" · ")
-    : [offering?.display_name || benefit._offeringName || "Public card", networkLabel(offering?.network_id)].filter(Boolean).join(" · ");
+    : [offering?.display_name || benefit._offeringName || "Public card", offeringNetworkLabel(offering)].filter(Boolean).join(" · ");
   main.append(node("p", cardLabel, "b-card"));
   main.append(node("h3", benefit.title, "b-title"));
   const allowance = consumerAllowanceText(benefit);
@@ -1097,7 +1105,7 @@ function alternativeBenefitCard(benefit) {
   const categoryLabel = humanBenefitCategory(benefit.category || benefit.benefit_type);
   if (!categoryLabel) return null;
   const card = node("article", undefined, "benefit-match-card");
-  card.append(node("p", [humanIssuerLabel(offering.issuer_id), networkLabel(offering.network_id)].filter(Boolean).join(" · "), "eyebrow"), node("h5", offering.display_name));
+  card.append(node("p", [humanIssuerLabel(offering.issuer_id), offeringNetworkLabel(offering)].filter(Boolean).join(" · "), "eyebrow"), node("h5", offering.display_name));
   card.append(node("p", `Also lists a ${categoryLabel} benefit. Its terms, caps, and eligibility can differ.`, "quiet-copy"));
   const button = node("button", "Explore this public rule", "secondary benefit-detail-toggle");
   button.type = "button";
@@ -1298,7 +1306,7 @@ function offeringForCard(card) {
 }
 function cardSearchText(card, offering) {
   const benefitNames = state.benefits.filter(benefit => benefit.offering_id === offering?.id || benefit.offering_id === offering?.slug || benefit.offering_id === card.offering_id).map(benefit => benefit.title);
-  return [offering?.display_name, offering?.issuer_id, networkLabel(offering?.network_id), humanLifecycleLabel(card.lifecycle), ...benefitNames].filter(Boolean).join(" ").toLocaleLowerCase();
+  return [offering?.display_name, offering?.issuer_id, offeringNetworkLabel(offering), offering?.network, offering?.tier, humanLifecycleLabel(card.lifecycle), ...benefitNames].filter(Boolean).join(" ").toLocaleLowerCase();
 }
 /* ---------- issuer-derived colourway: generated, never hand-assigned ---------- */
 function issuerHue(id){
@@ -1384,7 +1392,7 @@ function cardFaceData(card, offering) {
     issuer: humanIssuerLabel(offering?.issuer_id),
     issuer_id: offering?.issuer_id || card.offering_id || "issuer",
     name: offering?.display_name || UNMATCHED_CARD_LABEL,
-    network: networkLabel(offering?.network_id),
+    network: offeringNetworkLabel(offering),
     last4: maskedLastFour?.[1] || null,
     lifecycle: card.lifecycle,
     benefits: benefits.length,

@@ -4,7 +4,10 @@
   "display_name": "City Union Bank Credit Card",
   "issuer_id": "city-union-bank",
   "product_variant_id": "credit-card",
-  "network_id": "unknown",
+  "network": "unknown",
+  "tier": null,
+  "acceptance_marks": [],
+  "lounge_programme": null,
   "market": "IN",
   "aliases": []
 }

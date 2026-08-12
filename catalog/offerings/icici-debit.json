@@ -4,7 +4,10 @@
   "display_name": "ICICI Bank Debit Card",
   "issuer_id": "icici-bank",
   "product_variant_id": "debit-card",
-  "network_id": "unknown",
+  "network": "unknown",
+  "tier": null,
+  "acceptance_marks": [],
+  "lounge_programme": null,
   "market": "IN",
   "aliases": []
 }

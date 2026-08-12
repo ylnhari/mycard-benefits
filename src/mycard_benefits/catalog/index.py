@@ -36,7 +36,7 @@ from .loader import Catalog, load_catalog
 
 INDEX_FILENAME = "catalog.sqlite3"
 INDEX_DIRECTORY = "derived"
-INDEX_SCHEMA_VERSION = 1
+INDEX_SCHEMA_VERSION = 2
 
 _SOURCE_DIRECTORIES = ("schema", "offerings", "benefits", "relationships", "rewards")
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
@@ -177,7 +177,10 @@ CREATE TABLE offerings (
     display_name TEXT NOT NULL,
     issuer_id TEXT NOT NULL,
     product_variant_id TEXT NOT NULL,
-    network_id TEXT NOT NULL,
+    network TEXT,
+    tier TEXT,
+    acceptance_marks_json TEXT NOT NULL,
+    lounge_programme TEXT,
     market TEXT NOT NULL,
     co_brand_id TEXT,
     cohort_id TEXT,
@@ -594,8 +597,9 @@ def _populate(
         """
         INSERT INTO offerings(
             offering_id, slug, display_name, issuer_id, product_variant_id,
-            network_id, market, co_brand_id, cohort_id, effective_from, effective_to
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            network, tier, acceptance_marks_json, lounge_programme,
+            market, co_brand_id, cohort_id, effective_from, effective_to
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         [
             (
@@ -604,7 +608,10 @@ def _populate(
                 offering.display_name,
                 offering.issuer_id,
                 offering.product_variant_id,
-                offering.network_id,
+                offering.network,
+                offering.tier,
+                json.dumps(offering.acceptance_marks, separators=(",", ":")),
+                offering.lounge_programme,
                 offering.market,
                 offering.co_brand_id,
                 offering.cohort_id,

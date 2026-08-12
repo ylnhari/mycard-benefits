@@ -4,7 +4,10 @@
   "display_name": "IDFC FIRST Bank Millennia Visa Credit Card",
   "issuer_id": "idfc-first-bank",
   "product_variant_id": "millennia-credit",
-  "network_id": "visa",
+  "network": "visa",
+  "tier": null,
+  "acceptance_marks": [],
+  "lounge_programme": null,
   "market": "IN",
   "aliases": []
 }

@@ -4,7 +4,10 @@
   "display_name": "DBS EMT Visa Signature Debit Card",
   "issuer_id": "dbs-bank",
   "product_variant_id": "emt-visa-signature-debit",
-  "network_id": "visa-signature",
+  "network": "visa",
+  "tier": "signature",
+  "acceptance_marks": [],
+  "lounge_programme": null,
   "market": "IN",
   "aliases": []
 }
