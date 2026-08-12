@@ -1,6 +1,27 @@
 # Project status
 
-Last updated: 2026-08-11
+Last updated: 2026-08-12
+
+## Derived catalog index
+
+The public JSON catalog now has a rebuildable runtime SQLite projection at
+`<data-dir>/derived/catalog.sqlite3`, written only by
+`catalog.index.build_catalog_index`. It contains offerings, benefits, normalized
+quantities, reward records, category earning rows, and source metadata. The
+index records a fingerprint of its catalog inputs and every read verifies that
+fingerprint; changed JSON makes the index stale instead of allowing old facts
+to be trusted.
+
+Category ranking requires an explicit comparable metric and unit, and can be
+restricted to the offering IDs supplied by an optimizer caller. Unknown
+quantities and unknown reward valuations remain NULL/absent and are reported
+as excluded candidates. The production smoke build contains 72 offerings, 61
+benefits, 73 quantities, and one reward record. Synthetic tests cover exact
+rebuilds, numeric projections, unknown handling, stale detection, and the
+read-only query boundary.
+
+No vault, private record, credential, cryptography, commit, or push was
+involved in this change.
 
 ## Fresh-vault device-action session fix
 

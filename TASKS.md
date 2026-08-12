@@ -64,6 +64,7 @@ be validated as a product rather than as a collection of routes.
   - Progress: exact-product public candidate hints now appear only inside the relevant card/benefit detail, cached per product and labelled “Being verified”; they never enter active benefits, Today, rankings, or Compare. Compare defaults to two mapped owned products when available and prevents the same card being compared with itself.
   - Progress: the owner-approved local review library now exposes all 61 seeded public benefit references in the Benefits screen. One remains the reviewed active Tata rule; 55 are visibly activated only for local owner review with official-term links, and five source conflicts are labelled separately. These items are never used for Compare, Which Card, purchase ranking, or recommendations.
   - Progress: the public catalog browser now renders all 72 offerings without private storage, filters by issuer and network, and opens shared cardface-style product details with the three consumer benefit states.
+  - Progress: a rebuildable, source-fingerprint-checked SQLite catalog index now exposes normalized quantity and reward queries for future comparison; unknown values remain excluded and counted rather than ranking as zero.
   - Depends on: MC-002, MC-039, MC-046
   - Suggested runner: Luna implementation, Terra independent review
 

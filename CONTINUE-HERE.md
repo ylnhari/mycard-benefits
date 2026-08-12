@@ -3,6 +3,25 @@
 This repository is the single source of truth. Start from this file instead of
 old chat transcripts, task briefs, review reports, or former worktrees.
 
+## Derived catalog index — 2026-08-12
+
+- Added `src/mycard_benefits/catalog/index.py` with the single SQLite write boundary
+  `build_catalog_index`. It rebuilds the ignored runtime
+  `<data-dir>/derived/catalog.sqlite3` from offerings, benefits, quantities,
+  and reward records, and atomically replaces only a complete build.
+- The index stores a source-file fingerprint and every read rechecks it. JSON
+  remains authoritative; a changed catalog raises a stale-index error rather
+  than serving old rows. Query connections are immutable and read-only.
+- Quantity comparisons require category, metric, and unit, with optional scope.
+  Missing quantities, missing rates, and null reward valuations stay SQL NULL
+  or absent and are returned as excluded-unknown counts, never as zero.
+- The production catalog smoke build contains 72 offerings, 61 benefits, 73
+  quantities, and one reward record. Synthetic integration tests cover byte-
+  deterministic rebuilds, real quantity and valuation arithmetic, unknown
+  values, read-only enforcement, and stale-source rejection.
+- No vault path, cryptography, private record, credential, commit, or push was
+  involved.
+
 ## Fresh-vault device-action session fix — 2026-08-11
 
 - Fixed the fresh device-held vault regression where `POST

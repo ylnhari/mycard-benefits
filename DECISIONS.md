@@ -1,5 +1,18 @@
 # Decisions
 
+## Derived catalog index keeps JSON authoritative — 2026-08-12
+
+- The normalized quantity and reward JSON remains the reviewed, diffable source
+  of truth. A SQLite index is only a runtime projection under the ignored data
+  root and is rebuilt atomically by one builder.
+- The index stores a fingerprint of the catalog inputs. A changed source makes
+  the index stale and unusable until rebuilt; query code opens it immutably and
+  read-only.
+- Ranking accepts an explicit category, metric, and unit so unlike quantities
+  are never compared. Missing quantities, missing earning rates, and null
+  reward valuations remain unknown and are counted as excluded candidates, not
+  converted to zero.
+
 ## Family Finance unlink and integration removal — 2026-08-11
 
 - On 2026-08-11, the owner required MyCard Benefits and Family Finance to be
