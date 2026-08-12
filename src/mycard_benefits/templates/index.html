@@ -103,6 +103,10 @@
         </section>
 
         <section id="cardRevealPrompt" class="panel reveal-panel" hidden role="dialog" aria-modal="true" aria-labelledby="cardRevealTitle" aria-describedby="cardRevealHelp">
+          <!-- A modal that covers the page needs a way out of it. Without this the
+               dialog could say the rest of MyCard keeps working while being the
+               only thing on screen and offering no way back to it. -->
+          <button type="button" id="revealClose" class="reveal-close quiet" aria-label="Close card details">Close</button>
           <div id="revealCreateState" class="reveal-state">
             <h3 id="cardRevealTitle">Create a code for card details</h3>
             <p id="cardRevealHelp">You'll be asked for this whenever you show a full card number, CVV or PIN. Nothing else needs it.</p>

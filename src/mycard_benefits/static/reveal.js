@@ -8,6 +8,7 @@ export function createRevealController({ protectedJson }) {
   let revealHideTimer = null;
   let revealClipboardTimer = null;
   let revealClipboardButton = null;
+  let revealOpener = null;
 
   function revealSetMode(mode) {
     const pin = mode === "pin";
@@ -110,6 +111,17 @@ export function createRevealController({ protectedJson }) {
       card_details_unavailable: "Full card details are not stored for this card.",
     };
     if (messages[error?.code]) return messages[error.code];
+    // A failure with no code we recognise is the one case where the interface
+    // genuinely does not know what happened. Saying only that something is
+    // unavailable has been reported as unexplainable more than once, so the
+    // status is shown: it is not jargon to the person who has to report it,
+    // and it is the difference between "it broke" and a diagnosis.
+    if (typeof error?.status === "number") {
+      return (
+        `Card details are unavailable right now (error ${error.status}). ` +
+        "The rest of MyCard keeps working."
+      );
+    }
     // No message here blames the connection. Reveal is not refused for reaching
     // MyCard through the gateway: the server answers a proxied request exactly
     // as a direct one, so telling someone on their phone that their card
@@ -118,9 +130,29 @@ export function createRevealController({ protectedJson }) {
     return "Card details are unavailable right now. The rest of MyCard keeps working.";
   }
 
+  function revealDismiss() {
+    // Clear the plaintext and the countdown before hiding, so closing the
+    // dialog is a real teardown and not merely a change of what is painted.
+    revealHideFields();
+    document.querySelector("#cardRevealPrompt").hidden = true;
+    document.querySelector("#revealCreateState").hidden = true;
+    document.querySelector("#revealShownState").hidden = true;
+    const code = document.querySelector("#revealCode");
+    const confirm = document.querySelector("#revealCodeConfirm");
+    if (code) code.value = "";
+    if (confirm) confirm.value = "";
+    document.querySelector("#revealCreateError").hidden = true;
+    // Send focus back where it came from, or a keyboard user is left with the
+    // caret nowhere after the dialog disappears.
+    const opener = revealOpener;
+    revealOpener = null;
+    if (opener?.isConnected) opener.focus({ preventScroll: true });
+  }
+
   async function openCardReveal(card, offering) {
     revealCardId = card.card_id;
     revealOffering = offering;
+    revealOpener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     revealContext = null;
     document.querySelector("#cardRevealPrompt").hidden = false;
     document.querySelector("#revealCreateState").hidden = true;
@@ -236,6 +268,21 @@ export function createRevealController({ protectedJson }) {
     if (!visible) revealStartTimer();
   });
   document.querySelector("#revealHideNow")?.addEventListener("click", revealHideFields);
+  document.querySelector("#revealClose")?.addEventListener("click", revealDismiss);
+  // Escape closes it, as it does for any dialog. The listener is on the
+  // document because focus may sit on any control inside the panel.
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    if (document.querySelector("#cardRevealPrompt")?.hidden) return;
+    event.preventDefault();
+    revealDismiss();
+  });
+  // Clicking the dimmed page behind the panel closes it too. The panel fills
+  // its own bounds, so a click landing on the element itself is a click on the
+  // backdrop rather than on anything inside.
+  document.querySelector("#cardRevealPrompt")?.addEventListener("click", (event) => {
+    if (event.target === event.currentTarget) revealDismiss();
+  });
 
   return { open: openCardReveal };
 }

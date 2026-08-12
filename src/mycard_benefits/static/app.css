@@ -399,6 +399,14 @@ summary { display:flex; align-items:center; min-height:44px; cursor:pointer; }
   z-index: -1;
 }
 .reveal-panel[hidden] { display: none; }
+/* Anchored to the panel so it stays reachable however far the content scrolls. */
+.reveal-close {
+  position: sticky;
+  top: 0;
+  float: right;
+  margin: -0.25rem -0.25rem 0 0.5rem;
+  z-index: 1;
+}
 .reveal-state { display:grid; gap:.8rem; }
 .reveal-state h3 { margin:0; color:var(--text); }
 .reveal-state > p { margin:0; }
