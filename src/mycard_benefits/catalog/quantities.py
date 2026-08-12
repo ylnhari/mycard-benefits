@@ -60,6 +60,12 @@ QUANTITY_SCOPES = frozenset(
         "travel_booking",
         "UPI",
         "Tata Neu",
+        # Added when the Swiggy HDFC card was sourced. Its accelerated rate
+        # covers food orders, Instamart, Dineout and Genie, which is broader
+        # than the existing Dineout-only scope, so reusing that one would have
+        # narrowed a stated benefit. Extending this vocabulary is a deliberate
+        # change reviewed as a change, which is the point of it being closed.
+        "Swiggy app",
     }
 )
 

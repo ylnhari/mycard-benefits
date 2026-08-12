@@ -117,7 +117,19 @@ def test_quantity_coverage_report_accounts_for_projection_gaps() -> None:
 
     assert report["benefit_count"] == len(benefits)
     assert report["benefits_with_quantities"] == expected_with_quantities
-    assert report["distinct_allowance_keys"] == 102
+    # Counted from the catalog, not frozen. The guarantee is that the report
+    # describes the catalog it was generated from; a literal number turns
+    # adding a sourced benefit that introduces one new allowance key into a
+    # failure, which says nothing about whether the report is honest.
+    distinct_keys = {
+        key
+        for path in benefits
+        for key in (json.loads(path.read_text(encoding="utf-8")).get("allowance") or {})
+    }
+    assert report["distinct_allowance_keys"] == len(distinct_keys)
+    # The point of the report is that gaps are recorded rather than hidden, so
+    # every key is accounted for as either mapped or unmapped.
+    assert report["mapped_key_count"] + report["unmapped_key_count"] >= len(distinct_keys)
     unmapped = {(item["key"], item["reason"]): item["count"] for item in report["unmapped_keys"]}
     assert unmapped[("cap_inr_by_subtype", "nested subtype map is not modelled")] == 1
     assert unmapped[("partner_and_transfer_terms", "prose terms are not a numeric quantity")] == 1

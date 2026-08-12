@@ -1,0 +1,56 @@
+{
+  "id": "1565380e-a641-55d7-959d-5eee187ef827",
+  "offering_id": "f022c001-b6d9-5312-a1a1-d0583043e4f9",
+  "title": "Swiggy HDFC Bank cashback on other spends",
+  "benefit_type": "cashback",
+  "category": "cashback",
+  "allowance": {
+    "cashback_percent": 1,
+    "minimum_transaction_inr": 100
+  },
+  "quantities": [
+    {
+      "metric": "rate_percent",
+      "value": 1,
+      "unit": "percent",
+      "basis": "spend",
+      "scope": "Swiggy Dineout partner restaurants",
+      "period": "transaction",
+      "cap": null
+    }
+  ],
+  "eligibility": [],
+  "conditions": [],
+  "exclusions": [
+    "Fuel, rent, EMI, wallet, jewellery and government transactions are stated as excluded.",
+    "Cashback is stated as not applicable on transactions below INR 100.",
+    "Paid as statement credit in the following month's statement rather than at purchase.",
+    "No automated redemption authorization is implied.",
+    "Unknown stacking remains unapproved unless the terms explicitly support it."
+  ],
+  "redemption_steps": [
+    "Spend on the card outside the excluded categories.",
+    "The cashback is adjusted against the next month's statement balance."
+  ],
+  "provider": "HDFC Bank",
+  "effective_from": null,
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.hdfcbank.com/personal/pay/cards/credit-cards/swiggy-hdfc-bank-credit-card",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "040c48f3b1604e27eb08cb1e1883c119af781b03abb2f9a1a91d7d19643ad66f",
+  "retrieved_at": "2026-08-12T14:06:19Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.hdfcbank.com/personal/pay/cards/credit-cards/swiggy-hdfc-bank-credit-card",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "040c48f3b1604e27eb08cb1e1883c119af781b03abb2f9a1a91d7d19643ad66f",
+      "retrieved_at": "2026-08-12T14:06:19Z",
+      "id": "5adb5fd1-bcd9-59f8-8383-262db469a516",
+      "source_observation_id": "870117d4-81ef-5f45-80a2-e605e40c4a9d",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "medium"
+    }
+  ]
+}

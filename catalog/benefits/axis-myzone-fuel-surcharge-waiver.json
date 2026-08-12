@@ -1,0 +1,61 @@
+{
+  "id": "9917b55a-55a9-515c-aab9-91db14908ccc",
+  "offering_id": "9c68c30c-8181-5614-9eb0-4ede55558463",
+  "title": "Axis MY ZONE fuel surcharge waiver",
+  "benefit_type": "fuel",
+  "category": "fuel",
+  "allowance": {
+    "surcharge_percent": 1,
+    "minimum_transaction_inr": 400,
+    "maximum_transaction_inr": 4000
+  },
+  "quantities": [
+    {
+      "metric": "fee_percent",
+      "value": 1,
+      "unit": "percent",
+      "basis": "transaction",
+      "scope": "fuel",
+      "period": "transaction",
+      "cap": null
+    }
+  ],
+  "eligibility": [],
+  "conditions": [
+    {
+      "type": "mcc",
+      "operator": "equals",
+      "value": "fuel transactions in India"
+    }
+  ],
+  "exclusions": [
+    "The stated refund applies to fuel transactions between INR 400 and INR 4,000.",
+    "The page states a maximum benefit but the figure was truncated in the fetched document, so no cap value is asserted here.",
+    "No automated redemption authorization is implied."
+  ],
+  "redemption_steps": [
+    "Pay for fuel in India with the card within the stated transaction range.",
+    "The surcharge is refunded rather than waived at the pump."
+  ],
+  "provider": "Axis Bank",
+  "effective_from": null,
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.axisbank.com/retail/cards/credit-card/my-zone-credit-card",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "6f2840b42ad5656bdf0e546b8b132b9436702b7ddcf5c9f0f3efbf1ff8afb162",
+  "retrieved_at": "2026-08-12T14:06:19Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.axisbank.com/retail/cards/credit-card/my-zone-credit-card",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "6f2840b42ad5656bdf0e546b8b132b9436702b7ddcf5c9f0f3efbf1ff8afb162",
+      "retrieved_at": "2026-08-12T14:06:19Z",
+      "id": "47003e90-1a02-57c1-b265-38249cfc692b",
+      "source_observation_id": "5e256d1f-ed10-53eb-909c-b444d51a83a0",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "medium"
+    }
+  ]
+}
