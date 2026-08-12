@@ -556,7 +556,20 @@ def public_catalog_payload(catalog: Catalog) -> dict[str, Any]:
                       "status": b.status, "review_tier": b.review_tier, "rule_version": b.rule_version,
                       "effective_from": b.effective_from.isoformat() if b.effective_from else None,
                       "effective_to": b.effective_to.isoformat() if b.effective_to else None,
-                      "eligibility": list(b.eligibility), "allowance": b.allowance, "conflicts_with": list(b.conflicts_with),
+                      "eligibility": list(b.eligibility), "allowance": b.allowance,
+                      "quantities": [
+                          {
+                              "metric": quantity.metric,
+                              "value": quantity.value,
+                              "unit": quantity.unit,
+                              "basis": quantity.basis,
+                              "scope": quantity.scope,
+                              "period": quantity.period,
+                              "cap": quantity.cap,
+                          }
+                          for quantity in b.quantities
+                      ],
+                      "conflicts_with": list(b.conflicts_with),
                       "evidence": [{"id": e.id, "source_policy_class": e.source_policy_class, "source_tier": e.source_tier,
                                     "source_url": e.url, "content_sha256": e.content_sha256, "retrieved_at": e.retrieved_at.isoformat(),
                                     "confidence": e.confidence, "review_state": e.review_state} for e in b.evidence]} for b in catalog.benefits],

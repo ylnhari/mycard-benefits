@@ -68,6 +68,16 @@ class ConflictSummary(_PublicModel):
     more_authoritative_id: str | None
 
 
+class QuantitySummary(_PublicModel):
+    metric: str
+    value: int | float
+    unit: str
+    basis: str
+    scope: str | None
+    period: str
+    cap: dict[str, Any] | None
+
+
 class BenefitSummary(_PublicModel):
     id: str
     offering_id: str
@@ -81,6 +91,7 @@ class BenefitSummary(_PublicModel):
     supersedes: str | None = None
     eligibility: list[dict[str, Any]]
     allowance: dict[str, Any] | None
+    quantities: list[QuantitySummary]
     provider: str | None = None
     official_reference: str | None = None
     redemption_steps: list[str] = Field(default_factory=list)
@@ -737,6 +748,18 @@ def _benefit_summary(
         supersedes=rule.supersedes,
         eligibility=[dict(predicate) for predicate in rule.eligibility],
         allowance=dict(rule.allowance) if rule.allowance is not None else None,
+        quantities=[
+            QuantitySummary(
+                metric=quantity.metric,
+                value=quantity.value,
+                unit=quantity.unit,
+                basis=quantity.basis,
+                scope=quantity.scope,
+                period=quantity.period,
+                cap=quantity.cap,
+            )
+            for quantity in rule.quantities
+        ],
         provider=rule.provider,
         official_reference=rule.official_reference,
         redemption_steps=list(rule.redemption_steps),

@@ -49,6 +49,12 @@
     "allowance": {
       "type": "object"
     },
+    "quantities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/quantity"
+      }
+    },
     "eligibility": {
       "type": "array",
       "items": {
@@ -297,6 +303,67 @@
         "value": {}
       },
       "additionalProperties": true
+    },
+    "quantity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["metric", "value", "unit", "basis", "scope", "period", "cap"],
+      "properties": {
+        "metric": {
+          "enum": [
+            "rate_percent", "discount_percent", "fee_percent", "cap", "count",
+            "coverage", "fee", "value", "duration"
+          ]
+        },
+        "value": {
+          "type": "number",
+          "minimum": 0
+        },
+        "unit": {
+          "enum": ["percent", "inr", "points", "visits", "tickets", "multiple", "days"]
+        },
+        "basis": {
+          "enum": ["spend", "transaction", "statement", "year"]
+        },
+        "scope": {
+          "anyOf": [
+            {"type": "null"},
+            {"enum": [
+              "amazon.in", "BookMyShow", "Swiggy Dineout partner restaurants",
+              "Visa APAC airport dining", "fuel", "travel_booking", "UPI",
+              "Tata Neu"
+            ]}
+          ]
+        },
+        "period": {
+          "enum": [
+            "transaction", "month", "quarter", "half_year", "year", "financial_year",
+            "statement_cycle", "qualifying_calendar_quarter", "one_time", "total",
+            "issuance_window", "qualification_window", "claim_window", "validity"
+          ]
+        },
+        "cap": {
+          "anyOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["value", "unit", "period"],
+              "properties": {
+                "value": {"type": "number", "minimum": 0},
+                "unit": {"enum": ["percent", "inr", "points", "visits", "tickets", "multiple", "days"]},
+                "period": {
+                  "enum": [
+                    "transaction", "month", "quarter", "half_year", "year", "financial_year",
+                    "statement_cycle", "qualifying_calendar_quarter", "one_time", "total",
+                    "issuance_window", "qualification_window", "claim_window", "validity"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
     }
   }
 }

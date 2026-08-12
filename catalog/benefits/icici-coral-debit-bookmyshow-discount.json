@@ -49,5 +49,16 @@
       "hash_kind": "snapshot_manifest_sha256",
       "confidence": "low"
     }
+  ],
+  "quantities": [
+    {
+      "metric": "discount_percent",
+      "value": 25,
+      "unit": "percent",
+      "basis": "transaction",
+      "scope": "BookMyShow",
+      "period": "month",
+      "cap": null
+    }
   ]
 }

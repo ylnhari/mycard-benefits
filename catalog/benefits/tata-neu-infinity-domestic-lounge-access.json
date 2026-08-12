@@ -39,5 +39,16 @@
       "confidence": "high",
       "effective_from": "2025-06-10"
     }
+  ],
+  "quantities": [
+    {
+      "metric": "cap",
+      "value": 2,
+      "unit": "visits",
+      "basis": "transaction",
+      "scope": "Tata Neu",
+      "period": "quarter",
+      "cap": null
+    }
   ]
 }

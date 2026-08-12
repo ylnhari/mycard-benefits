@@ -250,6 +250,24 @@ class ProductRelationship:
 
 
 @dataclass(frozen=True)
+class BenefitQuantity:
+    """A conservative, comparable projection of one allowance quantity.
+
+    ``allowance`` remains the source-shaped record.  This type is deliberately
+    small and closed so ranking code cannot accidentally treat an arbitrary
+    source key as a comparable number.
+    """
+
+    metric: str
+    value: int | float
+    unit: str
+    basis: str
+    scope: str | None
+    period: str
+    cap: dict[str, Any] | None = None
+
+
+@dataclass(frozen=True)
 class BenefitRule:
     id: str
     offering_id: str
@@ -289,6 +307,7 @@ class BenefitRule:
     state: str | None = None
     not_claimed: tuple[str, ...] = ()
     source_divergence: tuple[dict[str, Any], ...] = ()
+    quantities: tuple[BenefitQuantity, ...] = ()
 
     @property
     def end_date_known(self) -> bool:

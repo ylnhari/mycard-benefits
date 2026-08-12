@@ -37,5 +37,16 @@
       "hash_kind": "snapshot_manifest_sha256",
       "confidence": "low"
     }
+  ],
+  "quantities": [
+    {
+      "metric": "fee",
+      "value": 1000,
+      "unit": "inr",
+      "basis": "year",
+      "scope": null,
+      "period": "year",
+      "cap": null
+    }
   ]
 }

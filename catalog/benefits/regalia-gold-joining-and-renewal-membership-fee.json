@@ -39,5 +39,25 @@
       "id": "9d6de74f-caa3-5a5a-b1f6-ba9f38264cca",
       "confidence": "high"
     }
+  ],
+  "quantities": [
+    {
+      "metric": "fee",
+      "value": 2500,
+      "unit": "inr",
+      "basis": "transaction",
+      "scope": null,
+      "period": "transaction",
+      "cap": null
+    },
+    {
+      "metric": "fee",
+      "value": 2500,
+      "unit": "inr",
+      "basis": "year",
+      "scope": null,
+      "period": "year",
+      "cap": null
+    }
   ]
 }

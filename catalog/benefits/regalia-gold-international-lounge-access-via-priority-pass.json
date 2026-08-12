@@ -39,5 +39,16 @@
       "confidence": "high",
       "effective_from": "2026-01-01"
     }
+  ],
+  "quantities": [
+    {
+      "metric": "cap",
+      "value": 6,
+      "unit": "visits",
+      "basis": "transaction",
+      "scope": null,
+      "period": "year",
+      "cap": null
+    }
   ]
 }

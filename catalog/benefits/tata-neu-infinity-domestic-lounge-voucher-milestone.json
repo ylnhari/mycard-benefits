@@ -121,5 +121,16 @@
       ]
     }
   ],
-  "conflicts_with": []
+  "conflicts_with": [],
+  "quantities": [
+    {
+      "metric": "duration",
+      "value": 120,
+      "unit": "days",
+      "basis": "transaction",
+      "scope": "Tata Neu",
+      "period": "claim_window",
+      "cap": null
+    }
+  ]
 }

@@ -16,6 +16,7 @@ from urllib.parse import urlparse
 
 from .model import (
     BenefitCategory,
+    BenefitQuantity,
     BenefitRule,
     ConditionPredicate,
     ConversionRule,
@@ -28,6 +29,13 @@ from .model import (
     ReleaseMetadata,
     RuleOwner,
     ValuationRange,
+)
+from .quantities import (
+    QUANTITY_BASES,
+    QUANTITY_METRICS,
+    QUANTITY_PERIODS,
+    QUANTITY_SCOPES,
+    QUANTITY_UNITS,
 )
 
 
@@ -77,6 +85,7 @@ _OWNER_KINDS = {"issuer", "network", "co_brand", "merchant", "membership", "even
 _VALUE_CLASSES = {"guaranteed", "conditional", "estimated"}
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _SLUG = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+_QUANTITIES_MISSING = object()
 
 
 @dataclass(frozen=True)
@@ -406,6 +415,7 @@ _RESCUED_OPTIONAL_FIELDS = {
     "evidence",
     "conflicts_with",
     "value_class",
+    "quantities",
 }
 _RESCUED_METADATA_FIELDS = {
     "end_date_known",
@@ -508,6 +518,10 @@ def _parse_rescued_only_benefit(
     if len(condition_items) > 32:
         raise CatalogLoadError(f"{path}: conditions has too many items")
     conditions = tuple(_parse_condition(item, path) for item in condition_items)
+    quantities = _parse_quantities(
+        raw.get("quantities", _QUANTITIES_MISSING),
+        path,
+    )
 
     exclusions = tuple(
         _bounded_string_list(
@@ -587,6 +601,7 @@ def _parse_rescued_only_benefit(
         state=state,
         not_claimed=_parse_rescued_not_claimed(raw, path),
         source_divergence=source_divergence,
+        quantities=quantities,
     )
     if state == "verified":
         _validate_active_review_gate(rule, path)
@@ -724,6 +739,7 @@ def _parse_legacy_benefit(
         "value_class",
         "inheritance",
         "benefit_shape",
+        "quantities",
     }
     _require_exact_keys(raw, required, optional, path)
     benefit_type = _nonempty(raw["benefit_type"], path, "benefit_type")
@@ -780,6 +796,10 @@ def _parse_legacy_benefit(
     if len(condition_items) > 32:
         raise CatalogLoadError(f"{path}: conditions has too many items")
     conditions = tuple(_parse_condition(item, path) for item in condition_items)
+    quantities = _parse_quantities(
+        raw.get("quantities", _QUANTITIES_MISSING),
+        path,
+    )
     earn = _parse_earn(raw.get("earn"), path)
     conversion = _parse_conversion(raw.get("conversion"), path)
     valuations = _parse_valuations(raw.get("valuations", []), path)
@@ -815,6 +835,7 @@ def _parse_legacy_benefit(
         value_class=value_class,
         inheritance=inheritance,
         benefit_shape=benefit_shape,
+        quantities=quantities,
     )
     if status == "active":
         _validate_active_review_gate(rule, path)
@@ -846,6 +867,81 @@ def _parse_condition(raw: dict[str, Any], path: str) -> ConditionPredicate:
     elif condition_value is not None and not isinstance(condition_value, (str, int, float, bool)):
         raise CatalogLoadError(f"{path}: condition.value has unsupported type")
     return ConditionPredicate(condition_type, operator, condition_value)
+
+
+def _parse_quantities(value: Any, path: str) -> tuple[BenefitQuantity, ...]:
+    """Validate the optional normalized projection with closed vocabularies."""
+
+    if value is _QUANTITIES_MISSING:
+        return ()
+    items = _object_list(value, path, "quantities")
+    if len(items) > 64:
+        raise CatalogLoadError(f"{path}: quantities has too many items")
+    parsed: list[BenefitQuantity] = []
+    for index, item in enumerate(items):
+        item_path = f"{path} quantities[{index}]"
+        _require_exact_keys(
+            item,
+            {"metric", "value", "unit", "basis", "scope", "period", "cap"},
+            path=item_path,
+        )
+        metric = _nonempty(item["metric"], item_path, "quantity.metric")
+        if metric not in QUANTITY_METRICS:
+            raise CatalogLoadError(f"{item_path}: unsupported quantity metric {metric!r}")
+        quantity_value = _quantity_number(item["value"], item_path, "quantity.value")
+        unit = _nonempty(item["unit"], item_path, "quantity.unit")
+        if unit not in QUANTITY_UNITS:
+            raise CatalogLoadError(f"{item_path}: unsupported quantity unit {unit!r}")
+        basis = _nonempty(item["basis"], item_path, "quantity.basis")
+        if basis not in QUANTITY_BASES:
+            raise CatalogLoadError(f"{item_path}: unsupported quantity basis {basis!r}")
+        scope = item["scope"]
+        if scope is not None:
+            scope = _nonempty(scope, item_path, "quantity.scope")
+            if scope not in QUANTITY_SCOPES:
+                raise CatalogLoadError(f"{item_path}: unsupported quantity scope {scope!r}")
+        period = _nonempty(item["period"], item_path, "quantity.period")
+        if period not in QUANTITY_PERIODS:
+            raise CatalogLoadError(f"{item_path}: unsupported quantity period {period!r}")
+        cap = item["cap"]
+        if cap is not None:
+            if not isinstance(cap, dict):
+                raise CatalogLoadError(f"{item_path}: quantity.cap must be an object or null")
+            _require_exact_keys(cap, {"value", "unit", "period"}, path=f"{item_path} cap")
+            cap_value = _quantity_number(cap["value"], item_path, "quantity.cap.value")
+            cap_unit = _nonempty(cap["unit"], item_path, "quantity.cap.unit")
+            if cap_unit not in QUANTITY_UNITS:
+                raise CatalogLoadError(
+                    f"{item_path}: unsupported quantity cap unit {cap_unit!r}"
+                )
+            cap_period = _nonempty(cap["period"], item_path, "quantity.cap.period")
+            if cap_period not in QUANTITY_PERIODS:
+                raise CatalogLoadError(
+                    f"{item_path}: unsupported quantity cap period {cap_period!r}"
+                )
+            cap = {"value": cap_value, "unit": cap_unit, "period": cap_period}
+        parsed.append(
+            BenefitQuantity(
+                metric=metric,
+                value=quantity_value,
+                unit=unit,
+                basis=basis,
+                scope=scope,
+                period=period,
+                cap=cap,
+            )
+        )
+    return tuple(parsed)
+
+
+def _quantity_number(value: Any, path: str, field: str) -> int | float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise CatalogLoadError(f"{path}: {field} must be a JSON number")
+    if isinstance(value, float) and not math.isfinite(value):
+        raise CatalogLoadError(f"{path}: {field} must be finite")
+    if value < 0:
+        raise CatalogLoadError(f"{path}: {field} must not be negative")
+    return value
 
 
 def _parse_owners(value: Any, path: str) -> tuple[RuleOwner, ...]:

@@ -1,0 +1,72 @@
+{
+  "schema_version": "1.0.0",
+  "offering_id": "3eeb4094-d452-5a33-9061-0e8999cd6c89",
+  "offering_slug": "hdfc-tata-neu-rupay-select-credit",
+  "currency": {
+    "code": "neucoins",
+    "display_name": "NeuCoins"
+  },
+  "base_earn": {
+    "points_per_inr": null,
+    "note": "The published page states category and channel rates rather than a single base rate, so no base rate is asserted here."
+  },
+  "category_earn": [
+    {
+      "scope": "tata_neu_app",
+      "percent_back": 5,
+      "cap": null,
+      "conditions": [
+        "Stated for selected categories on the Tata Neu App or website after registering for NeuPass.",
+        "From 2025-01-15 the published terms restrict this to transactions on the primary cardholder's mobile number account."
+      ]
+    },
+    {
+      "scope": "upi",
+      "percent_back": 0.5,
+      "cap": null,
+      "conditions": [
+        "Stated for eligible UPI spends on the RuPay variant from 2024-08-01."
+      ]
+    },
+    {
+      "scope": "upi_tata_neu_id",
+      "percent_back": 1.0,
+      "cap": null,
+      "conditions": [
+        "Published as additional to the 0.5% UPI rate when paying via a Tata Neu UPI ID."
+      ]
+    },
+    {
+      "scope": "grocery",
+      "percent_back": null,
+      "cap": {
+        "value": 2000,
+        "unit": "points",
+        "period": "month"
+      },
+      "conditions": [
+        "The published terms cap NeuCoins earned on grocery transactions without restating the rate, so only the cap is recorded."
+      ]
+    }
+  ],
+  "exclusions": [
+    "Fuel, wallet, rental, government and online gaming transactions are stated as not accruing NeuCoins.",
+    "No automated redemption authorization is implied."
+  ],
+  "expiry": {
+    "months": 12,
+    "from": "end_of_credit_month",
+    "note": "Stated from 2025-08-01, including the lock period."
+  },
+  "valuation": {
+    "inr_per_point": null,
+    "basis": null,
+    "note": "Deliberately unpriced. The fetched issuer page does not state a rupee value for a NeuCoin, and an estimated valuation would make this card look comparable to others while being an invention. Comparison across currencies stays unavailable until a real price is sourced."
+  },
+  "source_url": "https://www.hdfcbank.com/personal/pay/cards/credit-cards/tata-neu-infinity-hdfc-bank-credit-card",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "b82b664fd093840ae5f606b83e0a75112fbec6b1e19d941b3e1cf53d245e336b",
+  "retrieved_at": "2026-08-12T07:47:44Z",
+  "state": "check_before_use",
+  "review_state": "needs_review"
+}

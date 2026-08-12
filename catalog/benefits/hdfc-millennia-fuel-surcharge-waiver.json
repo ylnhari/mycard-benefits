@@ -41,5 +41,20 @@
       "hash_kind": "snapshot_manifest_sha256",
       "confidence": "low"
     }
+  ],
+  "quantities": [
+    {
+      "metric": "fee_percent",
+      "value": 1,
+      "unit": "percent",
+      "basis": "transaction",
+      "scope": "fuel",
+      "period": "statement_cycle",
+      "cap": {
+        "value": 250,
+        "unit": "inr",
+        "period": "statement_cycle"
+      }
+    }
   ]
 }

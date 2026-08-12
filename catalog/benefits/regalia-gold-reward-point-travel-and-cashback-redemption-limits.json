@@ -40,5 +40,16 @@
       "id": "f21ca056-6d72-5b33-8d74-0e6e0fa8bfc8",
       "confidence": "high"
     }
+  ],
+  "quantities": [
+    {
+      "metric": "cap",
+      "value": 70,
+      "unit": "percent",
+      "basis": "transaction",
+      "scope": "travel_booking",
+      "period": "transaction",
+      "cap": null
+    }
   ]
 }

@@ -30,5 +30,16 @@
       "id": "f21ca056-6d72-5b33-8d74-0e6e0fa8bfc8",
       "confidence": "high"
     }
+  ],
+  "quantities": [
+    {
+      "metric": "discount_percent",
+      "value": 10,
+      "unit": "percent",
+      "basis": "transaction",
+      "scope": "Swiggy Dineout partner restaurants",
+      "period": "transaction",
+      "cap": null
+    }
   ]
 }

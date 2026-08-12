@@ -42,5 +42,16 @@
       "hash_kind": "snapshot_manifest_sha256",
       "confidence": "low"
     }
+  ],
+  "quantities": [
+    {
+      "metric": "duration",
+      "value": 120,
+      "unit": "days",
+      "basis": "transaction",
+      "scope": null,
+      "period": "claim_window",
+      "cap": null
+    }
   ]
 }

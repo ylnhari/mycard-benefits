@@ -31,5 +31,34 @@
       "id": "f21ca056-6d72-5b33-8d74-0e6e0fa8bfc8",
       "confidence": "high"
     }
+  ],
+  "quantities": [
+    {
+      "metric": "coverage",
+      "value": 10000000,
+      "unit": "inr",
+      "basis": "transaction",
+      "scope": null,
+      "period": "total",
+      "cap": null
+    },
+    {
+      "metric": "coverage",
+      "value": 900000,
+      "unit": "inr",
+      "basis": "transaction",
+      "scope": null,
+      "period": "total",
+      "cap": null
+    },
+    {
+      "metric": "coverage",
+      "value": 1500000,
+      "unit": "inr",
+      "basis": "transaction",
+      "scope": null,
+      "period": "total",
+      "cap": null
+    }
   ]
 }

@@ -86,5 +86,25 @@
       },
       "effective_from": "2025-06-01"
     }
+  ],
+  "quantities": [
+    {
+      "metric": "count",
+      "value": 1,
+      "unit": "visits",
+      "basis": "transaction",
+      "scope": "Tata Neu",
+      "period": "quarter",
+      "cap": null
+    },
+    {
+      "metric": "count",
+      "value": 4,
+      "unit": "visits",
+      "basis": "transaction",
+      "scope": "Tata Neu",
+      "period": "year",
+      "cap": null
+    }
   ]
 }

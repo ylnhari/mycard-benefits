@@ -1,0 +1,393 @@
+{
+  "report_version": "1",
+  "source": "catalog/benefits/*.json",
+  "benefit_count": 61,
+  "benefits_with_quantities": 44,
+  "quantity_count": 73,
+  "distinct_allowance_keys": 102,
+  "mapped_key_count": 49,
+  "unmapped_key_count": 55,
+  "keys_with_mapped_and_unmapped_observations": 2,
+  "mapped_keys": [
+    "accident_inr",
+    "accidental_air_death_cover_inr",
+    "air_accident_inr",
+    "baggage_inr",
+    "bank_transfer_target_days_after_statement",
+    "bookmyshow_issuance_window_days",
+    "cap",
+    "cap_inr",
+    "cashback_percent",
+    "channel",
+    "claim_window_days",
+    "claim_window_days_from_quarter_end",
+    "complimentary_or_discounted_tickets",
+    "complimentary_tickets",
+    "credit_liability_cover_inr",
+    "discount_percent",
+    "download_window_days",
+    "dynamic_currency_conversion_markup_percent",
+    "emergency_overseas_hospitalization_cover_inr",
+    "extended_claim_visibility_days_from_statement",
+    "food_and_beverage_cap_inr",
+    "foreign_currency_markup_percent",
+    "foreign_exchange_markup_percent",
+    "initial_claim_window_days",
+    "issuer_first_statement_window_days",
+    "joining_fee_inr",
+    "maximum_discount_percent",
+    "monthly_cap_inr",
+    "movie_ticket_cap_each_inr",
+    "period",
+    "purchase_inr",
+    "qualification_window_days",
+    "renewal_fee_inr",
+    "second_ticket_cap_inr",
+    "statement_cycle_cap_inr",
+    "surcharge_percent",
+    "ticket_cap_inr",
+    "transaction_cap_inr",
+    "travel_booking_redemption_percent_cap",
+    "unauthorized_use_inr",
+    "unit",
+    "uses_per_month",
+    "uses_total",
+    "visits",
+    "visits_per_quarter",
+    "visits_per_year",
+    "voucher_value_inr",
+    "waived_fee_inr",
+    "welcome_validity_days_from_claim"
+  ],
+  "unmapped_keys": [
+    {
+      "key": "any_upi_percent",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 1
+    },
+    {
+      "key": "balance_transfer_fee",
+      "reason": "no unambiguous projection exists in the current closed vocabulary",
+      "count": 1
+    },
+    {
+      "key": "calendar_month_cap",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 2
+    },
+    {
+      "key": "cap_basis",
+      "reason": "cap selection semantics are not represented in the quantity shape",
+      "count": 3
+    },
+    {
+      "key": "cap_inr_by_subtype",
+      "reason": "nested subtype map is not modelled",
+      "count": 1
+    },
+    {
+      "key": "cashpoints",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 1
+    },
+    {
+      "key": "cashpoints_percent",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 3
+    },
+    {
+      "key": "choice",
+      "reason": "the source field is not a comparable numeric quantity",
+      "count": 1
+    },
+    {
+      "key": "claim_route",
+      "reason": "no unambiguous projection exists in the current closed vocabulary",
+      "count": 1
+    },
+    {
+      "key": "conditions",
+      "reason": "the source field is not a comparable numeric quantity",
+      "count": 1
+    },
+    {
+      "key": "count",
+      "reason": "no unambiguous projection exists in the current closed vocabulary",
+      "count": 1
+    },
+    {
+      "key": "daily_inventory_blocks",
+      "reason": "the source unit is not in the closed quantity vocabulary",
+      "count": 1
+    },
+    {
+      "key": "exclusions",
+      "reason": "the source field is not a comparable numeric quantity",
+      "count": 1
+    },
+    {
+      "key": "expiry_years",
+      "reason": "the source unit is not in the closed quantity vocabulary",
+      "count": 1
+    },
+    {
+      "key": "grocery_monthly_cap_neucoins",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 1
+    },
+    {
+      "key": "hotel_and_flight_multiplier",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 1
+    },
+    {
+      "key": "incremental_points_cap_per_month",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 1
+    },
+    {
+      "key": "india_only",
+      "reason": "a boolean scope restriction has no standalone quantity",
+      "count": 4
+    },
+    {
+      "key": "inr_per_cashpoint",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 1
+    },
+    {
+      "key": "instant_voucher_multiplier",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 1
+    },
+    {
+      "key": "insurance_monthly_cap_neucoins",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 1
+    },
+    {
+      "key": "interest_free_period",
+      "reason": "the source value is qualified prose rather than a plain number",
+      "count": 1
+    },
+    {
+      "key": "maximum_airmiles_per_reward_point",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 1
+    },
+    {
+      "key": "maximum_cashback_inr",
+      "reason": "no unambiguous projection exists in the current closed vocabulary",
+      "count": 1
+    },
+    {
+      "key": "merchant_emi_percent",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 1
+    },
+    {
+      "key": "monthly_cap_neucoins",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 1
+    },
+    {
+      "key": "monthly_flight_hotel_points_cap",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 1
+    },
+    {
+      "key": "monthly_statement_balance_points_cap",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 1
+    },
+    {
+      "key": "multiplier",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 1
+    },
+    {
+      "key": "neucoins_per_inr",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 1
+    },
+    {
+      "key": "not_claimed",
+      "reason": "an evidence gap is not a numeric quantity",
+      "count": 1
+    },
+    {
+      "key": "other_non_emi_percent",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 1
+    },
+    {
+      "key": "participating_locations",
+      "reason": "the source field is not a comparable numeric quantity",
+      "count": 3
+    },
+    {
+      "key": "partner_and_transfer_terms",
+      "reason": "prose terms are not a numeric quantity",
+      "count": 1
+    },
+    {
+      "key": "partner_tata_non_emi_percent",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 1
+    },
+    {
+      "key": "period",
+      "reason": "no unambiguous projection exists in the current closed vocabulary",
+      "count": 4
+    },
+    {
+      "key": "post_purchase_emi",
+      "reason": "the source field is not a comparable numeric quantity",
+      "count": 1
+    },
+    {
+      "key": "redemption_fee_inr",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 1
+    },
+    {
+      "key": "reward_point_expiry",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 1
+    },
+    {
+      "key": "reward_redemption_fee_inr",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 1
+    },
+    {
+      "key": "selected_brand_multiplier",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 1
+    },
+    {
+      "key": "stated_brand_count",
+      "reason": "the source unit is not in the closed quantity vocabulary",
+      "count": 1
+    },
+    {
+      "key": "statement_cycle_cap",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 1
+    },
+    {
+      "key": "tata_neu_upi_increment_percent",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 1
+    },
+    {
+      "key": "taxes",
+      "reason": "the source field is not a comparable numeric quantity",
+      "count": 1
+    },
+    {
+      "key": "telecom_cable_monthly_cap_neucoins",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 1
+    },
+    {
+      "key": "unit",
+      "reason": "no unambiguous projection exists in the current closed vocabulary",
+      "count": 1
+    },
+    {
+      "key": "uses_per_financial_year",
+      "reason": "a count of uses has no supported normalized unit",
+      "count": 1
+    },
+    {
+      "key": "utility_monthly_cap_neucoins",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 1
+    },
+    {
+      "key": "validation_fee_reversed",
+      "reason": "the source field is not a comparable numeric quantity",
+      "count": 1
+    },
+    {
+      "key": "validation_fee_usd",
+      "reason": "the closed unit vocabulary has INR but no USD unit",
+      "count": 1
+    },
+    {
+      "key": "validation_swipe_inr",
+      "reason": "a qualifying validation transaction is a condition, not a benefit quantity",
+      "count": 4
+    },
+    {
+      "key": "voucher_validity_months",
+      "reason": "the source unit is not in the closed quantity vocabulary",
+      "count": 1
+    },
+    {
+      "key": "waived_fee",
+      "reason": "the source field is not a comparable numeric quantity",
+      "count": 1
+    },
+    {
+      "key": "welcome_neucoins",
+      "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
+      "count": 1
+    }
+  ],
+  "vocabularies": {
+    "metric": [
+      "cap",
+      "count",
+      "coverage",
+      "discount_percent",
+      "duration",
+      "fee",
+      "fee_percent",
+      "rate_percent",
+      "value"
+    ],
+    "unit": [
+      "days",
+      "inr",
+      "multiple",
+      "percent",
+      "points",
+      "tickets",
+      "visits"
+    ],
+    "basis": [
+      "spend",
+      "statement",
+      "transaction",
+      "year"
+    ],
+    "scope": [
+      "BookMyShow",
+      "Swiggy Dineout partner restaurants",
+      "Tata Neu",
+      "UPI",
+      "Visa APAC airport dining",
+      "amazon.in",
+      "fuel",
+      "travel_booking"
+    ],
+    "period": [
+      "claim_window",
+      "financial_year",
+      "half_year",
+      "issuance_window",
+      "month",
+      "one_time",
+      "qualification_window",
+      "qualifying_calendar_quarter",
+      "quarter",
+      "statement_cycle",
+      "total",
+      "transaction",
+      "validity",
+      "year"
+    ]
+  }
+}

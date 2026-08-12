@@ -55,5 +55,34 @@
       "confidence": "high",
       "effective_from": "2025-07-15"
     }
+  ],
+  "quantities": [
+    {
+      "metric": "duration",
+      "value": 180,
+      "unit": "days",
+      "basis": "statement",
+      "scope": "Tata Neu",
+      "period": "claim_window",
+      "cap": null
+    },
+    {
+      "metric": "duration",
+      "value": 60,
+      "unit": "days",
+      "basis": "transaction",
+      "scope": "Tata Neu",
+      "period": "claim_window",
+      "cap": null
+    },
+    {
+      "metric": "duration",
+      "value": 365,
+      "unit": "days",
+      "basis": "transaction",
+      "scope": "Tata Neu",
+      "period": "validity",
+      "cap": null
+    }
   ]
 }

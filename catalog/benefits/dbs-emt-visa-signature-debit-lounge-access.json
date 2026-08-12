@@ -41,5 +41,16 @@
       "confidence": "low",
       "effective_from": "2026-04-01"
     }
+  ],
+  "quantities": [
+    {
+      "metric": "count",
+      "value": 1,
+      "unit": "visits",
+      "basis": "transaction",
+      "scope": null,
+      "period": "quarter",
+      "cap": null
+    }
   ]
 }

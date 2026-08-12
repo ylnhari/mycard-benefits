@@ -47,5 +47,34 @@
       "hash_kind": "snapshot_manifest_sha256",
       "confidence": "low"
     }
+  ],
+  "quantities": [
+    {
+      "metric": "cap",
+      "value": 500,
+      "unit": "inr",
+      "basis": "transaction",
+      "scope": "BookMyShow",
+      "period": "one_time",
+      "cap": null
+    },
+    {
+      "metric": "duration",
+      "value": 90,
+      "unit": "days",
+      "basis": "transaction",
+      "scope": "BookMyShow",
+      "period": "issuance_window",
+      "cap": null
+    },
+    {
+      "metric": "duration",
+      "value": 60,
+      "unit": "days",
+      "basis": "statement",
+      "scope": "BookMyShow",
+      "period": "statement_cycle",
+      "cap": null
+    }
   ]
 }

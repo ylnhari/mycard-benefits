@@ -35,5 +35,16 @@
       "effective_from": "2026-01-01",
       "effective_to": "2026-12-31"
     }
+  ],
+  "quantities": [
+    {
+      "metric": "discount_percent",
+      "value": 20,
+      "unit": "percent",
+      "basis": "transaction",
+      "scope": "Visa APAC airport dining",
+      "period": "transaction",
+      "cap": null
+    }
   ]
 }

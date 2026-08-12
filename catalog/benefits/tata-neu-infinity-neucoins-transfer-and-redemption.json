@@ -52,5 +52,16 @@
       "confidence": "high",
       "effective_from": "2025-07-15"
     }
+  ],
+  "quantities": [
+    {
+      "metric": "duration",
+      "value": 7,
+      "unit": "days",
+      "basis": "statement",
+      "scope": "Tata Neu",
+      "period": "statement_cycle",
+      "cap": null
+    }
   ]
 }

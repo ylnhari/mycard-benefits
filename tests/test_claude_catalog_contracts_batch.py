@@ -32,7 +32,7 @@ from mycard_benefits.catalog.router import create_catalog_router
 _CONSUMER_BENEFIT_FIELDS = {
     "id", "offering_id", "benefit_type", "title", "state",
     "effective_from", "effective_to", "end_date_known", "rule_version", "supersedes",
-    "eligibility", "allowance", "provider", "official_reference", "redemption_steps",
+    "eligibility", "allowance", "quantities", "provider", "official_reference", "redemption_steps",
     "exclusions", "conflicts_with", "conflicts", "evidence", "not_claimed",
     "source_divergence",
     # Approved into the lock on 2026-08-10 after review. These were serialised

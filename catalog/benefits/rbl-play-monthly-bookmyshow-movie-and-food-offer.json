@@ -52,5 +52,34 @@
       "hash_kind": "snapshot_manifest_sha256",
       "confidence": "low"
     }
+  ],
+  "quantities": [
+    {
+      "metric": "cap",
+      "value": 250,
+      "unit": "inr",
+      "basis": "transaction",
+      "scope": "BookMyShow",
+      "period": "month",
+      "cap": null
+    },
+    {
+      "metric": "cap",
+      "value": 100,
+      "unit": "inr",
+      "basis": "transaction",
+      "scope": "BookMyShow",
+      "period": "month",
+      "cap": null
+    },
+    {
+      "metric": "cap",
+      "value": 500,
+      "unit": "inr",
+      "basis": "transaction",
+      "scope": "BookMyShow",
+      "period": "month",
+      "cap": null
+    }
   ]
 }

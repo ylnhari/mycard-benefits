@@ -3,6 +3,7 @@
 from .loader import Catalog, CatalogLoadError, load_catalog
 from .model import (
     BenefitCategory,
+    BenefitQuantity,
     BenefitRule,
     ConditionPredicate,
     ConversionRule,
@@ -14,7 +15,7 @@ from .model import (
 )
 
 __all__ = [
-    "BenefitCategory", "BenefitRule", "Catalog", "CatalogLoadError",
+    "BenefitCategory", "BenefitQuantity", "BenefitRule", "Catalog", "CatalogLoadError",
     "ConditionPredicate", "ConversionRule", "EarnRule", "InheritanceRule",
     "ProductRelationship", "RuleOwner", "ValuationRange", "load_catalog",
 ]

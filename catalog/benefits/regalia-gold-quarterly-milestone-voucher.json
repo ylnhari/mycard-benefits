@@ -36,5 +36,25 @@
       "id": "c9431c62-0e55-5257-b580-66dcdf31a234",
       "confidence": "high"
     }
+  ],
+  "quantities": [
+    {
+      "metric": "duration",
+      "value": 60,
+      "unit": "days",
+      "basis": "transaction",
+      "scope": null,
+      "period": "claim_window",
+      "cap": null
+    },
+    {
+      "metric": "value",
+      "value": 1500,
+      "unit": "inr",
+      "basis": "transaction",
+      "scope": null,
+      "period": "one_time",
+      "cap": null
+    }
   ]
 }

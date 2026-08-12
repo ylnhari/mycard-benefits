@@ -48,5 +48,6 @@
       "hash_kind": "snapshot_manifest_sha256",
       "confidence": "low"
     }
-  ]
+  ],
+  "quantities": []
 }

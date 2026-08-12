@@ -41,5 +41,52 @@
       "hash_kind": "snapshot_manifest_sha256",
       "confidence": "low"
     }
+  ],
+  "quantities": [
+    {
+      "metric": "coverage",
+      "value": 200000,
+      "unit": "inr",
+      "basis": "transaction",
+      "scope": null,
+      "period": "total",
+      "cap": null
+    },
+    {
+      "metric": "coverage",
+      "value": 10000000,
+      "unit": "inr",
+      "basis": "transaction",
+      "scope": null,
+      "period": "total",
+      "cap": null
+    },
+    {
+      "metric": "coverage",
+      "value": 50000,
+      "unit": "inr",
+      "basis": "transaction",
+      "scope": null,
+      "period": "total",
+      "cap": null
+    },
+    {
+      "metric": "coverage",
+      "value": 75000,
+      "unit": "inr",
+      "basis": "transaction",
+      "scope": null,
+      "period": "total",
+      "cap": null
+    },
+    {
+      "metric": "coverage",
+      "value": 500000,
+      "unit": "inr",
+      "basis": "transaction",
+      "scope": null,
+      "period": "total",
+      "cap": null
+    }
   ]
 }

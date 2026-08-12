@@ -44,5 +44,25 @@
       "id": "c9431c62-0e55-5257-b580-66dcdf31a234",
       "confidence": "high"
     }
+  ],
+  "quantities": [
+    {
+      "metric": "duration",
+      "value": 60,
+      "unit": "days",
+      "basis": "transaction",
+      "scope": null,
+      "period": "issuance_window",
+      "cap": null
+    },
+    {
+      "metric": "duration",
+      "value": 90,
+      "unit": "days",
+      "basis": "transaction",
+      "scope": null,
+      "period": "qualification_window",
+      "cap": null
+    }
   ]
 }

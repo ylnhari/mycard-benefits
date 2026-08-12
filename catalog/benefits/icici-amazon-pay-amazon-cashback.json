@@ -55,5 +55,16 @@
       "hash_kind": "snapshot_manifest_sha256",
       "confidence": "medium"
     }
+  ],
+  "quantities": [
+    {
+      "metric": "rate_percent",
+      "value": 5,
+      "unit": "percent",
+      "basis": "spend",
+      "scope": "amazon.in",
+      "period": "statement_cycle",
+      "cap": null
+    }
   ]
 }

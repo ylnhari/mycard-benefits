@@ -51,5 +51,20 @@
       "hash_kind": "snapshot_manifest_sha256",
       "confidence": "low"
     }
+  ],
+  "quantities": [
+    {
+      "metric": "count",
+      "value": 1,
+      "unit": "tickets",
+      "basis": "transaction",
+      "scope": "BookMyShow",
+      "period": "month",
+      "cap": {
+        "value": 500,
+        "unit": "inr",
+        "period": "month"
+      }
+    }
   ]
 }
