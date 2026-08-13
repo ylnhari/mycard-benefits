@@ -143,10 +143,18 @@ export function createRevealController({ protectedJson }) {
     if (confirm) confirm.value = "";
     document.querySelector("#revealCreateError").hidden = true;
     // Send focus back where it came from, or a keyboard user is left with the
-    // caret nowhere after the dialog disappears.
+    // caret nowhere after the dialog disappears. The card list re-renders while
+    // the dialog is open, which replaces the button that opened it — so when
+    // the original is gone, fall back to an equivalent control rather than
+    // leaving focus on nothing at all.
     const opener = revealOpener;
     revealOpener = null;
-    if (opener?.isConnected) opener.focus({ preventScroll: true });
+    if (opener?.isConnected) {
+      opener.focus({ preventScroll: true });
+      return;
+    }
+    const fallback = document.querySelector(".reveal-trigger") || document.querySelector("#main");
+    fallback?.focus({ preventScroll: true });
   }
 
   async function openCardReveal(card, offering) {

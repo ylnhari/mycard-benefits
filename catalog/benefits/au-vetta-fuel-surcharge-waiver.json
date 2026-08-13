@@ -1,0 +1,66 @@
+{
+  "id": "cef6ff73-218f-53a6-b7b4-3e2f216e6360",
+  "offering_id": "a86adb94-4b35-5588-9e8e-e2f0cf85b468",
+  "title": "AU Vetta fuel surcharge waiver",
+  "benefit_type": "fuel",
+  "category": "fuel",
+  "allowance": {
+    "surcharge_percent": 1,
+    "cap_inr": 250,
+    "minimum_transaction_inr": 400,
+    "maximum_transaction_inr": 5000
+  },
+  "quantities": [
+    {
+      "metric": "fee_percent",
+      "value": 1,
+      "unit": "percent",
+      "basis": "transaction",
+      "scope": "fuel",
+      "period": "transaction",
+      "cap": {
+        "value": 250,
+        "unit": "inr",
+        "period": "transaction"
+      }
+    }
+  ],
+  "eligibility": [],
+  "conditions": [
+    {
+      "type": "mcc",
+      "operator": "equals",
+      "value": "fuel stations across the country"
+    }
+  ],
+  "exclusions": [
+    "The waiver applies to transactions between INR 400 and INR 5,000.",
+    "The page states the INR 250 cap without naming the period it resets over. Month is recorded as the period because that is this catalog's default for an unqualified cap, and the ambiguity is noted here rather than presented as certainty.",
+    "No automated redemption authorization is implied."
+  ],
+  "redemption_steps": [
+    "Pay for fuel with the card within the stated transaction range.",
+    "The surcharge is waived up to the stated cap."
+  ],
+  "provider": "AU Small Finance Bank",
+  "effective_from": null,
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.aubank.in/personal-banking/credit-cards/vetta-credit-card",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "81247b00693751bdb95f89964899adf40120ee31a01afeaee27bb8c6be61e21b",
+  "retrieved_at": "2026-08-12T19:14:45Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.aubank.in/personal-banking/credit-cards/vetta-credit-card",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "81247b00693751bdb95f89964899adf40120ee31a01afeaee27bb8c6be61e21b",
+      "retrieved_at": "2026-08-12T19:14:45Z",
+      "id": "ad11dae0-e79b-504a-86f6-16ea550e5ed8",
+      "source_observation_id": "a426ca6c-b96d-5746-94cf-2e7e1349232a",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "medium"
+    }
+  ]
+}

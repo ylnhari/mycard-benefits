@@ -398,6 +398,12 @@ def test_private_card_failure_empty_and_filtered_states_are_distinct(
         transition_page.route("**/api/v1/private/cards/add", add_card)
         transition_page.goto(f"{synthetic_loopback_app}/#my-cards", wait_until="networkidle")
 
+        # The add-cards picker is collapsed once a wallet has cards, so open it
+        # before reaching in. An empty wallet opens it on its own; this fixture
+        # has cards, which is exactly when it stays shut.
+        transition_page.evaluate(
+            "() => { const d = document.querySelector('#cardAddDetails'); if (d) d.open = true; }"
+        )
         products = transition_page.locator("#cardAddOfferingChoices .onboarding-product")
         expect(products).to_have_count(2)
         submit = transition_page.locator("#cardAddSubmit")

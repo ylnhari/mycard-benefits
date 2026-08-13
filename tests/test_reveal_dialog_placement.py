@@ -16,6 +16,7 @@ The stored values are synthetic; the PAN is non-numeric and cannot be Luhn-valid
 
 from __future__ import annotations
 
+import contextlib
 import os
 import socket
 import threading
@@ -130,6 +131,14 @@ def test_the_details_prompt_opens_within_the_viewport(
                     && rect.right <= window.innerWidth + 1;
             }"""
         )
+        # Focus is set after the reveal request resolves, so wait for it rather
+        # than sampling immediately — reading it too early reports a working
+        # dialog as broken, which is the flake this suite has already had once.
+        with contextlib.suppress(Exception):
+            page.wait_for_function(
+                "() => document.activeElement && document.activeElement.id === 'revealCode'",
+                timeout=8000,
+            )
         focused = page.evaluate("() => document.activeElement && document.activeElement.id")
         browser.close()
 

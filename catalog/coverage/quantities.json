@@ -1,12 +1,12 @@
 {
   "report_version": "1",
   "source": "catalog/benefits/*.json",
-  "benefit_count": 67,
-  "benefits_with_quantities": 48,
-  "quantity_count": 77,
-  "distinct_allowance_keys": 105,
+  "benefit_count": 69,
+  "benefits_with_quantities": 49,
+  "quantity_count": 78,
+  "distinct_allowance_keys": 107,
   "mapped_key_count": 49,
-  "unmapped_key_count": 58,
+  "unmapped_key_count": 60,
   "keys_with_mapped_and_unmapped_observations": 2,
   "mapped_keys": [
     "accident_inr",
@@ -121,6 +121,11 @@
       "count": 1
     },
     {
+      "key": "domestic_visits_per_quarter",
+      "reason": "no unambiguous projection exists in the current closed vocabulary",
+      "count": 1
+    },
+    {
       "key": "exclusions",
       "reason": "the source field is not a comparable numeric quantity",
       "count": 1
@@ -171,6 +176,11 @@
       "count": 1
     },
     {
+      "key": "international_visits_per_quarter",
+      "reason": "no unambiguous projection exists in the current closed vocabulary",
+      "count": 1
+    },
+    {
       "key": "maximum_airmiles_per_reward_point",
       "reason": "reward-point earning, conversion, or valuation belongs in catalog/rewards",
       "count": 1
@@ -183,7 +193,7 @@
     {
       "key": "maximum_transaction_inr",
       "reason": "no unambiguous projection exists in the current closed vocabulary",
-      "count": 2
+      "count": 3
     },
     {
       "key": "merchant_emi_percent",
@@ -193,7 +203,7 @@
     {
       "key": "minimum_transaction_inr",
       "reason": "no unambiguous projection exists in the current closed vocabulary",
-      "count": 4
+      "count": 5
     },
     {
       "key": "monthly_cap_neucoins",

@@ -45,6 +45,11 @@
         <section class="panel protected-card-actions" data-private-only hidden aria-labelledby="protected-card-actions-title">
           <div class="section-head"><div><p class="eyebrow">Your wallet</p><h2 id="protected-card-actions-title">Add your cards</h2><p class="quiet-copy">Choose the exact card variant. You can add private details later if you want to.</p></div><span id="protectedActionBadge" class="badge pending">Cards unavailable</span></div>
           <p id="protectedActionStatus" class="qa-status" role="status" aria-live="polite">My Cards is loading.</p>
+          <!-- Collapsed by default, like "Manage cards and private details". Adding
+               cards is something a person does occasionally; leaving the picker open
+               pushed the wallet itself most of a screen down on every visit. -->
+          <details id="cardAddDetails" class="add-cards-details">
+            <summary>Add cards to your wallet</summary>
           <div class="protected-action-grid primary-card-action">
             <form id="cardAddForm" class="protected-action-form" autocomplete="off">
               <h3>Choose your cards</h3>
@@ -55,6 +60,7 @@
               <button id="cardAddSubmit" type="submit" disabled>Add cards</button>
             </form>
           </div>
+          </details>
           <section id="cardAddLastFourPrompt" class="card-add-followup" hidden aria-labelledby="cardAddLastFourTitle">
             <div class="section-head"><div><p class="eyebrow">Step 3 · Optional follow-up</p><h3 id="cardAddLastFourTitle">Tell your cards apart</h3><p class="quiet-copy">Add a last 4 only if it helps you recognise duplicate products. You can skip this and do it later.</p></div></div>
             <div id="cardAddLastFourFields" class="card-add-followup-grid"></div>

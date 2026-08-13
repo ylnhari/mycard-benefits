@@ -838,9 +838,61 @@ function benefitCard(benefit) {
   const officialHref = officialBenefitHref(benefit);
   if (officialHref) { const link = node("a", "Official terms", "srclink"); link.href = officialHref; link.target = "_blank"; link.rel = "noopener noreferrer"; right.append(link); }
   const button = node("button", "Details", "secondary benefit-detail-toggle");
-  button.type = "button"; button.setAttribute("aria-label", `Open details for ${benefit.title}`); button.addEventListener("click", () => selectBenefit(benefit.id));
+  button.type = "button";
+  button.setAttribute("aria-label", `Show details for ${benefit.title}`);
+  button.setAttribute("aria-expanded", "false");
+  // Expand in place. This used to call selectBenefit, which navigates to
+  // Search to reach the detail panel that lives there — so asking for detail
+  // about one benefit threw the reader onto a different screen and lost the
+  // list they were reading.
+  button.addEventListener("click", () => {
+    const open = row.nextElementSibling?.classList.contains("brow-detail");
+    if (open) {
+      row.nextElementSibling.remove();
+      button.textContent = "Details";
+      button.setAttribute("aria-expanded", "false");
+      return;
+    }
+    const panel = benefitInlineDetail(benefit);
+    row.after(panel);
+    button.textContent = "Hide";
+    button.setAttribute("aria-expanded", "true");
+    panel.focus({ preventScroll: true });
+  });
   right.append(button); row.append(right);
   return row;
+}
+function benefitInlineDetail(benefit) {
+  const panel = node("div", undefined, "brow-detail");
+  panel.tabIndex = -1;
+  const conditions = (benefit.conditions || []).map(item =>
+    typeof item === "string" ? humanizeConditionText(item) : friendlyPredicate(item),
+  ).filter(Boolean);
+  const steps = benefitHowToUse(benefit);
+  const exclusions = (benefit.exclusions || []).map(item =>
+    typeof item === "string" ? item : friendlyPredicate(item),
+  ).filter(Boolean);
+
+  const section = (heading, items) => {
+    if (!items.length) return;
+    panel.append(node("h4", heading));
+    const list = node("ul", undefined, "brow-detail-list");
+    for (const item of items) list.append(node("li", item));
+    panel.append(list);
+  };
+  section("How to qualify", conditions);
+  section("How to claim it", steps);
+  section("What it does not cover", exclusions);
+  if (!conditions.length && !steps.length && !exclusions.length) {
+    panel.append(node("p", "No conditions, steps or exclusions are recorded for this benefit yet.", "quiet-copy"));
+  }
+  const href = officialBenefitHref(benefit);
+  if (href) {
+    const link = node("a", "Read the official terms", "srclink");
+    link.href = href; link.target = "_blank"; link.rel = "noopener noreferrer";
+    panel.append(link);
+  }
+  return panel;
 }
 function renderBenefits() {
   const list = document.querySelector("#benefitList");
@@ -1332,7 +1384,12 @@ function countLine(c){
 function cardFace(c){
   const el = document.createElement("button");
   el.type = "button";
-  el.className = "cardface" + (c.lifecycle === "archived" ? " archived" : "");
+  // Any card that is not in use is dulled, not just an archived one. A card
+  // that expired, was closed, replaced, lost or stolen is equally not a card
+  // you can spend on, and rendering it at full strength alongside live cards
+  // is the difference between a wallet you can read at a glance and one you
+  // have to check card by card.
+  el.className = "cardface" + (c.lifecycle && c.lifecycle !== "active" ? " archived" : "");
   el.style.background = issuerGradient(c.issuer_id);
   const publicCard = c.public === true;
   const lifecycleText = publicCard ? "public card" : (c.lifecycle === "archived" ? "archived" : "in use");
@@ -1533,6 +1590,13 @@ function refreshCardFilters() {
 }
 function renderPrivateCards() {
   if (!state.privateCardsAvailable) return;
+  // The add-cards picker is collapsed by default, because adding cards is
+  // occasional and leaving it open pushed the wallet down the screen. An empty
+  // wallet is the one case where it is the whole point of the screen, so it
+  // opens itself there — a first-time user must not have to find a disclosure
+  // to add their first card.
+  const addDetails = document.querySelector("#cardAddDetails");
+  if (addDetails && !state.privateCards.length) addDetails.open = true;
   refreshCardFilters();
   const query = document.querySelector("#myCardSearch")?.value.trim().toLocaleLowerCase() || "";
   const cards = state.privateCards.filter(card => {
@@ -1563,7 +1627,7 @@ function renderPrivateCards() {
   if (!state.privateCards.length) {
     const empty = node("div", undefined, "empty-state");
     empty.append(node("p", "Your wallet is empty", "eyebrow"), node("h3", "Add your cards"), node("p", "Tick everything in your wallet. You can add details later — nothing is required now."), node("p", "Skipping entirely is allowed — the catalog is browsable with zero cards.", "quiet-copy"));
-    const action = node("a", "Add my first card", "button"); action.href = "#cardAddForm"; action.addEventListener("click", () => document.querySelector("#cardAddIssuerChips button")?.focus()); empty.append(action);
+    const action = node("a", "Add my first card", "button"); action.href = "#cardAddForm"; action.addEventListener("click", () => { const details = document.querySelector("#cardAddDetails"); if (details) details.open = true; document.querySelector("#cardAddIssuerChips button")?.focus(); }); empty.append(action);
     target.append(empty);
     return;
   }

@@ -1,0 +1,50 @@
+{
+  "id": "9b4c8e07-7df0-5af5-945c-410992d999fb",
+  "offering_id": "a86adb94-4b35-5588-9e8e-e2f0cf85b468",
+  "title": "AU Vetta quarterly airport lounge access",
+  "benefit_type": "lounge",
+  "category": "lounge",
+  "allowance": {
+    "domestic_visits_per_quarter": 1,
+    "international_visits_per_quarter": 1
+  },
+  "quantities": [],
+  "eligibility": [],
+  "conditions": [
+    {
+      "type": "time_window",
+      "operator": "equals",
+      "value": "one visit per quarter, domestic and international counted separately"
+    }
+  ],
+  "exclusions": [
+    "The page states one complimentary domestic and one international visit per quarter. The quantity records a single visit per quarter because the shape cannot express two different scopes in one entry; the allowance above keeps both figures.",
+    "The page does not name the lounge programme or the participating lounges, so neither is asserted.",
+    "No automated redemption authorization is implied."
+  ],
+  "redemption_steps": [
+    "Present the card at a participating lounge.",
+    "Check the current participating list before travelling, since the page does not name it."
+  ],
+  "provider": "AU Small Finance Bank",
+  "effective_from": null,
+  "effective_to": null,
+  "end_date_known": false,
+  "source_url": "https://www.aubank.in/personal-banking/credit-cards/vetta-credit-card",
+  "source_policy_class": "issuer_document",
+  "content_sha256": "81247b00693751bdb95f89964899adf40120ee31a01afeaee27bb8c6be61e21b",
+  "retrieved_at": "2026-08-12T19:14:45Z",
+  "state": "check_before_use",
+  "provenance": [
+    {
+      "source_url": "https://www.aubank.in/personal-banking/credit-cards/vetta-credit-card",
+      "source_policy_class": "issuer_document",
+      "content_sha256": "81247b00693751bdb95f89964899adf40120ee31a01afeaee27bb8c6be61e21b",
+      "retrieved_at": "2026-08-12T19:14:45Z",
+      "id": "f59f0c1f-41ac-5c68-8294-ffe40aad6aee",
+      "source_observation_id": "f3da8c74-369f-5807-bf86-40d90d46a192",
+      "hash_kind": "snapshot_manifest_sha256",
+      "confidence": "medium"
+    }
+  ]
+}
